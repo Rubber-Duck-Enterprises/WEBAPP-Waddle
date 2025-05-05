@@ -1,0 +1,21 @@
+import React from "react";
+
+interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+
+const UITextArea: React.FC<Props> = (props) => {
+  return (
+    <textarea
+      {...props}
+      style={{
+        padding: "0.5rem",
+        borderRadius: "8px",
+        border: "1px solid #ccc",
+        resize: "none",
+        width: "100%",
+        ...props.style,
+      }}
+    />
+  );
+};
+
+export default UITextArea;
