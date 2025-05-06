@@ -47,13 +47,25 @@ const DateFilterBar: React.FC<Props> = ({
           type="date"
           value={customStart}
           onChange={(e) => setCustomStart(e.target.value)}
-          style={{ padding: "0.4rem", borderRadius: "8px", border: "1px solid #ccc" }}
+          style={{
+            padding: "0.4rem",
+            borderRadius: "8px",
+            border: "1px solid var(--input-border-color)",
+            background: "var(--input-bg)",
+            color: "var(--text-primary)",
+          }}
         />
         <input
           type="date"
           value={customEnd}
           onChange={(e) => setCustomEnd(e.target.value)}
-          style={{ padding: "0.4rem", borderRadius: "8px", border: "1px solid #ccc" }}
+          style={{
+            padding: "0.4rem",
+            borderRadius: "8px",
+            border: "1px solid var(--input-border-color)",
+            background: "var(--input-bg)",
+            color: "var(--text-primary)",
+          }}
         />
       </>
     )}

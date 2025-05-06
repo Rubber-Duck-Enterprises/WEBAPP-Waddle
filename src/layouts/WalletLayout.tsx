@@ -1,9 +1,11 @@
+// layouts/WalletLayout.tsx
 import React, { useState } from "react";
 import Drawer from "../components/Navigation/Drawer";
+import BottomNav from "../components/Navigation/BottomNav";
 import Header from "../components/Navigation/Header";
 import { motion } from "framer-motion";
 
-const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const WalletLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -22,9 +24,10 @@ const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </motion.div>
       </main>
 
+      <BottomNav />
       <Drawer isOpen={isDrawerOpen} onClose={() => setDrawerOpen(false)} />
     </div>
   );
 };
 
-export default DefaultLayout;
+export default WalletLayout;

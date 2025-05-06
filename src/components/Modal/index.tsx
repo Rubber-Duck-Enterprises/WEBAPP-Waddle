@@ -49,9 +49,11 @@ const Modal = () => {
               exit={{ opacity: 0, scale: 0.95, y: 30 }}
               transition={{ duration: 0.25 }}
               style={{
-                background: "#fff",
+                background: "var(--background)",
+                color: "var(--text-primary)",
                 padding: "2rem",
                 borderRadius: "12px",
+                minWidth: "300px",
                 maxWidth: "90vw",
                 maxHeight: "90vh",
                 overflowY: "auto",

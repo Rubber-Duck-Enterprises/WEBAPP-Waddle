@@ -11,16 +11,17 @@ interface Props {
 
 const MovementItem: React.FC<Props> = ({ expense, section, onDelete, onEdit }) => {
   const isExpense = expense.amount < 0;
-  const color = isExpense ? "#f44336" : "#4caf50";
+  const colorVar = isExpense ? "var(--danger-color)" : "var(--success-color)";
+  const bgVar = isExpense ? "var(--danger-bg)" : "var(--success-bg)";
 
   return (
     <li
       style={{
         marginBottom: "1rem",
         padding: "1rem",
-        border: `1px solid ${color}`,
+        border: `1px solid ${colorVar}`,
         borderRadius: "8px",
-        backgroundColor: `${color}1A`, // color con transparencia
+        backgroundColor: bgVar,
         boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
         display: "flex",
         flexDirection: "column",
@@ -29,11 +30,11 @@ const MovementItem: React.FC<Props> = ({ expense, section, onDelete, onEdit }) =
     >
       <strong>{expense.description}</strong>
 
-      <span style={{ color }}>
+      <span style={{ color: colorVar }}>
         {isExpense ? "-" : "+"}${Math.abs(expense.amount).toLocaleString()}
       </span>
 
-      <small>
+      <small style={{ color: "var(--text-secondary)" }}>
         {new Date(expense.date).toLocaleDateString()} ·{" "}
         {section ? `${section.icon || "📁"} ${section.name}` : "General"}
       </small>

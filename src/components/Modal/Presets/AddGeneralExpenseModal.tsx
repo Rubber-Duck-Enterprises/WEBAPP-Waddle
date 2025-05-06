@@ -5,11 +5,7 @@ import UIButton from "../../UI/UIButton";
 
 type Props = {
   type: "income" | "expense";
-  onConfirm: (data: {
-    description: string;
-    amount: number;
-    notes?: string;
-  }) => void;
+  onConfirm: (data: { description: string; amount: number; notes?: string }) => void;
   onCancel: () => void;
 };
 
@@ -25,27 +21,29 @@ const AddGeneralExpenseModal: React.FC<Props> = ({ type, onConfirm, onCancel }) 
   const isIncome = type === "income";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3>{isIncome ? "Agregar ingreso" : "Agregar gasto"} general</h3>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+      <h3 style={{ color: "var(--text-primary)" }}>
+        {isIncome ? "Agregar ingreso" : "Agregar gasto"} general
+      </h3>
 
       <UITextInput
         type="text"
         placeholder="Descripción"
         value={description}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
+        onChange={(e) => setDescription(e.target.value)}
       />
 
       <UITextInput
         type="number"
         placeholder="Monto"
         value={amount}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(Number(e.target.value))}
       />
 
       <UITextArea
         placeholder="Notas (opcional)"
         value={notes}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
+        onChange={(e) => setNotes(e.target.value)}
       />
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
@@ -63,3 +61,5 @@ const AddGeneralExpenseModal: React.FC<Props> = ({ type, onConfirm, onCancel }) 
     </div>
   );
 };
+
+export default AddGeneralExpenseModal;

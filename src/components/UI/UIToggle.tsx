@@ -46,7 +46,7 @@ const UIToggle: React.FC<Props> = ({ label, checked, onChange }) => (
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: checked ? "#ffcd00" : "#ccc",
+          backgroundColor: checked ? "var(--toggle-on)" : "var(--toggle-off)",
           borderRadius: "999px",
           transition: "0.3s",
         }}
@@ -58,10 +58,10 @@ const UIToggle: React.FC<Props> = ({ label, checked, onChange }) => (
           left: checked ? "22px" : "2px",
           width: "16px",
           height: "16px",
-          backgroundColor: "#fff",
+          backgroundColor: "var(--toggle-thumb)",
           borderRadius: "50%",
           transition: "0.3s",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+          boxShadow: "var(--toggle-shadow)",
         }}
       />
     </div>

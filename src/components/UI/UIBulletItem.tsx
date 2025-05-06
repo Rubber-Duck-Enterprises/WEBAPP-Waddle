@@ -8,8 +8,8 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const UIBulletItem: React.FC<Props> = ({ active = false, color = "#ccc", children, style, ...props }) => {
-  const borderColor = active ? color : "#ccc";
-  const backgroundColor = active ? `${color}1A` : "#eee";
+  const borderColor = active ? color : "var(--bullet-border)";
+  const backgroundColor = active ? `${color}1A` : "var(--bullet-bg)";
 
   return (
     <button
@@ -19,6 +19,7 @@ const UIBulletItem: React.FC<Props> = ({ active = false, color = "#ccc", childre
         borderRadius: "999px",
         border: `1px solid ${borderColor}`,
         backgroundColor,
+        color: active ? "var(--bullet-text-active)" : "var(--bullet-text)",
         display: "flex",
         alignItems: "center",
         gap: "0.4rem",

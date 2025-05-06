@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import UITextInput from "../../UI/UITextInput";
 import UIButton from "../../UI/UIButton";
 
 type Props = {
@@ -43,23 +44,18 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
       <h3>Editar apartado</h3>
       <p>Nombre: <strong>{name}</strong></p>
 
-      <label>
-        🎯 Meta (opcional):
-        <input
+      {/* 🎯 Meta */}
+      <div>
+        <label style={{ display: "block", marginBottom: "0.3rem" }}>🎯 Meta (opcional):</label>
+        <UITextInput
           type="number"
           value={goal}
           onChange={(e) => setGoal(Number(e.target.value))}
           placeholder="0"
-          style={{
-            marginTop: "0.3rem",
-            width: "100%",
-            padding: "0.4rem",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-          }}
         />
-      </label>
+      </div>
 
+      {/* 🎨 Color */}
       <div>
         <p style={{ marginBottom: "0.5rem" }}>🎨 Color del apartado:</p>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -74,7 +70,7 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                border: c === effectiveColor ? "2px solid #000" : "1px solid #ccc",
+                border: c === effectiveColor ? "2px solid var(--text-primary)" : "1px solid var(--border-color)",
                 backgroundColor: c,
                 cursor: "pointer",
               }}
@@ -85,11 +81,19 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
           type="color"
           value={customColor || color}
           onChange={(e) => setCustomColor(e.target.value)}
-          style={{ marginTop: "0.5rem", width: "48px", height: "32px", border: "none", background: "none", cursor: "pointer" }}
+          style={{
+            marginTop: "0.5rem",
+            width: "48px",
+            height: "32px",
+            border: "none",
+            background: "none",
+            cursor: "pointer",
+          }}
         />
         <small style={{ marginLeft: "0.5rem" }}>← Personalizado</small>
       </div>
 
+      {/* 😃 Emoji */}
       <div>
         <p style={{ marginBottom: "0.5rem" }}>😃 Icono (emoji):</p>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
@@ -104,8 +108,8 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
                 fontSize: "1.4rem",
                 padding: "0.2rem 0.5rem",
                 borderRadius: "8px",
-                border: emoji === effectiveEmoji ? "2px solid #000" : "1px solid #ccc",
-                background: "#fff",
+                border: emoji === effectiveEmoji ? "2px solid var(--text-primary)" : "1px solid var(--border-color)",
+                background: "var(--background)",
                 cursor: "pointer",
               }}
             >
@@ -113,7 +117,7 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
             </button>
           ))}
         </div>
-        <input
+        <UITextInput
           type="text"
           maxLength={2}
           placeholder="🎨"
@@ -121,9 +125,6 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
           onChange={(e) => setCustomEmoji(e.target.value)}
           style={{
             marginTop: "0.5rem",
-            padding: "0.4rem",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
             width: "60px",
             textAlign: "center",
             fontSize: "1.5rem",
@@ -132,10 +133,19 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
         <small style={{ marginLeft: "0.5rem" }}>← Personalizado</small>
       </div>
 
+      {/* Botones */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-        <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
+        <UIButton onClick={onCancel} variant="default">
+          Cancelar
+        </UIButton>
         <UIButton
-          onClick={() => onConfirm({ goal, color: effectiveColor, icon: effectiveEmoji })}
+          onClick={() =>
+            onConfirm({
+              goal,
+              color: effectiveColor,
+              icon: effectiveEmoji,
+            })
+          }
           variant="primary"
         >
           Guardar

@@ -19,18 +19,19 @@ const TransactionList: React.FC<Props> = ({ latest, sections }) => (
               display: "flex",
               justifyContent: "space-between",
               padding: "0.5rem 0",
-              borderBottom: "1px solid #eee",
+              borderBottom: "1px solid var(--border-color)",
               flexDirection: "column",
+              color: "var(--text-primary)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span>{tx.description}</span>
-              <span style={{ color: tx.amount < 0 ? "#f44336" : "#4caf50" }}>
+              <span style={{ color: tx.amount < 0 ? "var(--danger-color)" : "var(--success-color)" }}>
                 {tx.amount < 0 ? "-" : "+"}${Math.abs(tx.amount).toLocaleString()}
               </span>
             </div>
             {section && (
-              <small style={{ color: "#777", fontSize: "0.8rem" }}>
+              <small style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>
                 {section.icon || "📁"} {section.name}
               </small>
             )}

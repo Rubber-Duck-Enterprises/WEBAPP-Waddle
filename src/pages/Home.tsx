@@ -7,11 +7,12 @@ import { useDateRange } from "../hooks/useDateRange";
 import { useModal } from "../context/ModalContext";
 import { getAddGeneralExpenseModal } from "../components/Modal/Presets/AddGeneralExpenseModal";
 
-import DefaultLayout from "../layouts/DefaultLayout";
 import DateFilterBar from "../components/Home/DateFilterBar";
 import BalanceCard from "../components/Home/BalanceCard";
 import SectionSelector from "../components/Home/SectionSelector";
 import SectionBalanceCard from "../components/Home/SectionBalanceCard";
+
+import WalletLayout from "../layouts/WalletLayout";
 
 const Home: React.FC = () => {
   const { showModal, hideModal } = useModal();
@@ -93,7 +94,7 @@ const Home: React.FC = () => {
   }, [sections, selectedSectionId]);
 
   return (
-    <DefaultLayout>
+    <WalletLayout>
       <DateFilterBar
         rangeType={rangeType}
         setRangeType={setRangeType}
@@ -136,8 +137,7 @@ const Home: React.FC = () => {
           )}
         </div>
       )}
-
-    </DefaultLayout>
+    </WalletLayout>
   );
 };
 

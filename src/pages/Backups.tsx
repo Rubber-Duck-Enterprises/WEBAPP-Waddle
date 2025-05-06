@@ -2,8 +2,13 @@ import React from "react";
 import localforage from "localforage";
 import UIButton from "../components/UI/UIButton";
 import DefaultLayout from "../layouts/DefaultLayout";
+import { useModal } from "../context/ModalContext";
+import { getImportSuccessModal } from "../components/Modal/Presets/ImportSuccessModal";
+import { getDeleteAllDataModal } from "../components/Modal/Presets/DeleteAllDataModal";
 
 const BackupPage: React.FC = () => {
+  const { showModal, hideModal } = useModal();
+
   const handleExport = async () => {
     const sectionData = await localforage.getItem("waddle-sections");
     const expenseData = await localforage.getItem("waddle-expenses");
@@ -35,7 +40,15 @@ const BackupPage: React.FC = () => {
       if (data.sections && data.expenses) {
         await localforage.setItem("waddle-sections", data.sections);
         await localforage.setItem("waddle-expenses", data.expenses);
-        alert("Importación exitosa. Recarga la página para ver los cambios.");
+
+        showModal(
+          getImportSuccessModal({
+            onConfirm: () => {
+              hideModal();
+              window.location.reload();
+            },
+          })
+        );
       } else {
         alert("Archivo inválido.");
       }
@@ -46,17 +59,51 @@ const BackupPage: React.FC = () => {
 
   return (
     <DefaultLayout>
-      <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         <h2>☁️ Respaldos</h2>
 
         <UIButton onClick={handleExport} variant="secondary">
           Exportar respaldo
         </UIButton>
 
-        <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-          <strong>Importar respaldo:</strong>
-          <input type="file" accept="application/json" onChange={handleImport} />
-        </label>
+        <UIButton
+          variant="danger"
+          onClick={() =>
+            showModal(
+              getDeleteAllDataModal({
+                onCancel: hideModal,
+                onConfirm: async () => {
+                  await localforage.removeItem("waddle-sections");
+                  await localforage.removeItem("waddle-expenses");
+                  hideModal();
+                  window.location.reload();
+                },
+              })
+            )
+          }
+          >
+          Borrar todos los datos
+        </UIButton>
+
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label htmlFor="import-backup" style={{ fontWeight: "bold" }}>
+            Importar respaldo:
+          </label>
+          <input
+            id="import-backup"
+            type="file"
+            accept="application/json"
+            onChange={handleImport}
+            style={{
+              padding: "0.5rem",
+              border: "1px solid var(--input-border-color)",
+              borderRadius: "8px",
+              backgroundColor: "var(--input-bg)",
+              color: "var(--text-primary)",
+            }}
+          />
+        </div>
       </div>
     </DefaultLayout>
   );

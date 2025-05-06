@@ -14,13 +14,14 @@ const TransferItem: React.FC<Props> = ({ amount, fromLabel, toLabel, date, notes
       style={{
         marginBottom: "1rem",
         padding: "1rem",
-        border: "1px solid #2196f3",
+        border: "1px solid var(--information-color)",
         borderRadius: "8px",
-        backgroundColor: "#2196f31A",
+        backgroundColor: "var(--information-bg)",
         boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
         display: "flex",
         flexDirection: "column",
         gap: "0.5rem",
+        color: "var(--text-primary)",
       }}
     >
       <strong style={{ fontSize: "1rem" }}>↔ Transferencia</strong>
@@ -34,11 +35,11 @@ const TransferItem: React.FC<Props> = ({ amount, fromLabel, toLabel, date, notes
         </div>
       </div>
 
-      <div style={{ fontSize: "0.9rem", color: "#4caf50" }}>
+      <div style={{ fontSize: "0.9rem", color: "var(--success-color)" }}>
         Monto: ${amount.toLocaleString()}
       </div>
 
-      <small>
+      <small style={{ color: "var(--text-secondary)" }}>
         {new Date(date).toLocaleDateString()}
         {notes ? ` · ${notes}` : ""}
       </small>

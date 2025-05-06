@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import UITextInput from "../../UI/UITextInput";
+import UIButton from "../../UI/UIButton";
 
 type Props = {
   name: string;
@@ -24,31 +26,23 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
   const effectiveEmoji = customEmoji || icon;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3>Configurar nuevo apartado</h3>
-      <p>Nombre: <strong>{name}</strong></p>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+      <h3 style={{ color: "var(--text-primary)" }}>Configurar nuevo apartado</h3>
+      <p style={{ color: "var(--text-secondary)" }}>
+        Nombre: <strong>{name}</strong>
+      </p>
 
       {/* 🎯 Meta */}
-      <label>
-        🎯 Meta (opcional):
-        <input
-          type="number"
-          value={goal}
-          onChange={(e) => setGoal(Number(e.target.value))}
-          placeholder="0"
-          style={{
-            marginTop: "0.3rem",
-            width: "100%",
-            padding: "0.4rem",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-          }}
-        />
-      </label>
+      <UITextInput
+        type="number"
+        placeholder="Meta (opcional)"
+        value={goal}
+        onChange={(e) => setGoal(Number(e.target.value))}
+      />
 
       {/* 🎨 Color */}
       <div>
-        <p style={{ marginBottom: "0.5rem" }}>🎨 Color del apartado:</p>
+        <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>🎨 Color del apartado:</p>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {colorOptions.map((c) => (
             <button
@@ -61,13 +55,14 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
                 width: "32px",
                 height: "32px",
                 borderRadius: "50%",
-                border: c === effectiveColor ? "2px solid #000" : "1px solid #ccc",
+                border: c === effectiveColor ? "2px solid var(--text-primary)" : "1px solid var(--border-color)",
                 backgroundColor: c,
                 cursor: "pointer",
               }}
             />
           ))}
         </div>
+
         <input
           type="color"
           value={customColor || color}
@@ -81,12 +76,12 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
             cursor: "pointer",
           }}
         />
-        <small style={{ marginLeft: "0.5rem" }}>← Personalizado</small>
+        <small style={{ marginLeft: "0.5rem", color: "var(--text-secondary)" }}>← Personalizado</small>
       </div>
 
-      {/* 😃 Emoji */}
+      {/* 😃 Icono */}
       <div>
-        <p style={{ marginBottom: "0.5rem" }}>😃 Icono (emoji):</p>
+        <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>😃 Icono (emoji):</p>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {emojiOptions.map((emoji) => (
             <button
@@ -99,8 +94,8 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
                 fontSize: "1.4rem",
                 padding: "0.2rem 0.5rem",
                 borderRadius: "8px",
-                border: emoji === effectiveEmoji ? "2px solid #000" : "1px solid #ccc",
-                background: "#fff",
+                border: emoji === effectiveEmoji ? "2px solid var(--text-primary)" : "1px solid var(--border-color)",
+                background: "var(--background)",
                 cursor: "pointer",
               }}
             >
@@ -108,43 +103,24 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
             </button>
           ))}
         </div>
-        <input
+
+        <UITextInput
           type="text"
           maxLength={2}
           placeholder="🎨"
           value={customEmoji}
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value.length <= 2) setCustomEmoji(value);
-          }}
-          style={{
-            marginTop: "0.5rem",
-            padding: "0.4rem",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            width: "60px",
-            textAlign: "center",
-            fontSize: "1.5rem",
-          }}
+          onChange={(e) => setCustomEmoji(e.target.value)}
+          style={{ width: "60px", textAlign: "center", fontSize: "1.5rem" }}
         />
-        <small style={{ marginLeft: "0.5rem" }}>← Personalizado</small>
+        <small style={{ marginLeft: "0.5rem", color: "var(--text-secondary)" }}>← Personalizado</small>
       </div>
 
       {/* ✔ Botones */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
-        <button
-          onClick={onCancel}
-          style={{
-            padding: "0.4rem 1rem",
-            background: "#eee",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
+        <UIButton onClick={onCancel} variant="default">
           Cancelar
-        </button>
-        <button
+        </UIButton>
+        <UIButton
           onClick={() =>
             onConfirm({
               goal,
@@ -152,18 +128,13 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
               icon: effectiveEmoji,
             })
           }
-          style={{
-            padding: "0.4rem 1rem",
-            background: "#4caf50",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
+          variant="primary"
         >
           Crear
-        </button>
+        </UIButton>
       </div>
     </div>
   );
 };
+
+export default CreateSectionModal;

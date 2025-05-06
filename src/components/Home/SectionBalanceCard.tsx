@@ -3,6 +3,7 @@ import { parseISO, isWithinInterval } from "date-fns";
 
 import UIButton from "../UI/UIButton";
 import UIBalanceAmount from "../UI/UIBalanceAmount";
+import UIIncomeExpenseSummary from "../UI/UIIncomeExpenseSummary";
 import UIProgressBar from "../UI/UIProgressBar";
 
 import { useModal } from "../../context/ModalContext";
@@ -42,7 +43,6 @@ const SectionBalanceCard: React.FC<Props> = ({
   const balance = income + totalExpenses;
   const latest = [...filtered].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 
-  const bgColor = `${section.color || "#ccc"}1A`;
   const goal = section.goal || 0;
   const progress = goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
 
@@ -87,11 +87,12 @@ const SectionBalanceCard: React.FC<Props> = ({
   return (
     <div
       style={{
-        background: bgColor,
+        background: `${section.color || "var(--surface)"}1A`,
         borderRadius: "12px",
         padding: "1rem",
-        border: `1px solid ${section.color || "#ccc"}`,
+        border: `1px solid ${section.color || "var(--border-color)"}`,
         boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+        color: "var(--text-primary)",
         display: "flex",
         flexDirection: "column",
         gap: "0.75rem",
@@ -115,10 +116,7 @@ const SectionBalanceCard: React.FC<Props> = ({
 
       <UIBalanceAmount amount={balance} />
 
-      <div style={{ display: "flex", gap: "1rem", fontSize: "0.9rem" }}>
-        <span style={{ color: "#4caf50" }}>+ Ingresos: ${income.toLocaleString()}</span>
-        <span style={{ color: "#f44336" }}>- Gastos: ${Math.abs(totalExpenses).toLocaleString()}</span>
-      </div>
+      <UIIncomeExpenseSummary income={income} totalExpenses={totalExpenses} />
 
       <TransactionList latest={latest} sections={[]} />
 
@@ -131,13 +129,13 @@ const SectionBalanceCard: React.FC<Props> = ({
           + Ingreso
         </UIButton>
 
-        <UIButton
+        {/* <UIButton
           variant="secondary"
           style={{ width: "64px" }}
           onClick={openTransferToThisModal}
         >
           ↔
-        </UIButton>
+        </UIButton> */}
 
         <UIButton
           variant="danger"

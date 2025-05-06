@@ -8,7 +8,7 @@ import MovementItem from "../components/Movements/MovementItem";
 import TransferItem from "../components/Movements/TransferItem";
 import EditExpenseModal from "../components/Modal/Presets/EditExpenseModal";
 
-import DefaultLayout from "../layouts/DefaultLayout";
+import WalletLayout from "../layouts/WalletLayout";
 
 const Movements: React.FC = () => {
   const groupedTransfers = new Set<string>();
@@ -44,7 +44,7 @@ const Movements: React.FC = () => {
   };
 
   return (
-    <DefaultLayout>
+    <WalletLayout>
       <div style={{ padding: "1rem" }}>
         <ul style={{ listStyle: "none", padding: 0 }}>
           {expenses
@@ -104,7 +104,7 @@ const Movements: React.FC = () => {
           })}
         </ul>
       </div>
-    </DefaultLayout>
+    </WalletLayout>
   );
 };
 

@@ -13,8 +13,9 @@ const Header: React.FC<Props> = ({ onOpenMenu }) => {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "1rem",
-        borderBottom: "1px solid #ddd",
-        background: "#fff",
+        borderBottom: "1px solid var(--border-color)",
+        background: "var(--background)",
+        color: "var(--text-primary)",
       }}
     >
       <MenuButton onClick={onOpenMenu} />

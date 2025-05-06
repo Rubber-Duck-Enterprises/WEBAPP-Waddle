@@ -12,6 +12,7 @@ const MenuButton: React.FC<Props> = ({ onClick }) => {
         background: "none",
         border: "none",
         fontSize: "1.5rem",
+        color: "var(--text-primary)",
         cursor: "pointer",
       }}
     >

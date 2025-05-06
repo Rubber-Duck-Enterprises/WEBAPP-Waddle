@@ -14,10 +14,10 @@ const UIProgressBar: React.FC<Props> = ({ value, max, color = "#4caf50" }) => {
       style={{
         width: "100%",
         height: "12px",
-        backgroundColor: "#e0e0e0",
+        backgroundColor: "var(--progress-bg)",
         borderRadius: "8px",
         overflow: "hidden",
-        boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1)",
+        boxShadow: "var(--progress-shadow)",
       }}
     >
       <div

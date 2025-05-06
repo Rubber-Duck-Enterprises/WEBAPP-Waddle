@@ -3,6 +3,7 @@ import React from "react";
 import UIButton from "../UI/UIButton";
 import UIToggle from "../UI/UIToggle";
 import UIBalanceAmount from "../UI/UIBalanceAmount";
+import UIIncomeExpenseSummary from "../UI/UIIncomeExpenseSummary";
 import { useModal } from "../../context/ModalContext";
 import TransferFundsModal from "../Modal/Presets/TransferFundsModal";
 import TransactionList from "./TransactionList";
@@ -76,7 +77,8 @@ const BalanceCard: React.FC<Props> = ({
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--surface)",
+        color: "var(--text-primary)",
         borderRadius: "12px",
         padding: "1rem",
         boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
@@ -87,23 +89,20 @@ const BalanceCard: React.FC<Props> = ({
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>Balance general</h2>
-        <UIToggle
+        {/* <UIToggle
           label="Solo generales"
           checked={onlyGeneral}
           onChange={setOnlyGeneral}
-        />
+        /> */}
       </div>
 
       <UIBalanceAmount amount={balance} />
 
-      <div style={{ display: "flex", gap: "1rem", fontSize: "0.9rem" }}>
-        <span style={{ color: "#4caf50" }}>+ Ingresos: ${income.toLocaleString()}</span>
-        <span style={{ color: "#f44336" }}>- Gastos: ${Math.abs(totalExpenses).toLocaleString()}</span>
-      </div>
+      <UIIncomeExpenseSummary income={income} totalExpenses={totalExpenses} />
 
       <TransactionList latest={latest} sections={sections} />
 
-      <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+      {/* <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
         <UIButton
           variant="primary"
           fullWidth
@@ -127,7 +126,7 @@ const BalanceCard: React.FC<Props> = ({
         >
           + Gasto
         </UIButton>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -21,14 +21,15 @@ export const getDeleteSectionModal = ({ sectionName, onConfirm, onCancel }: Prop
 const DeleteSectionModal: React.FC<Props> = ({ sectionName, onConfirm, onCancel }) => {
   const [confirmText, setConfirmText] = useState("");
 
-  const isValid = confirmText === sectionName;
+  const isValid = confirmText.trim() === sectionName;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3>¿Eliminar apartado?</h3>
-      <p>
-        Esta acción no se puede deshacer. Para confirmar, escribe el nombre del
-        apartado: <strong>{sectionName}</strong>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+      <h3 style={{ color: "var(--text-primary)" }}>¿Eliminar apartado?</h3>
+      <p style={{ color: "var(--text-secondary)" }}>
+        Esta acción no se puede deshacer. Para confirmar, escribe el nombre del apartado:
+        <br />
+        <strong>{sectionName}</strong>
       </p>
 
       <UITextInput
@@ -46,10 +47,6 @@ const DeleteSectionModal: React.FC<Props> = ({ sectionName, onConfirm, onCancel 
           onClick={onConfirm}
           disabled={!isValid}
           variant="danger"
-          style={{
-            background: isValid ? "#f44336" : "#ccc",
-            cursor: isValid ? "pointer" : "not-allowed",
-          }}
         >
           Eliminar
         </UIButton>
@@ -57,3 +54,5 @@ const DeleteSectionModal: React.FC<Props> = ({ sectionName, onConfirm, onCancel 
     </div>
   );
 };
+
+export default DeleteSectionModal;

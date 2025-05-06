@@ -13,10 +13,10 @@ const UIButton: React.FC<Props> = ({
   ...props 
 }) => {
   const colors = {
-    primary: "#4caf50",
-    secondary: "#2196f3",
-    danger: "#f44336",
-    default: "#ccc",
+    primary: "var(--btn-primary-bg)",
+    secondary: "var(--btn-secondary-bg)",
+    danger: "var(--btn-danger-bg)",
+    default: "var(--btn-default-bg)",
   };
 
   return (
@@ -25,7 +25,7 @@ const UIButton: React.FC<Props> = ({
       style={{
         padding: "0.6rem",
         background: colors[variant],
-        color: "#fff",
+        color: "var(--btn-text-color)",
         border: "none",
         borderRadius: "8px",
         fontWeight: "bold",

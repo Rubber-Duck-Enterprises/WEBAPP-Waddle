@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Sections from "./pages/Sections";
 import Movements from "./pages/Movements";
 import Backups from "./pages/Backups";
+import Settings from "./pages/Settings";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -12,10 +13,11 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<Home />} />
-        <Route path="/sections" element={<Sections />} />
-        <Route path="/movements" element={<Movements />} />
+        <Route path="/wallet" element={<Home />} />
+        <Route path="/wallet/sections" element={<Sections />} />
+        <Route path="/wallet/movements" element={<Movements />} />
         <Route path="/backups" element={<Backups />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </AnimatePresence>
   );

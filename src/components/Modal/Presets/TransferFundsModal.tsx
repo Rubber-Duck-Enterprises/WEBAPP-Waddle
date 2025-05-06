@@ -69,7 +69,7 @@ const TransferFundsModal: React.FC<Props> = ({
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3>Mover fondos</h3>
 
-      <label>Desde:</label>
+      <label style={{ color: "var(--text-primary)" }}>Desde:</label>
       <UISelect value={from} onChange={(e) => setFrom(e.target.value)}>
         <option value="general" disabled={to === "general"}>General</option>
         {sections
@@ -81,7 +81,7 @@ const TransferFundsModal: React.FC<Props> = ({
           ))}
       </UISelect>
 
-      <label>Hacia:</label>
+      <label style={{ color: "var(--text-primary)" }}>Hacia:</label>
       <UISelect
         disabled={isToThis}
         value={to}
@@ -95,22 +95,22 @@ const TransferFundsModal: React.FC<Props> = ({
         ))}
       </UISelect>
 
-      <label>Monto:</label>
+      <label style={{ color: "var(--text-primary)" }}>Monto:</label>
       <UITextInput
         type="number"
         value={amount}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(Number(e.target.value))}
         placeholder="Cantidad"
       />
 
-      <div style={{ fontSize: "0.85rem", color: "#555" }}>
+      <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
         Disponible en origen: <strong>${available.toLocaleString()}</strong>
       </div>
 
       <UITextArea
         placeholder="Notas (opcional)"
         value={notes}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
+        onChange={(e) => setNotes(e.target.value)}
       />
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>

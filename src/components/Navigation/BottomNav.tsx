@@ -6,9 +6,9 @@ const BottomNav: React.FC = () => {
   const navigate = useNavigate();
 
   const navItems = [
-    { path: "/", label: "Inicio", emoji: "🏠" },
-    { path: "/movements", label: "Movimientos", emoji: "🧾" },
-    { path: "/sections", label: "Apartados", emoji: "📁" },
+    { path: "/wallet", label: "Inicio", emoji: "🏠" },
+    { path: "/wallet/movements", label: "Movimientos", emoji: "🧾" },
+    { path: "/wallet/sections", label: "Apartados", emoji: "📁" },
   ];
 
   return (
@@ -18,8 +18,8 @@ const BottomNav: React.FC = () => {
         justifyContent: "space-around",
         alignItems: "center",
         padding: "0.5rem 0",
-        borderTop: "1px solid #ddd",
-        background: "#fff",
+        borderTop: "1px solid var(--border-color)",
+        background: "var(--background)",
         position: "fixed",
         bottom: 0,
         width: "100%",
@@ -36,7 +36,7 @@ const BottomNav: React.FC = () => {
             style={{
               background: "none",
               border: "none",
-              color: isActive ? "#000" : "#999",
+              color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
               fontWeight: isActive ? "bold" : "normal",
               fontSize: "1rem",
               display: "flex",
