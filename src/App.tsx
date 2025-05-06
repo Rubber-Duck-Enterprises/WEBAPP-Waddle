@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import StartRedirect from "./pages/StartRedirect";
 import Home from "./pages/Home";
 import Sections from "./pages/Sections";
 import Movements from "./pages/Movements";
@@ -13,6 +14,7 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<StartRedirect />} />
         <Route path="/wallet" element={<Home />} />
         <Route path="/wallet/sections" element={<Sections />} />
         <Route path="/wallet/movements" element={<Movements />} />
