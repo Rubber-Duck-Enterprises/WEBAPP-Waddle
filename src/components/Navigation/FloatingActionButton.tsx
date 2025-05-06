@@ -10,7 +10,11 @@ import { getCreateTaskModal } from "../Modal/Presets/CreateTaskModal";
 import { useTaskListStore } from "../../stores/TaskListStore";
 import { useTaskStore } from "../../stores/TaskStore";
 
-const FloatingActionButton: React.FC = () => {
+type Props = {
+  activeListId: string | "all";
+};
+
+const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
   const [open, setOpen] = useState(false);
   const { showModal, hideModal } = useModal();
 
@@ -23,19 +27,24 @@ const FloatingActionButton: React.FC = () => {
       onClick: () => {
         showModal(
           getCreateTaskModal({
+            activeListId,
             onCancel: hideModal,
-            onConfirm: ({ title, dueDate, notes }) => {
+            onConfirm: ({ title, dueDate, notes, listId, priority, repeat, tags }) => {
               addTask({
                 title,
                 dueDate,
                 notes,
-                listId: undefined,
+                listId,
+                priority,
+                repeat,
+                tags,
               });
+              
               hideModal();
-            }
+            },
           })
         );
-      } 
+      }
     },
     { 
       label: "Agregar lista", emoji: "📝", 
@@ -94,7 +103,7 @@ const FloatingActionButton: React.FC = () => {
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         style={fabStyle}
       >
-        <FiPlus size={28} />
+        <FiPlus size={32} />
       </motion.button>
     </>
   );
@@ -102,6 +111,9 @@ const FloatingActionButton: React.FC = () => {
 
 const fabStyle: React.CSSProperties = {
   position: "fixed",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
   bottom: "1.5rem",
   right: "1.5rem",
   width: "56px",

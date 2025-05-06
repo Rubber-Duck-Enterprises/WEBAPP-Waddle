@@ -3,8 +3,12 @@ import Drawer from "../components/Navigation/Drawer";
 import Header from "../components/Navigation/Header";
 import { motion } from "framer-motion";
 import FloatingActionButton from "../components/Navigation/FloatingActionButton";
+import UIMotionEffectLayer from "../components/UI/UIFullScreenEffectLayer";
 
-const ListLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ListLayout: React.FC<{ children: React.ReactNode; activeListId: string | "all" }> = ({
+  children,
+  activeListId,
+}) => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -23,8 +27,9 @@ const ListLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </motion.div>
       </main>
 
-      <FloatingActionButton />
+      <FloatingActionButton activeListId={activeListId} />
       <Drawer isOpen={isDrawerOpen} onClose={() => setDrawerOpen(false)} />
+      <UIMotionEffectLayer />
     </div>
   );
 };

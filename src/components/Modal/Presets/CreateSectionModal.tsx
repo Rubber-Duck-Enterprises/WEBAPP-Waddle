@@ -13,7 +13,7 @@ export const getCreateSectionModal = ({ name, onConfirm, onCancel }: Props) => {
 };
 
 const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
-  const [goal, setGoal] = useState<number>(0);
+  const [goal, setGoal] = useState<number | null>(null);
   const [color, setColor] = useState<string>("#FFD700");
   const [icon, setIcon] = useState<string>("💰");
   const [customColor, setCustomColor] = useState<string>("");
@@ -36,7 +36,7 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
       <UITextInput
         type="number"
         placeholder="Meta (opcional)"
-        value={goal}
+        value={goal ?? ""}
         onChange={(e) => setGoal(Number(e.target.value))}
       />
 
@@ -123,7 +123,7 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
         <UIButton
           onClick={() =>
             onConfirm({
-              goal,
+              goal: goal ?? 0,
               color: effectiveColor,
               icon: effectiveEmoji,
             })

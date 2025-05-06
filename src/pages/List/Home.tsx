@@ -3,29 +3,36 @@ import { useTaskStore } from "../../stores/TaskStore";
 import { useTaskListStore } from "../../stores/TaskListStore";
 
 import ListLayout from "../../layouts/ListLayout";
+import TaskListGroup from "../../components/ToolList/Home/TaskListGroup";
 import UIButton from "../../components/UI/UIButton";
+import UIBulletItem from "../../components/UI/UIBulletItem";
+import { useModal } from "../../context/ModalContext";
+import { getEditTaskModal } from "../../components/Modal/Presets/EditTaskModal";
 
 const ListHome: React.FC = () => {
-  const { tasks, toggleTaskDone } = useTaskStore();
-  const { taskLists } = useTaskListStore();
+  const { tasks, toggleTaskDone, updateTask, deleteTask } = useTaskStore();
+  const { taskLists, deleteTaskList  } = useTaskListStore();
+  const { showModal, hideModal } = useModal();
 
   const [activeListId, setActiveListId] = useState<string | "all">("all");
-  const [filter, setFilter] = useState<"all" | "done" | "pending">("all");
+  const [filter, setFilter] = useState<"all" | "done" | "pending">("pending");
 
-  const filteredTasks = tasks.filter((task) => {
-    const inList = activeListId === "all" || task.listId === activeListId;
-    const matchesFilter =
-      filter === "all" ||
-      (filter === "done" && task.isDone) ||
-      (filter === "pending" && !task.isDone);
-    return inList && matchesFilter;
-  });
+  const deleteTasksFromList = (listId: string) => {
+    tasks.forEach((task) => {
+      if (task.listId === listId) deleteTask(task.id);
+    });
+  };
 
   return (
-    <ListLayout>
+    <ListLayout activeListId={activeListId}>
       <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Select de listas */}
-        <div>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+          }}
+        >
           <select
             value={activeListId}
             onChange={(e) => setActiveListId(e.target.value)}
@@ -45,64 +52,78 @@ const ListHome: React.FC = () => {
               </option>
             ))}
           </select>
+
+          {activeListId !== "all" && (
+            <UIButton
+              variant="danger"
+              onClick={() => {
+                const list = taskLists.find((l) => l.id === activeListId);
+                if (list && confirm(`¿Eliminar la lista "${list.name}" y todas sus tareas?`)) {
+                  deleteTaskList(list.id);
+                  deleteTasksFromList(list.id);
+                  setActiveListId("all");
+                }
+              }}
+            >
+              Eliminar
+            </UIButton>
+          )}
         </div>
 
-        {/* Filtros de tarea */}
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <UIButton onClick={() => setFilter("all")} variant={filter === "all" ? "primary" : "default"}>
-            Todas
-          </UIButton>
-          <UIButton onClick={() => setFilter("pending")} variant={filter === "pending" ? "primary" : "default"}>
+        {/* Filtros */}
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <UIBulletItem
+            active={filter === "pending"}
+            onClick={() => setFilter("pending")}
+            color="#f39c12"
+          >
             Pendientes
-          </UIButton>
-          <UIButton onClick={() => setFilter("done")} variant={filter === "done" ? "primary" : "default"}>
+          </UIBulletItem>
+          <UIBulletItem
+            active={filter === "done"}
+            onClick={() => setFilter("done")}
+            color="#2ecc71"
+          >
             Completadas
-          </UIButton>
+          </UIBulletItem>
+          <UIBulletItem
+            active={filter === "all"}
+            onClick={() => setFilter("all")}
+            color="#cccccc"
+          >
+            Todas
+          </UIBulletItem>
         </div>
 
         {/* Lista de tareas */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {filteredTasks.length === 0 ? (
-            <p style={{ color: "var(--text-secondary)" }}>No hay tareas para mostrar.</p>
-          ) : (
-            filteredTasks.map((task) => (
-              <label
-                key={task.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  background: "var(--surface)",
-                  padding: "0.75rem 1rem",
-                  borderRadius: "8px",
-                  border: "1px solid var(--border-color)",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={task.isDone}
-                  onChange={() => toggleTaskDone(task.id)}
-                />
-                <div style={{ flex: 1 }}>
-                  <p
-                    style={{
-                      margin: 0,
-                      textDecoration: task.isDone ? "line-through" : "none",
-                      color: task.isDone ? "var(--text-secondary)" : "var(--text-primary)",
-                    }}
-                  >
-                    {task.title}
-                  </p>
-                  {task.dueDate && (
-                    <small style={{ color: "var(--text-secondary)" }}>
-                      📅 {new Date(task.dueDate).toLocaleDateString()}
-                    </small>
-                  )}
-                </div>
-              </label>
-            ))
-          )}
-        </div>
+        <TaskListGroup
+          tasks={tasks.filter((t) => activeListId === "all" || t.listId === activeListId)}
+          taskLists={taskLists}
+          activeListId={activeListId}
+          filter={filter}
+          onToggleDone={(id) => {
+            toggleTaskDone(id);
+            const task = tasks.find((t) => t.id === id);
+            if (task && !task.isDone) (window as any).triggerCelebration?.();
+          }}
+          onEdit={(task) => {
+            showModal(
+              getEditTaskModal({
+                task,
+                activeListId,
+                onCancel: hideModal,
+                onConfirm: (updatedTask) => {
+                  updateTask(task.id, updatedTask);
+                  hideModal();
+                },
+                onDelete: () => {
+                  deleteTask(task.id);
+                  hideModal();
+                },
+              })
+            );
+          }}
+        />
       </div>
     </ListLayout>
   );

@@ -15,7 +15,7 @@ export const getAddGeneralExpenseModal = ({ type, onConfirm, onCancel }: Props) 
 
 const AddGeneralExpenseModal: React.FC<Props> = ({ type, onConfirm, onCancel }) => {
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
 
   const isIncome = type === "income";
@@ -36,7 +36,7 @@ const AddGeneralExpenseModal: React.FC<Props> = ({ type, onConfirm, onCancel }) 
       <UITextInput
         type="number"
         placeholder="Monto"
-        value={amount}
+        value={amount ?? ""}
         onChange={(e) => setAmount(Number(e.target.value))}
       />
 
@@ -51,9 +51,9 @@ const AddGeneralExpenseModal: React.FC<Props> = ({ type, onConfirm, onCancel }) 
           Cancelar
         </UIButton>
         <UIButton
-          onClick={() => onConfirm({ description, amount, notes: notes || undefined })}
+          onClick={() => amount !== null && onConfirm({ description, amount, notes: notes || undefined })}
           variant={isIncome ? "primary" : "danger"}
-          disabled={!description || amount <= 0}
+          disabled={!description || amount === null || amount <= 0}
         >
           Agregar
         </UIButton>
