@@ -6,13 +6,13 @@ import UIBalanceAmount from "../UI/UIBalanceAmount";
 import UIIncomeExpenseSummary from "../UI/UIIncomeExpenseSummary";
 import UIProgressBar from "../UI/UIProgressBar";
 
-import { useModal } from "../../context/ModalContext";
-import TransferFundsModal from "../Modal/Presets/TransferFundsModal";
+// import { useModal } from "../../context/ModalContext";
+// import TransferFundsModal from "../Modal/Presets/TransferFundsModal";
 import TransactionList from "./TransactionList";
 
 import { Expense, Section } from "../../types";
-import { useExpenseStore } from "../../stores/expenseStore";
-import { useSectionStore } from "../../stores/sectionStore";
+// import { useExpenseStore } from "../../stores/expenseStore";
+// import { useSectionStore } from "../../stores/sectionStore";
 
 interface Props {
   section: Section;
@@ -29,9 +29,9 @@ const SectionBalanceCard: React.FC<Props> = ({
   endDate,
   onAdd
 }) => {
-  const { showModal, hideModal } = useModal();
-  const { addExpense } = useExpenseStore();
-  const { sections } = useSectionStore();
+  // const { showModal, hideModal } = useModal();
+  // const { addExpense } = useExpenseStore();
+  // const { sections } = useSectionStore();
 
   const filtered = expenses.filter((e) => {
     const date = parseISO(e.date);
@@ -46,43 +46,43 @@ const SectionBalanceCard: React.FC<Props> = ({
   const goal = section.goal || 0;
   const progress = goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
 
-  const openTransferToThisModal = () => {
-    showModal(
-      <TransferFundsModal
-        mode="to-this"
-        destinationId={section.id}
-        sections={sections}
-        onCancel={hideModal}
-        onConfirm={({ from, to, amount, notes }) => {
-          const fromLabel = from === "general"
-            ? "General"
-            : sections.find((s) => s.id === from)?.name || from;
+  // const openTransferToThisModal = () => {
+  //   showModal(
+  //     <TransferFundsModal
+  //       mode="to-this"
+  //       destinationId={section.id}
+  //       sections={sections}
+  //       onCancel={hideModal}
+  //       onConfirm={({ from, to, amount, notes }) => {
+  //         const fromLabel = from === "general"
+  //           ? "General"
+  //           : sections.find((s) => s.id === from)?.name || from;
 
-          const toLabel = to === "general"
-            ? "General"
-            : sections.find((s) => s.id === to)?.name || to;
+  //         const toLabel = to === "general"
+  //           ? "General"
+  //           : sections.find((s) => s.id === to)?.name || to;
 
-          addExpense({
-            description: `Transferencia a ${toLabel}`,
-            amount: -amount,
-            category: from,
-            date: new Date().toISOString(),
-            notes,
-          });
+  //         addExpense({
+  //           description: `Transferencia a ${toLabel}`,
+  //           amount: -amount,
+  //           category: from,
+  //           date: new Date().toISOString(),
+  //           notes,
+  //         });
 
-          addExpense({
-            description: `Transferencia desde ${fromLabel}`,
-            amount,
-            category: to,
-            date: new Date().toISOString(),
-            notes,
-          });
+  //         addExpense({
+  //           description: `Transferencia desde ${fromLabel}`,
+  //           amount,
+  //           category: to,
+  //           date: new Date().toISOString(),
+  //           notes,
+  //         });
 
-          hideModal();
-        }}
-      />
-    );
-  };
+  //         hideModal();
+  //       }}
+  //     />
+  //   );
+  // };
 
   return (
     <div
