@@ -1,5 +1,5 @@
-import { Section } from "../../types";
-import UIBulletItem from "../UI/UIBulletItem";
+import { Section } from "../../../types";
+import UIBulletItem from "../../UI/UIBulletItem";
 
 interface Props {
   sections: Section[];

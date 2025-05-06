@@ -86,7 +86,9 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
             <li style={{ cursor: "pointer" }} onClick={() => handleNavigate("/wallet")}>
               💰 Waddle Wallet
             </li>
-            <li>📝 Waddle List</li>
+            <li style={{ cursor: "pointer" }} onClick={() => handleNavigate("/list")}>
+              📝 Waddle List
+            </li>
             <li style={{ cursor: "pointer" }} onClick={() => handleNavigate("/backups")}>
               ☁️ Respaldos
             </li>

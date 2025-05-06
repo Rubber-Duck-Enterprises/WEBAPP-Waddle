@@ -1,16 +1,16 @@
 import React from "react";
 import { parseISO, isWithinInterval } from "date-fns";
 
-import UIButton from "../UI/UIButton";
-import UIBalanceAmount from "../UI/UIBalanceAmount";
-import UIIncomeExpenseSummary from "../UI/UIIncomeExpenseSummary";
-import UIProgressBar from "../UI/UIProgressBar";
+import UIButton from "../../UI/UIButton";
+import UIBalanceAmount from "../../UI/UIBalanceAmount";
+import UIIncomeExpenseSummary from "../../UI/UIIncomeExpenseSummary";
+import UIProgressBar from "../../UI/UIProgressBar";
 
 // import { useModal } from "../../context/ModalContext";
 // import TransferFundsModal from "../Modal/Presets/TransferFundsModal";
 import TransactionList from "./TransactionList";
 
-import { Expense, Section } from "../../types";
+import { Expense, Section } from "../../../types";
 // import { useExpenseStore } from "../../stores/expenseStore";
 // import { useSectionStore } from "../../stores/sectionStore";
 

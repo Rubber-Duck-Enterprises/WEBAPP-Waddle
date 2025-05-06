@@ -21,7 +21,7 @@ const AddGeneralExpenseModal: React.FC<Props> = ({ type, onConfirm, onCancel }) 
   const isIncome = type === "income";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>
         {isIncome ? "Agregar ingreso" : "Agregar gasto"} general
       </h3>

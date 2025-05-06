@@ -1,20 +1,20 @@
 import React, {useEffect} from "react";
 import { isWithinInterval, parseISO } from "date-fns";
 
-import { useSectionStore } from "../stores/sectionStore";
-import { useExpenseStore } from "../stores/expenseStore";
-import { useDateRange } from "../hooks/useDateRange";
-import { useModal } from "../context/ModalContext";
-import { getAddGeneralExpenseModal } from "../components/Modal/Presets/AddGeneralExpenseModal";
+import { useSectionStore } from "../../stores/sectionStore";
+import { useExpenseStore } from "../../stores/expenseStore";
+import { useDateRange } from "../../hooks/useDateRange";
+import { useModal } from "../../context/ModalContext";
+import { getAddGeneralExpenseModal } from "../../components/Modal/Presets/AddGeneralExpenseModal";
 
-import DateFilterBar from "../components/Home/DateFilterBar";
-import BalanceCard from "../components/Home/BalanceCard";
-import SectionSelector from "../components/Home/SectionSelector";
-import SectionBalanceCard from "../components/Home/SectionBalanceCard";
+import DateFilterBar from "../../components/ToolWallet/Home/DateFilterBar";
+import BalanceCard from "../../components/ToolWallet/Home/BalanceCard";
+import SectionSelector from "../../components/ToolWallet/Home/SectionSelector";
+import SectionBalanceCard from "../../components/ToolWallet/Home/SectionBalanceCard";
 
-import WalletLayout from "../layouts/WalletLayout";
+import WalletLayout from "../../layouts/WalletLayout";
 
-const Home: React.FC = () => {
+const WalletHome: React.FC = () => {
   const { showModal, hideModal } = useModal();
   const { addExpense, expenses } = useExpenseStore();
   const [onlyGeneral, setOnlyGeneral] = React.useState<boolean>(false);
@@ -141,4 +141,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default WalletHome;

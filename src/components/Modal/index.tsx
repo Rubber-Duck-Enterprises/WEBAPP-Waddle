@@ -51,7 +51,7 @@ const Modal = () => {
               style={{
                 background: "var(--background)",
                 color: "var(--text-primary)",
-                padding: "2rem",
+                padding: "24px",
                 borderRadius: "12px",
                 minWidth: "300px",
                 maxWidth: "90vw",

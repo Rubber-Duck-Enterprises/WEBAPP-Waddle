@@ -1,3 +1,4 @@
+// Waddle Wallet
 export type Section = {
   id: string;
   name: string;
@@ -24,6 +25,7 @@ export type ExpenseCategory = {
   icon?: string;
 };
 
+// Waddle List
 export type Task = {
   id: string;
   title: string;
@@ -32,6 +34,12 @@ export type Task = {
   dueDate?: string;
   notes?: string;
   listId?: string;
+  priority?: "low" | "medium" | "high";
+  reminders?: string[];
+  subtasks?: Task[];
+  repeat?: "daily" | "weekly" | "monthly" | null;
+  completedAt?: string;
+  tags?: string[];
 };
 
 export type TaskList = {
@@ -39,8 +47,17 @@ export type TaskList = {
   name: string;
   icon?: string;
   color?: string;
+  sortOrder?: "manual" | "dueDate" | "priority";
+  isArchived?: boolean;
 };
 
+export type Tag = {
+  id: string;
+  name: string;
+  color?: string;
+};
+
+// Backups
 export type BackupMetadata = {
   id: string;
   createdAt: string;

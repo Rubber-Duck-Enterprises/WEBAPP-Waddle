@@ -24,7 +24,7 @@ const DeleteSectionModal: React.FC<Props> = ({ sectionName, onConfirm, onCancel 
   const isValid = confirmText.trim() === sectionName;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>¿Eliminar apartado?</h3>
       <p style={{ color: "var(--text-secondary)" }}>
         Esta acción no se puede deshacer. Para confirmar, escribe el nombre del apartado:

@@ -11,7 +11,7 @@ export const getImportSuccessModal = ({ onConfirm }: Props) => {
 
 const ImportSuccessModal: React.FC<Props> = ({ onConfirm }) => {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>✅ Importación exitosa</h3>
       <p style={{ color: "var(--text-secondary)" }}>
         Los datos fueron cargados correctamente. Se recargará la página para aplicar los cambios.

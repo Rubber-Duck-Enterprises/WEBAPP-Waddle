@@ -2,13 +2,13 @@ import React from "react";
 
 // import UIButton from "../UI/UIButton";
 // import UIToggle from "../UI/UIToggle";
-import UIBalanceAmount from "../UI/UIBalanceAmount";
-import UIIncomeExpenseSummary from "../UI/UIIncomeExpenseSummary";
+import UIBalanceAmount from "../../UI/UIBalanceAmount";
+import UIIncomeExpenseSummary from "../../UI/UIIncomeExpenseSummary";
 // import { useModal } from "../../context/ModalContext";
 // import TransferFundsModal from "../Modal/Presets/TransferFundsModal";
 import TransactionList from "./TransactionList";
 
-import { Expense, Section } from "../../types";
+import { Expense, Section } from "../../../types";
 // import { useExpenseStore } from "../../stores/expenseStore";
 
 interface Props {
