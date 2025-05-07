@@ -2,16 +2,17 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 
+// Paginas
 import StartRedirect from "./pages/StartRedirect";
-
 import WalletHome from "./pages/Wallet/Home";
 import Sections from "./pages/Wallet/Sections";
 import Movements from "./pages/Wallet/Movements";
-
 import ListHome from "./pages/List/Home";
-
 import Backups from "./pages/Backups";
 import Settings from "./pages/Settings";
+import About from "./pages/About";
+
+import { useScheduledTaskCleanup } from "./hooks/useScheduledTaskCleanup"
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -33,12 +34,18 @@ const AnimatedRoutes = () => {
         {/* Other Routes */}
         <Route path="/backups" element={<Backups />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/about" element={<About />} />
+
+        {/* Catch-all Route */}
+        <Route path="*" element={<StartRedirect />} />
       </Routes>
     </AnimatePresence>
   );
 };
 
 const App: React.FC = () => {
+  useScheduledTaskCleanup();
+
   return (
     <Router>
       <AnimatedRoutes />

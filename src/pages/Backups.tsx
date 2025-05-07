@@ -84,6 +84,7 @@ const BackupPage: React.FC = () => {
   ) => (
     <div
       style={{
+        backgroundColor: "var(--surface)",
         border: "1px solid var(--border-color)",
         borderRadius: "8px",
         padding: "1rem",
