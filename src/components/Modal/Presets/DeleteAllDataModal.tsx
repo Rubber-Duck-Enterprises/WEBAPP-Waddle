@@ -17,7 +17,7 @@ const DeleteAllDataModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
   const isValid = confirmText.trim().toLowerCase() === "eliminar todo";
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>⚠️ Eliminar todos los datos</h3>
       <p style={{ color: "var(--text-secondary)" }}>
         Esta acción eliminará permanentemente todos tus apartados y movimientos. No se puede deshacer.<br />

@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Local env files
+.env
+.env.*
+
 # builds
 dev-dist/
 out/

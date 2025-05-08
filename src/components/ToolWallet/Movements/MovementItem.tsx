@@ -1,6 +1,6 @@
 import React from "react";
-import UIButton from "../UI/UIButton";
-import { Expense, Section } from "../../types";
+import UIButton from "../../UI/UIButton";
+import { Expense, Section } from "../../../types";
 
 interface Props {
   expense: Expense;

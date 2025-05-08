@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useLocation } from "react-router-dom";
 import UIToggle from "../../components/UI/UIToggle";
 import UIButton from "../../components/UI/UIButton";
+import DrawerLink from "./DrawerLink";
 import { useTheme } from "../../hooks/useTheme";
 
 type Props = {
@@ -13,6 +13,7 @@ type Props = {
 const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
 
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
@@ -21,7 +22,6 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
-
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
@@ -38,8 +38,10 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
   };
 
   const handleNavigate = (path: string) => {
+    if (location.pathname !== path) {
+      navigate(path);
+    }
     onClose();
-    navigate(path);
   };
 
   return (
@@ -63,7 +65,6 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
       >
         <div>
           <h2 style={{ color: "var(--text-primary)" }}>Menú</h2>
-
           <div
             style={{
               backgroundColor: "var(--border-color)",
@@ -73,37 +74,22 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
             }}
           />
 
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.75rem",
-              color: "var(--text-primary)",
-            }}
-          >
-            <li style={{ cursor: "pointer" }} onClick={() => handleNavigate("/wallet")}>
-              💰 Waddle Wallet
-            </li>
-            <li>📝 Waddle List</li>
-            <li style={{ cursor: "pointer" }} onClick={() => handleNavigate("/backups")}>
-              ☁️ Respaldos
-            </li>
-            <li style={{ cursor: "pointer" }} onClick={() => handleNavigate("/settings")}>
-              ⚙️ Configuración
-            </li>
-            <li>ℹ️ Sobre Waddle</li>
+          <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            <DrawerLink path="/wallet" label="💰 Waddle Wallet" onClick={handleNavigate} />
+            <DrawerLink path="/list" label="📝 Waddle List" onClick={handleNavigate} />
+            <DrawerLink path="/backups" label="☁️ Respaldos" onClick={handleNavigate} />
+            <DrawerLink path="/settings" label="⚙️ Configuración" onClick={handleNavigate} />
+            <DrawerLink path="/about" label="ℹ️ Sobre Waddle" onClick={handleNavigate} />
           </ul>
         </div>
 
         <div>
           {deferredPrompt && (
             <div style={{ marginTop: "1rem" }}>
-            <UIButton onClick={handleInstallClick} variant="secondary" fullWidth>
-              📲 Instalar app
-            </UIButton>
-          </div>
+              <UIButton onClick={handleInstallClick} variant="secondary" fullWidth>
+                📲 Instalar app
+              </UIButton>
+            </div>
           )}
 
           <div

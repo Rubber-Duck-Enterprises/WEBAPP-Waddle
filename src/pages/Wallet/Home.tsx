@@ -1,20 +1,20 @@
 import React, {useEffect} from "react";
 import { isWithinInterval, parseISO } from "date-fns";
 
-import { useSectionStore } from "../stores/sectionStore";
-import { useExpenseStore } from "../stores/expenseStore";
-import { useDateRange } from "../hooks/useDateRange";
-import { useModal } from "../context/ModalContext";
-import { getAddGeneralExpenseModal } from "../components/Modal/Presets/AddGeneralExpenseModal";
+import { useSectionStore } from "../../stores/sectionStore";
+import { useExpenseStore } from "../../stores/expenseStore";
+import { useDateRange } from "../../hooks/useDateRange";
+import { useModal } from "../../context/ModalContext";
+import { getAddGeneralExpenseModal } from "../../components/Modal/Presets/AddGeneralExpenseModal";
 
-import DateFilterBar from "../components/Home/DateFilterBar";
-import BalanceCard from "../components/Home/BalanceCard";
-import SectionSelector from "../components/Home/SectionSelector";
-import SectionBalanceCard from "../components/Home/SectionBalanceCard";
+import DateFilterBar from "../../components/ToolWallet/Home/DateFilterBar";
+import BalanceCard from "../../components/ToolWallet/Home/BalanceCard";
+import SectionSelector from "../../components/ToolWallet/Home/SectionSelector";
+import SectionBalanceCard from "../../components/ToolWallet/Home/SectionBalanceCard";
 
-import WalletLayout from "../layouts/WalletLayout";
+import WalletLayout from "../../layouts/WalletLayout";
 
-const Home: React.FC = () => {
+const WalletHome: React.FC = () => {
   const { showModal, hideModal } = useModal();
   const { addExpense, expenses } = useExpenseStore();
   const [onlyGeneral, setOnlyGeneral] = React.useState<boolean>(false);
@@ -35,7 +35,9 @@ const Home: React.FC = () => {
     sections.length > 0 ? sections[0].id : null
   );
   const selectedSection = sections.find((s) => s.id === selectedSectionId);
-  const sectionExpenses = expenses.filter((e) => e.category === selectedSection?.id);
+  const sectionExpenses = expenses.filter(
+    (e) => e.category === selectedSection?.id || e.source === selectedSection?.id
+  );
 
   const allExpensesInRange = expenses.filter((e) => {
     const date = parseISO(e.date);
@@ -44,10 +46,20 @@ const Home: React.FC = () => {
     return isInRange && (!onlyGeneral ? true : isGeneral);
   });
 
-  const income = allExpensesInRange.filter((e) => e.amount > 0).reduce((acc, e) => acc + e.amount, 0);
-  const totalExpenses = allExpensesInRange.filter((e) => e.amount < 0).reduce((acc, e) => acc + e.amount, 0);
+  const income = allExpensesInRange
+    .filter((e) => e.amount > 0)
+    .reduce((acc, e) => acc + e.amount, 0);
+
+  const realExpenses = allExpensesInRange.filter((e) => {
+    if (e.amount >= 0) return false;
+    return !e.source || e.source !== e.category;
+  });
+
+  const totalExpenses = realExpenses.reduce((acc, e) => acc + e.amount, 0);
   const balance = income + totalExpenses;
-  const latest = [...allExpensesInRange].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const latest = [...allExpensesInRange]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 3);
 
   const openModal = (type: "income" | "expense") => {
     showModal(
@@ -72,12 +84,14 @@ const Home: React.FC = () => {
     showModal(
       getAddGeneralExpenseModal({
         type,
+        sectionId,
         onCancel: hideModal,
-        onConfirm: ({ description, amount, notes }) => {
+        onConfirm: ({ description, amount, notes, source }) => {
           addExpense({
             description,
             amount: type === "expense" ? -Math.abs(amount) : Math.abs(amount),
             category: sectionId,
+            source,
             date: new Date().toISOString(),
             notes,
           });
@@ -141,4 +155,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default WalletHome;

@@ -15,6 +15,7 @@
 
   /* App Theme */
   --primary-color: #ffcd00;
+  --primary-bg: #ffeb3b40;
   --success-color: #4caf50;
   --danger-color: #f44336;
   --information-color: #2196f3;
@@ -53,6 +54,7 @@
   --border-color: #333;
 
   --primary-color: #ffd600;
+  --primary-bg: #ffeb3b40;
   --success-color: #81c784;
   --danger-color: #ef9a9a;
   --information-color: #64b5f6;

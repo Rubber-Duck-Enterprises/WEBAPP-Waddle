@@ -1,48 +1,44 @@
+// components/Modal/Presets/CreateTaskListModal.tsx
 import React, { useState } from "react";
 import UITextInput from "../../UI/UITextInput";
 import UIButton from "../../UI/UIButton";
 
 type Props = {
-  name: string;
-  onConfirm: (config: { goal: number; color: string; icon: string }) => void;
+  onConfirm: (config: { name: string; color: string; icon: string }) => void;
   onCancel: () => void;
 };
 
-export const getCreateSectionModal = ({ name, onConfirm, onCancel }: Props) => {
-  return <CreateSectionModal name={name} onConfirm={onConfirm} onCancel={onCancel} />;
+export const getCreateTaskListModal = ({ onConfirm, onCancel }: Props) => {
+  return <CreateTaskListModal onConfirm={onConfirm} onCancel={onCancel} />;
 };
 
-const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
-  const [goal, setGoal] = useState<number | null>(null);
-  const [color, setColor] = useState<string>("#FFD700");
-  const [icon, setIcon] = useState<string>("💰");
-  const [customColor, setCustomColor] = useState<string>("");
-  const [customEmoji, setCustomEmoji] = useState<string>("");
+const CreateTaskListModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
+  const [name, setName] = useState("");
+  const [color, setColor] = useState("#2196f3");
+  const [icon, setIcon] = useState("✅");
+  const [customColor, setCustomColor] = useState("");
+  const [customEmoji, setCustomEmoji] = useState("");
 
-  const colorOptions = ["#FFD700", "#4caf50", "#2196f3", "#e91e63", "#ff9800"];
-  const emojiOptions = ["💰", "🏠", "🍔", "🎓", "✈️", "📦", "🎁"];
+  const colorOptions = ["#2196f3", "#4caf50", "#e91e63", "#ff9800", "#9c27b0"];
+  const emojiOptions = ["✅", "📋", "📝", "🎯", "🗓️", "💼", "🔖"];
 
   const effectiveColor = customColor || color;
   const effectiveEmoji = customEmoji || icon;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem"}}>
-      <h3 style={{ color: "var(--text-primary)" }}>Configurar nuevo apartado</h3>
-      <p style={{ color: "var(--text-secondary)" }}>
-        Nombre: <strong>{name}</strong>
-      </p>
-
-      {/* 🎯 Meta */}
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <h3 style={{ color: "var(--text-primary)" }}>Crear nueva lista</h3>
+      
+      {/* 📝 Nombre de la lista */}
       <UITextInput
-        type="number"
-        placeholder="Meta (opcional)"
-        value={goal ?? ""}
-        onChange={(e) => setGoal(Number(e.target.value))}
+        placeholder="Nombre de la lista"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
       />
 
       {/* 🎨 Color */}
       <div>
-        <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>🎨 Color del apartado:</p>
+        <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>🎨 Color de la lista:</p>
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
           {colorOptions.map((c) => (
             <button
@@ -62,7 +58,6 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
             />
           ))}
         </div>
-
         <input
           type="color"
           value={customColor || color}
@@ -107,7 +102,7 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
         <UITextInput
           type="text"
           maxLength={2}
-          placeholder="🎨"
+          placeholder="📝"
           value={customEmoji}
           onChange={(e) => setCustomEmoji(e.target.value)}
           style={{ width: "60px", textAlign: "center", fontSize: "1.5rem" }}
@@ -121,13 +116,12 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
           Cancelar
         </UIButton>
         <UIButton
-          onClick={() =>
-            onConfirm({
-              goal: goal ?? 0,
-              color: effectiveColor,
-              icon: effectiveEmoji,
-            })
-          }
+          onClick={() => {
+            if (name.trim()) {
+              onConfirm({ name: name.trim(), color: effectiveColor, icon: effectiveEmoji });
+            }
+          }}
+          disabled={!name.trim()}
           variant="primary"
         >
           Crear
@@ -137,4 +131,4 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
   );
 };
 
-export default CreateSectionModal;
+export default CreateTaskListModal;

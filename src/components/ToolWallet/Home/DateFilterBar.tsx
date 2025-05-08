@@ -1,5 +1,5 @@
 import React from "react";
-import UIBulletItem from "../UI/UIBulletItem";
+import UIBulletItem from "../../UI/UIBulletItem";
 
 interface Props {
   rangeType: "month" | "week" | "all" | "custom";

@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { useModal } from "../context/ModalContext";
-import { useSectionStore } from "../stores/sectionStore";
-import { getCreateSectionModal }  from "../components/Modal/Presets/CreateSectionModal";
-import { getDeleteSectionModal }  from "../components/Modal/Presets/DeleteSectionModal";
-import { getEditSectionModal } from "../components/Modal/Presets/EditSectionModal";
-import NewSectionCard from "../components/Sections/NewSectionCard";
-import SectionItem from "../components/Sections/SectionItem";
+import { useModal } from "../../context/ModalContext";
+import { useSectionStore } from "../../stores/sectionStore";
+import { getCreateSectionModal }  from "../../components/Modal/Presets/CreateSectionModal";
+import { getDeleteSectionModal }  from "../../components/Modal/Presets/DeleteSectionModal";
+import { getEditSectionModal } from "../../components/Modal/Presets/EditSectionModal";
+import NewSectionCard from "../../components/ToolWallet/Sections/NewSectionCard";
+import SectionItem from "../../components/ToolWallet/Sections/SectionItem";
+import UIButton from "../../components/UI/UIButton";
 
-import WalletLayout from "../layouts/WalletLayout";
+import WalletLayout from "../../layouts/WalletLayout";
 
 
 const Sections: React.FC = () => {
@@ -21,7 +22,12 @@ const Sections: React.FC = () => {
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <h3>Campo vacío</h3>
           <p>Por favor escribe un nombre antes de crear el apartado.</p>
-          <button onClick={hideModal}>Entendido</button>
+          <UIButton 
+            onClick={hideModal} 
+            variant="secondary"
+          >
+            Entendido
+          </UIButton>
         </div>
       );
       return;
