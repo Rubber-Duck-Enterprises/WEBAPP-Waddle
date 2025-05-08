@@ -124,8 +124,7 @@ const Settings: React.FC = () => {
           </>
         )}
 
-
-        {notificationPermission === "granted" && (
+        {/* {notificationPermission === "granted" && (
           <div
             style={{
               display: "flex",
@@ -155,8 +154,7 @@ const Settings: React.FC = () => {
               Copiar token FCM
             </UIButton>
           </div>
-        )}
-
+        )} */}
 
         <div 
           style={{ 
