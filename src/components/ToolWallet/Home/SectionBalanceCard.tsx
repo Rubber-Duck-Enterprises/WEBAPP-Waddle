@@ -6,13 +6,10 @@ import UIBalanceAmount from "../../UI/UIBalanceAmount";
 import UIIncomeExpenseSummary from "../../UI/UIIncomeExpenseSummary";
 import UIProgressBar from "../../UI/UIProgressBar";
 
-// import { useModal } from "../../context/ModalContext";
-// import TransferFundsModal from "../Modal/Presets/TransferFundsModal";
 import TransactionList from "./TransactionList";
 
 import { Expense, Section } from "../../../types";
-// import { useExpenseStore } from "../../stores/expenseStore";
-// import { useSectionStore } from "../../stores/sectionStore";
+
 
 interface Props {
   section: Section;
@@ -29,61 +26,31 @@ const SectionBalanceCard: React.FC<Props> = ({
   endDate,
   onAdd
 }) => {
-  // const { showModal, hideModal } = useModal();
-  // const { addExpense } = useExpenseStore();
-  // const { sections } = useSectionStore();
 
-  const filtered = expenses.filter((e) => {
+  const balanceExpenses = expenses.filter((e) => {
     const date = parseISO(e.date);
-    return isWithinInterval(date, { start: startDate, end: endDate });
+    const inRange = isWithinInterval(date, { start: startDate, end: endDate });
+  
+    return (
+      inRange &&
+      (e.category === section.id || e.source === section.id)
+    );
   });
+  
+  const income = balanceExpenses
+  .filter((e) => e.amount > 0 && e.category === section.id)
+  .reduce((acc, e) => acc + e.amount, 0);
 
-  const income = filtered.filter((e) => e.amount > 0).reduce((acc, e) => acc + e.amount, 0);
-  const totalExpenses = filtered.filter((e) => e.amount < 0).reduce((acc, e) => acc + e.amount, 0);
+  const totalExpenses = balanceExpenses
+    .filter((e) => e.amount < 0 && (e.category === section.id || e.source === section.id))
+    .reduce((acc, e) => acc + e.amount, 0);
+
   const balance = income + totalExpenses;
-  const latest = [...filtered].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const latest = [...balanceExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 
   const goal = section.goal || 0;
   const progress = goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
-
-  // const openTransferToThisModal = () => {
-  //   showModal(
-  //     <TransferFundsModal
-  //       mode="to-this"
-  //       destinationId={section.id}
-  //       sections={sections}
-  //       onCancel={hideModal}
-  //       onConfirm={({ from, to, amount, notes }) => {
-  //         const fromLabel = from === "general"
-  //           ? "General"
-  //           : sections.find((s) => s.id === from)?.name || from;
-
-  //         const toLabel = to === "general"
-  //           ? "General"
-  //           : sections.find((s) => s.id === to)?.name || to;
-
-  //         addExpense({
-  //           description: `Transferencia a ${toLabel}`,
-  //           amount: -amount,
-  //           category: from,
-  //           date: new Date().toISOString(),
-  //           notes,
-  //         });
-
-  //         addExpense({
-  //           description: `Transferencia desde ${fromLabel}`,
-  //           amount,
-  //           category: to,
-  //           date: new Date().toISOString(),
-  //           notes,
-  //         });
-
-  //         hideModal();
-  //       }}
-  //     />
-  //   );
-  // };
-
+  
   return (
     <div
       style={{
@@ -128,14 +95,6 @@ const SectionBalanceCard: React.FC<Props> = ({
         >
           + Ingreso
         </UIButton>
-
-        {/* <UIButton
-          variant="secondary"
-          style={{ width: "64px" }}
-          onClick={openTransferToThisModal}
-        >
-          ↔
-        </UIButton> */}
 
         <UIButton
           variant="danger"

@@ -17,14 +17,6 @@ registerSW({
   },
 });
 
-if ('Notification' in window && Notification.permission !== 'granted') {
-  Notification.requestPermission().then((permission) => {
-    if (permission === 'granted') {
-      console.log('🔔 Permiso de notificaciones concedido');
-    }
-  });
-}
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ModalProvider>

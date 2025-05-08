@@ -13,6 +13,7 @@ export type Expense = {
   description: string;
   amount: number;
   category: string;
+  source?: string;
   date: string;
   recurring?: boolean;
   notes?: string;

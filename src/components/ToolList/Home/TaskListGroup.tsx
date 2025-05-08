@@ -16,7 +16,6 @@ interface Props {
 const TaskListGroup: React.FC<Props> = ({
   tasks,
   taskLists,
-  activeListId,
   filter,
   onToggleDone,
   onEdit,
@@ -48,7 +47,7 @@ const TaskListGroup: React.FC<Props> = ({
                     <TaskItem
                       key={task.id}
                       task={task}
-                      list={activeListId === "all" ? list : undefined}
+                      list={list}
                       onToggleDone={() => onToggleDone(task.id)}
                       onEdit={() => onEdit(task)}
                     />

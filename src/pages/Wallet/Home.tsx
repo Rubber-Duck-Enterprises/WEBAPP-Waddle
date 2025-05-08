@@ -35,7 +35,9 @@ const WalletHome: React.FC = () => {
     sections.length > 0 ? sections[0].id : null
   );
   const selectedSection = sections.find((s) => s.id === selectedSectionId);
-  const sectionExpenses = expenses.filter((e) => e.category === selectedSection?.id);
+  const sectionExpenses = expenses.filter(
+    (e) => e.category === selectedSection?.id || e.source === selectedSection?.id
+  );
 
   const allExpensesInRange = expenses.filter((e) => {
     const date = parseISO(e.date);
@@ -44,10 +46,20 @@ const WalletHome: React.FC = () => {
     return isInRange && (!onlyGeneral ? true : isGeneral);
   });
 
-  const income = allExpensesInRange.filter((e) => e.amount > 0).reduce((acc, e) => acc + e.amount, 0);
-  const totalExpenses = allExpensesInRange.filter((e) => e.amount < 0).reduce((acc, e) => acc + e.amount, 0);
+  const income = allExpensesInRange
+    .filter((e) => e.amount > 0)
+    .reduce((acc, e) => acc + e.amount, 0);
+
+  const realExpenses = allExpensesInRange.filter((e) => {
+    if (e.amount >= 0) return false;
+    return !e.source || e.source !== e.category;
+  });
+
+  const totalExpenses = realExpenses.reduce((acc, e) => acc + e.amount, 0);
   const balance = income + totalExpenses;
-  const latest = [...allExpensesInRange].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const latest = [...allExpensesInRange]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 3);
 
   const openModal = (type: "income" | "expense") => {
     showModal(
@@ -72,12 +84,14 @@ const WalletHome: React.FC = () => {
     showModal(
       getAddGeneralExpenseModal({
         type,
+        sectionId,
         onCancel: hideModal,
-        onConfirm: ({ description, amount, notes }) => {
+        onConfirm: ({ description, amount, notes, source }) => {
           addExpense({
             description,
             amount: type === "expense" ? -Math.abs(amount) : Math.abs(amount),
             category: sectionId,
+            source,
             date: new Date().toISOString(),
             notes,
           });

@@ -4,11 +4,16 @@ import UISelect from "../components/UI/UISelect";
 import UIButton from "../components/UI/UIButton";
 import UITextInput from "../components/UI/UITextInput";
 import DefaultLayout from "../layouts/DefaultLayout";
+import { useModal } from "../context/ModalContext";
+import { getSavedSettingsModal } from "../components/Modal/Presets/SavedSettingsModal";
+import { getTasksDeletedModal } from "../components/Modal/Presets/TasksDeletedModal";
+
 import { useTheme } from "../hooks/useTheme";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useTaskStore } from "../stores/TaskStore";
 
 const Settings: React.FC = () => {
+  const { showModal, hideModal } = useModal();
   const { theme, toggleTheme } = useTheme();
   const {
     autoDeleteDoneTasks,
@@ -18,13 +23,45 @@ const Settings: React.FC = () => {
     setSetting,
     hydrated
   } = useSettingsStore();
+  
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>(() => {
+    return typeof Notification !== "undefined" ? Notification.permission : "default";
+  });
 
   // Estados locales para el formulario
   const [localTime, setLocalTime] = useState("");
   const [localFreq, setLocalFreq] = useState<"daily" | "weekly">("daily");
   const [localDay, setLocalDay] = useState(0);
 
-  // Sincronizar con el store una vez que esté cargado
+  const saveSettings = () => {
+    setSetting("deleteTime", localTime);
+    setSetting("deleteFrequency", localFreq);
+    setSetting("deleteDayOfWeek", localDay);
+  
+    showModal(getSavedSettingsModal({ onClose: hideModal }));
+  };
+  
+  const handleDeleteTasks = () => {
+    const completed = useTaskStore.getState().tasks.filter(t => t.isDone);
+    completed.forEach(t => useTaskStore.getState().deleteTask(t.id));
+  
+    showModal(getTasksDeletedModal({ count: completed.length, onClose: hideModal }));
+  };
+
+  const requestNotificationAccess = async () => {
+    const { requestPermissionAndToken } = await import("../firebase");
+    const token = await requestPermissionAndToken();
+    
+    setNotificationPermission(Notification.permission);
+  
+    if (token) {
+      console.log("✅ Token FCM:", token);
+      console.log("✅ Notificaciones activadas");
+    } else {
+      console.log("❌ No se otorgaron permisos o ocurrió un error");
+    }
+  };
+  
   useEffect(() => {
     if (hydrated) {
       setLocalTime(deleteTime);
@@ -33,19 +70,93 @@ const Settings: React.FC = () => {
     }
   }, [hydrated, deleteTime, deleteFrequency, deleteDayOfWeek]);
 
-  const saveSettings = () => {
-    setSetting("deleteTime", localTime);
-    setSetting("deleteFrequency", localFreq);
-    setSetting("deleteDayOfWeek", localDay);
-    console.log("✅ Cambios guardados");
-  };
-
   if (!hydrated) return null;
 
   return (
     <DefaultLayout>
       <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         <h2>⚙️ Configuración</h2>
+
+        {typeof Notification !== "undefined" && notificationPermission && (
+          <>
+            {notificationPermission === "default" && (
+              <div 
+                style={{
+                  display: "flex",
+                  backgroundColor: "var(--information-bg)",
+                  border: "1px solid var(--information-color)",
+                  borderRadius: "8px",
+                  flexDirection: "column",
+                  padding: "1rem",
+                  gap: "1rem",
+                }}
+              >
+                <h3>🔔 Notificaciones</h3>
+                <p style={{ color: "var(--text-secondary)" }}>
+                  Activa las notificaciones para recibir alertas importantes como limpiezas automáticas o recordatorios.
+                </p>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <UIButton variant="secondary" onClick={requestNotificationAccess}>
+                    Permitir notificaciones
+                  </UIButton>
+                </div>
+              </div>
+            )}
+
+            {notificationPermission === "denied" && (
+              <div 
+                style={{
+                  display: "flex",
+                  backgroundColor: "var(--danger-bg)",
+                  border: "1px solid var(--danger-color)",
+                  borderRadius: "8px",
+                  flexDirection: "column",
+                  padding: "1rem",
+                  gap: "1rem",
+                }}
+              >
+                <h3>🔕 Notificaciones bloqueadas</h3>
+                <p style={{ color: "var(--text-secondary)" }}>
+                  Has bloqueado las notificaciones. Para activarlas, ve a la configuración del navegador y permite notificaciones para esta app.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+
+        {notificationPermission === "granted" && (
+          <div
+            style={{
+              display: "flex",
+              backgroundColor: "var(--success-bg)",
+              border: "1px solid var(--success-color)",
+              borderRadius: "8px",
+              flexDirection: "column",
+              padding: "1rem",
+              gap: "1rem",
+            }}
+          >
+            <h3>🔔 Notificaciones activadas</h3>
+            <p style={{ color: "var(--text-secondary)" }}>
+              Las notificaciones están activadas. Recibirás alertas sobre eventos importantes como limpiezas automáticas.
+            </p>
+            <UIButton
+              variant="secondary"
+              onClick={async () => {
+                const { requestPermissionAndToken } = await import("../firebase");
+                const token = await requestPermissionAndToken();
+                if (token) {
+                  await navigator.clipboard.writeText(token);
+                  alert("🔗 Token FCM copiado al portapapeles.");
+                }
+              }}
+            >
+              Copiar token FCM
+            </UIButton>
+          </div>
+        )}
+
 
         <div 
           style={{ 
@@ -146,21 +257,12 @@ const Settings: React.FC = () => {
 
           {/* Botón guardar */}
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <UIButton
-              variant="danger"
-              onClick={() => {
-                const completed = useTaskStore.getState().tasks.filter(t => t.isDone);
-                completed.forEach(t => useTaskStore.getState().deleteTask(t.id));
-                console.log(`🧹 Eliminadas manualmente ${completed.length} tareas completadas`);
-              }}
-            >
+            <UIButton variant="danger" onClick={handleDeleteTasks}>
               🧹 Borrar tareas
             </UIButton>
             <UIButton onClick={saveSettings} variant="secondary">💾 Guardar</UIButton>
           </div>
         </div>
-
-
       </div>
     </DefaultLayout>
   );

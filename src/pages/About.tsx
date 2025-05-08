@@ -1,7 +1,21 @@
 import React from "react";
+
+import { useKonamiUniversalCode  } from "../hooks/useKonamiCode";
+
 import DefaultLayout from "../layouts/DefaultLayout";
 
 const About: React.FC = () => {
+  const playQuack = () => {
+    const audio = new Audio("/duck.mp3");
+    audio.play().catch((err) => {
+      console.warn("🔇 No se pudo reproducir el cuack automáticamente:", err);
+    });
+  };
+
+  useKonamiUniversalCode (() => {
+    playQuack();
+  });
+
   return (
     <DefaultLayout>
       <div style={{ padding: "1.5rem", maxWidth: "600px", margin: "0 auto" }}>
@@ -33,9 +47,8 @@ const About: React.FC = () => {
           <h4>🛠 Tecnologías utilizadas</h4>
           <ul style={{ paddingLeft: "1.25rem", lineHeight: "1.7", color: "var(--text-secondary)" }}>
             <li>⚛️ React + Vite</li>
-            <li>📦 Zustand con persistencia local</li>
-            <li>🎨 Soporte para tema claro/oscuro con CSS variables</li>
             <li>📱 Instalación como PWA</li>
+            <li>📦 Zustand con persistencia local</li>
             <li>🎬 Framer Motion para animaciones</li>
           </ul>
         </div>

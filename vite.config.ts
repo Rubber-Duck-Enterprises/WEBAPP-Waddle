@@ -1,7 +1,6 @@
-// vite.config.ts
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json' assert { type: 'json' };
 
 export default defineConfig({
@@ -12,6 +11,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      injectManifest: {
+        swSrc: 'src/sw.js',
+      },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
         name: 'Waddle',
@@ -52,4 +55,4 @@ export default defineConfig({
   server: {
     allowedHosts: ['.ngrok-free.app'],
   },
-})
+});
