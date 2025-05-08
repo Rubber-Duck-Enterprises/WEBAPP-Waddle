@@ -2,6 +2,7 @@
 import React from "react";
 import localforage from "localforage";
 import UIButton from "../components/UI/UIButton";
+import { FiPlus } from "react-icons/fi";
 import DefaultLayout from "../layouts/DefaultLayout";
 import { useModal } from "../context/ModalContext";
 import { getImportSuccessModal } from "../components/Modal/Presets/ImportSuccessModal";
@@ -99,18 +100,35 @@ const BackupPage: React.FC = () => {
         Exportar {title}
       </UIButton>
 
-      <label>
+      <label
+        style={{
+          backgroundColor: "var(--surface)",
+          border: "2px dashed var(--text-secondary)",
+          borderRadius: "8px",
+          padding: "0.5rem",
+          position: "relative",
+          width: "100%",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            inset: "0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "var(--text-secondary)",
+          }}
+        >
+          <FiPlus size={32} color="var(--text-secondary)"/>
+          <span style={{ marginLeft: "0.5rem" }}>Importar {title}</span>
+        </div>
+        
         <input
           type="file"
           accept="application/json"
           onChange={(e) => importData(e, keys)}
-          style={{
-            backgroundColor: "var(--surface)",
-            border: "1px solid var(--input-border-color)",
-            borderRadius: "8px",
-            padding: "0.5rem",
-            width: "100%",
-          }}
+          style={{ opacity: "0" }}  
         />
       </label>
 
