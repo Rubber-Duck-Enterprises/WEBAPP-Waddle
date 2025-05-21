@@ -12,12 +12,26 @@ import BalanceCard from "../../components/ToolWallet/Home/BalanceCard";
 import SectionSelector from "../../components/ToolWallet/Home/SectionSelector";
 import SectionBalanceCard from "../../components/ToolWallet/Home/SectionBalanceCard";
 
+import { Section } from "../../types";
 import WalletLayout from "../../layouts/WalletLayout";
 
 const WalletHome: React.FC = () => {
   const { showModal, hideModal } = useModal();
   const { addExpense, expenses } = useExpenseStore();
   const [onlyGeneral, setOnlyGeneral] = React.useState<boolean>(false);
+
+  const getSectionCapabilities = (section: Section) => {
+    const mode = section.cardSettings?.mode;
+    const isCredit = section.type === "card" && mode === "credit";
+    const isDebit = section.type === "card" && (mode === "debit" || mode === "both");
+
+    return {
+      canAddIncome: section.type === "standard" || section.type === "savings" || isDebit,
+      canAddExpense: section.type !== "savings" && !(section.type === "card" && !isDebit),
+      canTransfer: section.type === "standard" || section.type === "savings" || isDebit,
+      needsSource: section.type === "passive" || isCredit,
+    };
+  };
 
   const {
     rangeType,
@@ -81,10 +95,14 @@ const WalletHome: React.FC = () => {
   };
 
   const openSectionModal = (type: "income" | "expense", sectionId: string) => {
+    const section = sections.find((s) => s.id === sectionId);
+    const capabilities = section ? getSectionCapabilities(section) : undefined;
+
     showModal(
       getAddGeneralExpenseModal({
         type,
         sectionId,
+        needsSource: capabilities?.needsSource ?? false,
         onCancel: hideModal,
         onConfirm: ({ description, amount, notes, source }) => {
           addExpense({
@@ -147,6 +165,7 @@ const WalletHome: React.FC = () => {
               onAdd={openSectionModal}
               startDate={startDate}
               endDate={endDate}
+              capabilities={getSectionCapabilities(selectedSection)}
             />
           )}
         </div>

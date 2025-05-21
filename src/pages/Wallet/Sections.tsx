@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { useModal } from "../../context/ModalContext";
 import { useSectionStore } from "../../stores/sectionStore";
 import { getCreateSectionModal }  from "../../components/Modal/Presets/CreateSectionModal";
@@ -10,8 +12,8 @@ import UIButton from "../../components/UI/UIButton";
 
 import WalletLayout from "../../layouts/WalletLayout";
 
-
 const Sections: React.FC = () => {
+  const navigate = useNavigate();
   const { sections, addSection, deleteSection, updateSection } = useSectionStore();
   const { showModal, hideModal } = useModal();
   const [name, setName] = useState("");
@@ -37,11 +39,15 @@ const Sections: React.FC = () => {
       getCreateSectionModal({
         name: name.trim(),
         onCancel: hideModal,
-        onConfirm: ({ goal, color, icon }) => {
-          addSection({ name: name.trim(), goal, color, icon });
+        onConfirm: ({ goal, color, icon, type, cardSettings }) => {
+          addSection({ name: name.trim(), goal, color, icon, type, cardSettings });
           setName("");
           hideModal();
         },
+        goToSettings: () => {
+          hideModal();
+          navigate("/settings");
+        }
       })
     );
   };
@@ -63,6 +69,7 @@ const Sections: React.FC = () => {
                       goal: section.goal || 0,
                       color: section.color || "",
                       icon: section.icon || "",
+                      type: section.type || "standard",
                     },
                     onCancel: hideModal,
                     onConfirm: ({ goal, color, icon }) => {

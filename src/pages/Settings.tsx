@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged, signOut, User } from "firebase/auth";
+import localforage from "localforage";
+
 import UIToggle from "../components/UI/UIToggle";
 import UISelect from "../components/UI/UISelect";
 import UIButton from "../components/UI/UIButton";
@@ -11,8 +15,11 @@ import { getTasksDeletedModal } from "../components/Modal/Presets/TasksDeletedMo
 import { useTheme } from "../hooks/useTheme";
 import { useSettingsStore } from "../stores/settingsStore";
 import { useTaskStore } from "../stores/TaskStore";
+import { signInWithGoogle, saveBackupToCloud } from "../firebase";
 
 const Settings: React.FC = () => {
+  const navigate = useNavigate();
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const { showModal, hideModal } = useModal();
   const { theme, toggleTheme } = useTheme();
   const {
@@ -62,6 +69,28 @@ const Settings: React.FC = () => {
       console.log("❌ No se otorgaron permisos o ocurrió un error");
     }
   };
+
+  const handleCloudBackup = async () => {
+    if (!firebaseUser) {
+      alert("Debes iniciar sesión primero.");
+      return;
+    }
+
+    const keys: string[] = [
+      "waddle-sections",
+      "waddle-expenses",
+      "waddle-task-lists",
+      "waddle-tasks",
+    ];
+
+    const data: Record<string, any> = {};
+    for (const key of keys) {
+      data[key] = await localforage.getItem(key);
+    }
+
+    await saveBackupToCloud(data);
+    alert("☁️ Respaldo subido correctamente a la nube.");
+  };
   
   useEffect(() => {
     if (hydrated) {
@@ -70,6 +99,14 @@ const Settings: React.FC = () => {
       setLocalDay(deleteDayOfWeek);
     }
   }, [hydrated, deleteTime, deleteFrequency, deleteDayOfWeek]);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (!hydrated) return null;
 
@@ -237,7 +274,7 @@ const Settings: React.FC = () => {
               }
             </p>
           </div>
-
+        
           {/* Configuración de horario */}
           <div style={{
             display: "flex",
@@ -283,6 +320,132 @@ const Settings: React.FC = () => {
             <UIButton onClick={saveSettings} variant="secondary">💾 Guardar</UIButton>
           </div>
         </div>
+
+        <div
+          style={{
+            display: "flex",
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            flexDirection: "column",
+            padding: "1rem",
+            gap: "1rem",
+          }}
+        >
+          <h3>🕒 Horario personal</h3>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+            Define cuándo comienza y termina tu día. Las notificaciones se programarán a partir de este horario.
+          </p>
+
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <label style={{ flex: 1 }}>
+              Mi día comienza a las:
+              <UITextInput
+                type="time"
+                value={useSettingsStore.getState().dayStartTime}
+                onChange={(e) => setSetting("dayStartTime", e.target.value)}
+              />
+            </label>
+
+            <label style={{ flex: 1 }}>
+              Termina a las:
+              <UITextInput
+                type="time"
+                value={useSettingsStore.getState().dayEndTime}
+                onChange={(e) => setSetting("dayEndTime", e.target.value)}
+              />
+            </label>
+          </div>
+        </div>
+
+        <div 
+          style={{ 
+            display: "flex", 
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            flexDirection: "column",
+            padding: "1rem",
+            gap: "1rem" 
+          }}
+        >
+          <h3>☁ Respaldos</h3>
+
+          {!firebaseUser ? (
+            <div
+              style={{
+                alignItems: "center",
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "1rem",
+              }}
+            >
+              <p style={{ color: "var(--text-secondary)" }}>
+                Conectar cuenta de Google para respaldo en la nube
+              </p>
+              <button
+                style={{
+                  alignItems: "center",
+                  display: "flex",
+                  backgroundColor: "white",
+                  border: "1px solid #ccc",
+                  borderRadius: "8px",
+                  padding: "0.5rem 1rem",
+                  color: "black",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                }}
+                onClick={async () => {
+                  const { requestPermissionAndToken, saveNotificationSettingsToFirestore } = await import("../firebase");
+
+                  const token = await requestPermissionAndToken();
+                  const user = await signInWithGoogle();
+
+                  if (user && token) {
+                    await saveNotificationSettingsToFirestore(token, user);
+                  }
+
+                  if (user) alert(`✅ Conectado como ${user.displayName}`);
+                }}
+              >
+                <img
+                  src="/assets/account/google.png"
+                  alt="Google Logo"
+                  style={{ width: "20px", marginRight: "0.5rem" }}
+                />
+                Conectar
+              </button>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <p style={{ color: "var(--text-secondary)" }}>
+                  Conectado como <br/> 
+                  <strong>{firebaseUser.displayName}</strong>
+                </p>
+                <UIButton
+                  variant="danger"
+                  onClick={async () => {
+                    const { signOutAndRestoreAnonymous } = await import("../firebase");
+                    await signOutAndRestoreAnonymous();
+                    alert("🔌 Sesión cerrada y restaurado como anónimo.");
+                  }}
+                >
+                  🔌 Desconectar
+                </UIButton>
+              </div>
+
+              <UIButton variant="primary" onClick={handleCloudBackup}>
+                ☁️ Hacer respaldo en la nube
+              </UIButton>
+            </>
+          )}
+
+          <UIButton variant="secondary" onClick={() => navigate("/backups")}>
+            📦 Administrar respaldos
+          </UIButton>
+        </div>
+
       </div>
     </DefaultLayout>
   );

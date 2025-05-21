@@ -77,7 +77,7 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
           <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             <DrawerLink path="/wallet" label="💰 Waddle Wallet" onClick={handleNavigate} />
             <DrawerLink path="/list" label="📝 Waddle List" onClick={handleNavigate} />
-            <DrawerLink path="/backups" label="☁️ Respaldos" onClick={handleNavigate} />
+            {/* <DrawerLink path="/backups" label="☁️ Respaldos" onClick={handleNavigate} /> */}
             <DrawerLink path="/settings" label="⚙️ Configuración" onClick={handleNavigate} />
             <DrawerLink path="/about" label="ℹ️ Sobre Waddle" onClick={handleNavigate} />
           </ul>

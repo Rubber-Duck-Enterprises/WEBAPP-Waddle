@@ -19,6 +19,7 @@ export const useSectionStore = create<SectionStore>()(
         const newSection: Section = {
           id: nanoid(),
           createdAt: new Date().toISOString(),
+          type: section.type ?? "standard",
           ...section,
         };
         set({ sections: [...get().sections, newSection] });

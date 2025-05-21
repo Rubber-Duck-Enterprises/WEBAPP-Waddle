@@ -23,6 +23,20 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
 
   const actions = [
     { 
+      label: "Agregar lista", emoji: "📝", 
+      onClick: () => {
+        showModal(
+          getCreateTaskListModal({
+            onCancel: hideModal,
+            onConfirm: ({ name, color, icon }) => {
+              addTaskList({ name, color, icon });
+              hideModal();
+            }
+          })
+        );
+      } 
+    },
+    { 
       label: "Agregar tarea", emoji: "➕", 
       onClick: () => {
         showModal(
@@ -45,20 +59,6 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
           })
         );
       }
-    },
-    { 
-      label: "Agregar lista", emoji: "📝", 
-      onClick: () => {
-        showModal(
-          getCreateTaskListModal({
-            onCancel: hideModal,
-            onConfirm: ({ name, color, icon }) => {
-              addTaskList({ name, color, icon });
-              hideModal();
-            }
-          })
-        );
-      } 
     },
   ];
 

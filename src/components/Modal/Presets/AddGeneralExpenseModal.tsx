@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import UITextInput from "../../UI/UITextInput";
-import UITextArea from "../../UI/UITextArea";
 import UISelect from "../../UI/UISelect";
 import UIButton from "../../UI/UIButton";
-
 import { useSectionStore } from "../../../stores/sectionStore";
 
-type Props = {
+interface Props {
   type: "income" | "expense";
   sectionId?: string;
+  needsSource?: boolean;
   onConfirm: (data: {
     description: string;
     amount: number;
@@ -16,48 +15,29 @@ type Props = {
     source?: string;
   }) => void;
   onCancel: () => void;
+}
+
+export const getAddGeneralExpenseModal = ({ type, sectionId, needsSource = false, onConfirm, onCancel }: Props) => {
+  return <AddGeneralExpenseModal type={type} sectionId={sectionId} needsSource={needsSource} onConfirm={onConfirm} onCancel={onCancel} />;
 };
 
-export const getAddGeneralExpenseModal = ({
-  type,
-  onConfirm,
-  onCancel,
-  sectionId,
-}: Props) => {
-  return (
-    <AddGeneralExpenseModal
-      type={type}
-      onConfirm={onConfirm}
-      onCancel={onCancel}
-      sectionId={sectionId}
-    />
-  );
-};
+const AddGeneralExpenseModal: React.FC<Props> = ({ type, sectionId, needsSource, onConfirm, onCancel }) => {
+  const { sections } = useSectionStore();
 
-const AddGeneralExpenseModal: React.FC<Props> = ({
-  type,
-  onConfirm,
-  onCancel,
-  sectionId,
-}) => {
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState<number | null>(null);
+  const [amount, setAmount] = useState<number>(0);
   const [notes, setNotes] = useState("");
-  const [source, setSource] = useState("");
+  const [source, setSource] = useState<string>("");
 
-  const isIncome = type === "income";
-
-  const sections = useSectionStore((state) => state.sections);
-  const sourceOptions = sections.filter((s) => s.id !== sectionId);
+  const availableSources = sections.filter((s) => s.id !== sectionId);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>
-        {isIncome ? "Agregar ingreso" : "Agregar gasto"} general
+        {type === "income" ? "Agregar ingreso" : "Agregar gasto"}
       </h3>
 
       <UITextInput
-        type="text"
         placeholder="Descripción"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -66,25 +46,25 @@ const AddGeneralExpenseModal: React.FC<Props> = ({
       <UITextInput
         type="number"
         placeholder="Monto"
-        value={amount ?? ""}
+        value={amount}
         onChange={(e) => setAmount(Number(e.target.value))}
+        min={0.01}
+        step={0.01}
       />
 
-      {type === "expense" && sourceOptions.length > 0 && (
-        <UISelect
-          value={source}
-          onChange={(e) => setSource(e.target.value)}
-        >
-          <option value="">Selecciona fuente de pago</option>
-          {sourceOptions.map((opt) => (
-            <option key={opt.id} value={opt.id}>
-              {opt.name}
+      {needsSource && (
+        <UISelect value={source} onChange={(e) => setSource(e.target.value)}>
+          <option value="">Selecciona origen</option>
+          <option value="general">General</option>
+          {availableSources.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.icon || "📁"} {s.name}
             </option>
           ))}
         </UISelect>
       )}
 
-      <UITextArea
+      <UITextInput
         placeholder="Notas (opcional)"
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
@@ -96,18 +76,17 @@ const AddGeneralExpenseModal: React.FC<Props> = ({
         </UIButton>
         <UIButton
           onClick={() =>
-            amount !== null &&
             onConfirm({
               description,
               amount,
-              notes: notes || undefined,
-              source: source || undefined,
+              notes,
+              source: needsSource ? source : undefined,
             })
           }
-          variant={isIncome ? "primary" : "danger"}
-          disabled={!description || amount === null || amount <= 0}
+          variant="primary"
+          disabled={!description || amount <= 0 || (needsSource && !source)}
         >
-          Agregar
+          Guardar
         </UIButton>
       </div>
     </div>

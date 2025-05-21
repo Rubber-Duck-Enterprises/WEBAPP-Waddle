@@ -10,6 +10,12 @@ import TransactionList from "./TransactionList";
 
 import { Expense, Section } from "../../../types";
 
+interface Capabilities {
+  canAddIncome: boolean;
+  canAddExpense: boolean;
+  canTransfer: boolean;
+  needsSource: boolean;
+}
 
 interface Props {
   section: Section;
@@ -17,6 +23,7 @@ interface Props {
   startDate: Date;
   endDate: Date;
   onAdd: (type: "income" | "expense", sectionId: string) => void;
+  capabilities: Capabilities;
 }
 
 const SectionBalanceCard: React.FC<Props> = ({ 
@@ -24,22 +31,18 @@ const SectionBalanceCard: React.FC<Props> = ({
   expenses, 
   startDate,
   endDate,
-  onAdd
+  onAdd,
+  capabilities
 }) => {
-
   const balanceExpenses = expenses.filter((e) => {
     const date = parseISO(e.date);
-    const inRange = isWithinInterval(date, { start: startDate, end: endDate });
-  
-    return (
-      inRange &&
-      (e.category === section.id || e.source === section.id)
-    );
+    return isWithinInterval(date, { start: startDate, end: endDate }) &&
+      (e.category === section.id || e.source === section.id);
   });
-  
+
   const income = balanceExpenses
-  .filter((e) => e.amount > 0 && e.category === section.id)
-  .reduce((acc, e) => acc + e.amount, 0);
+    .filter((e) => e.amount > 0 && e.category === section.id)
+    .reduce((acc, e) => acc + e.amount, 0);
 
   const totalExpenses = balanceExpenses
     .filter((e) => e.amount < 0 && (e.category === section.id || e.source === section.id))
@@ -50,7 +53,7 @@ const SectionBalanceCard: React.FC<Props> = ({
 
   const goal = section.goal || 0;
   const progress = goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
-  
+
   return (
     <div
       style={{
@@ -66,7 +69,7 @@ const SectionBalanceCard: React.FC<Props> = ({
       }}
     >
       <h2>
-        {section.icon || "📁"} {section.name}
+        {section.icon || "\ud83d\udcc1"} {section.name}
       </h2>
 
       {goal > 0 && (
@@ -88,21 +91,35 @@ const SectionBalanceCard: React.FC<Props> = ({
       <TransactionList latest={latest} sections={[]} />
 
       <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
-        <UIButton
-          variant="primary"
-          fullWidth
-          onClick={() => onAdd("income", section.id)}
-        >
-          + Ingreso
-        </UIButton>
+        {capabilities.canAddIncome && (
+          <UIButton
+            variant="primary"
+            fullWidth
+            onClick={() => onAdd("income", section.id)}
+          >
+            + Ingreso
+          </UIButton>
+        )}
 
-        <UIButton
-          variant="danger"
-          fullWidth
-          onClick={() => onAdd("expense", section.id)}
-        >
-          + Gasto
-        </UIButton>
+        {capabilities.canAddExpense && (
+          <UIButton
+            variant="danger"
+            fullWidth
+            onClick={() => onAdd("expense", section.id)}
+          >
+            + Gasto
+          </UIButton>
+        )}
+
+        {capabilities.canTransfer && (
+          <UIButton
+            variant="secondary"
+            fullWidth
+            onClick={() => console.log("Abrir modal de transferencia")}
+          >
+            Transferir
+          </UIButton>
+        )}
       </div>
     </div>
   );

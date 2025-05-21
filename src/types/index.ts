@@ -1,4 +1,7 @@
 // Waddle Wallet
+export type SectionType = "standard" | "passive" | "card" | "savings";
+export type CardMode = "debit" | "credit" | "both";
+
 export type Section = {
   id: string;
   name: string;
@@ -6,6 +9,12 @@ export type Section = {
   color?: string;
   icon?: string;
   createdAt: string;
+  type?: SectionType;
+  cardSettings?: {
+    mode: CardMode;
+    cutoffDate?: string;
+    paymentDate?: string;
+  };
 };
 
 export type Expense = {

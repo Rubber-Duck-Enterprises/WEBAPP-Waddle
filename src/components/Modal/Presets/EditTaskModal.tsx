@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { nanoid } from "nanoid";
 import { Task } from "../../../types";
 import { useTaskListStore } from "../../../stores/TaskListStore";
 import UITextInput from "../../UI/UITextInput";
@@ -16,18 +17,30 @@ type Props = {
 
 export const getEditTaskModal = (props: Props) => <EditTaskModal {...props} />;
 
-const EditTaskModal: React.FC<Props> = ({ activeListId, task, onConfirm, onDelete, onCancel }) => {
-  const { taskLists } = useTaskListStore();
+const EditTaskModal: React.FC<Props> = ({
+  activeListId,
+  task,
+  onConfirm,
+  onDelete,
+  onCancel,
+}) => {
+  const { taskLists, getTagsForList, addTagToList } = useTaskListStore();
+
   const [title, setTitle] = useState(task.title || "");
   const [dueDate, setDueDate] = useState(task.dueDate || "");
   const [notes, setNotes] = useState(task.notes || "");
   const [priority, setPriority] = useState(task.priority || "medium");
-  const [repeat, setRepeat] = useState<"daily" | "weekly" | "monthly" | null | undefined>(task.repeat || null);
+  const [repeat, setRepeat] = useState<"daily" | "weekly" | "monthly" | null | undefined>(
+    task.repeat || null
+  );
   const [tags, setTags] = useState((task.tags || []).join(", "));
   const [selectedListId, setSelectedListId] = useState(task.listId || "");
 
-  const isValid = title.trim().length > 0 && (activeListId !== "all" || selectedListId);
+  const isValid =
+    title.trim().length > 0 && (activeListId !== "all" || selectedListId);
   const finalListId = activeListId === "all" ? selectedListId : activeListId;
+
+  const suggestedTags = getTagsForList(finalListId);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -69,11 +82,19 @@ const EditTaskModal: React.FC<Props> = ({ activeListId, task, onConfirm, onDelet
         placeholder="Etiquetas separadas por coma"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
+        list="tag-suggestions"
       />
+      <datalist id="tag-suggestions">
+        {suggestedTags.map((tag) => (
+          <option key={tag.id} value={tag.name} />
+        ))}
+      </datalist>
 
       {activeListId === "all" && (
         <UISelect value={selectedListId} onChange={(e) => setSelectedListId(e.target.value)}>
-          <option value="" disabled>Selecciona una lista</option>
+          <option value="" disabled>
+            Selecciona una lista
+          </option>
           {taskLists.map((l) => (
             <option key={l.id} value={l.id}>
               {l.icon} {l.name}
@@ -82,25 +103,38 @@ const EditTaskModal: React.FC<Props> = ({ activeListId, task, onConfirm, onDelet
         </UISelect>
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem" }}>
+      <div
+        style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem" }}
+      >
         <UIButton onClick={onDelete} variant="danger">
           Eliminar
         </UIButton>
         <div style={{ display: "flex", gap: "0.5rem" }}>
-          <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
+          <UIButton onClick={onCancel} variant="default">
+            Cancelar
+          </UIButton>
           <UIButton
             variant="primary"
             disabled={!isValid}
             onClick={() => {
               if (isValid) {
+                const parsedTags = tags
+                  .split(",")
+                  .map((t) => t.trim())
+                  .filter(Boolean);
+
+                parsedTags.forEach((name) => {
+                  addTagToList(finalListId, { id: nanoid(), name });
+                });
+
                 onConfirm({
                   title: title.trim(),
                   dueDate: dueDate || undefined,
                   notes: notes.trim() || undefined,
                   listId: finalListId,
                   priority,
-                  repeat: repeat,
-                  tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+                  repeat,
+                  tags: parsedTags,
                 });
               }
             }}
