@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAuth, onAuthStateChanged, signOut, User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import localforage from "localforage";
 
 import UIToggle from "../components/UI/UIToggle";
