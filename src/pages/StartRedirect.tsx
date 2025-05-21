@@ -4,14 +4,17 @@ import { useSettingsStore } from "../stores/settingsStore";
 
 const StartRedirect: React.FC = () => {
   const navigate = useNavigate();
-  const { startPath } = useSettingsStore();
+  const { startPath, hydrated } = useSettingsStore();
 
   useEffect(() => {
+    if (!hydrated) return;
     if (startPath === "/") {
       useSettingsStore.setState({ startPath: "/wallet" });
+      navigate("/wallet", { replace: true });
+    } else {
+      navigate(startPath, { replace: true });
     }
-    navigate(startPath || "/wallet", { replace: true });
-  }, [navigate, startPath]);
+  }, [navigate, startPath, hydrated]);
 
   return null;
 };

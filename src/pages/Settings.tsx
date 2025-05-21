@@ -36,7 +36,6 @@ const Settings: React.FC = () => {
     return typeof Notification !== "undefined" ? Notification.permission : "default";
   });
 
-  // Estados locales para el formulario
   const [localTime, setLocalTime] = useState("");
   const [localFreq, setLocalFreq] = useState<"daily" | "weekly">("daily");
   const [localDay, setLocalDay] = useState(0);
