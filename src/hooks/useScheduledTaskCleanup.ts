@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useTaskStore } from "../stores/TaskStore";
-import { useSettingsStore } from "../stores/settingsStore";
+import { useTaskStore } from "@/stores/TaskStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useScheduledTaskCleanup = () => {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);

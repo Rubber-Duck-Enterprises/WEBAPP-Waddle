@@ -1,6 +1,6 @@
 // components/ToolList/TaskItem.tsx
 import React from "react";
-import { TaskList, Task } from "../../../types";
+import { TaskList, Task } from "@/types";
 import { motion } from "framer-motion";
 import { FiEdit } from "react-icons/fi";
 

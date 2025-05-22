@@ -1,6 +1,6 @@
 import React from "react";
-import UIButton from "../../UI/UIButton";
-import UITextInput from "../../UI/UITextInput";
+import UIButton from "@/components/UI/UIButton";
+import UITextInput from "@/components/UI/UITextInput";
 
 interface Props {
   name: string;

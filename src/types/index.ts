@@ -1,4 +1,8 @@
 // Waddle Wallet
+export type SectionType = "standard" | "passive" | "card" | "savings";
+export type CardMode = "debit" | "credit" | "both";
+export type ExpenseKind = "expense" | "income" | "debt" | "payment";
+
 export type Section = {
   id: string;
   name: string;
@@ -6,6 +10,13 @@ export type Section = {
   color?: string;
   icon?: string;
   createdAt: string;
+  type?: SectionType;
+  cardSettings?: {
+    mode: CardMode;
+    cutoffDate?: string;
+    paymentDate?: string;
+    creditLimit?: number;
+  };
 };
 
 export type Expense = {
@@ -15,8 +26,10 @@ export type Expense = {
   category: string;
   source?: string;
   date: string;
+  kind?: ExpenseKind;
   recurring?: boolean;
   notes?: string;
+  adjustment?: boolean;
 };
 
 export type ExpenseCategory = {

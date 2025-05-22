@@ -3,7 +3,7 @@ import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
 
 export function useDateRange() {
   const now = new Date();
-  const [rangeType, setRangeType] = useState<"month" | "week" | "all" | "custom">("month");
+  const [rangeType, setRangeType] = useState<"month" | "week" | "all" | "custom">("all");
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
 

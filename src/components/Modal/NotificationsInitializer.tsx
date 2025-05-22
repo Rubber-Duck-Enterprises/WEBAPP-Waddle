@@ -1,7 +1,7 @@
 // src/components/NotificationsInitializer.tsx
 import { useEffect } from "react";
-import { useModal } from "../../context/ModalContext";
-import { getNotificationsRequestModal } from "./Presets/NotificationsRequestModal";
+import { useModal } from "@/context/ModalContext";
+import { getNotificationsRequestModal } from "@/components/Modal/Presets/System/NotificationsRequestModal";
 
 export default function NotificationsInitializer() {
   const { showModal, hideModal } = useModal();

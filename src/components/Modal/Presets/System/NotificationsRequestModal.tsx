@@ -1,6 +1,6 @@
 // components/Modal/Presets/NotificationsRequestModal.tsx
 import React from "react";
-import UIButton from "../../UI/UIButton";
+import UIButton from "@/components/UI/UIButton";
 
 type Props = {
   onClose: () => void;
@@ -13,18 +13,27 @@ export const getNotificationsRequestModal = ({ onClose }: Props) => (
 const NotificationsRequestModal: React.FC<Props> = ({ onClose }) => {
   const handleRequest = async () => {
     if ("Notification" in window) {
-      const { requestPermissionAndToken } = await import("../../../firebase");
-      const token = await requestPermissionAndToken();
-      if (token) {
-        console.log("✅ Token FCM:", token);
-        console.log("🔔 Notificaciones activadas");
-      } else {
-        console.log("⚠️ No se otorgaron permisos");
+      try {
+        const {
+          requestPermissionAndToken,
+          saveNotificationSettingsToFirestore,
+        } = await import("@/firebase");
+
+        const token = await requestPermissionAndToken();
+
+        if (token) {
+          await new Promise((res) => setTimeout(res, 500));
+          await saveNotificationSettingsToFirestore(token);
+          console.log("✅ Token FCM y configuración horaria guardados en Firestore");
+        } else {
+          console.warn("⚠️ Permisos no otorgados o token no disponible");
+        }
+      } catch (error) {
+        console.error("❌ Error al activar notificaciones:", error);
       }
     }
     onClose();
   };
-  
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

@@ -4,14 +4,14 @@ import { AnimatePresence } from "framer-motion";
 import NotificationsInitializer from "./components/Modal/NotificationsInitializer";
 
 // Paginas
-import StartRedirect from "./pages/StartRedirect";
-import WalletHome from "./pages/Wallet/Home";
-import Sections from "./pages/Wallet/Sections";
-import Movements from "./pages/Wallet/Movements";
-import ListHome from "./pages/List/Home";
-import Backups from "./pages/Backups";
-import Settings from "./pages/Settings";
-import About from "./pages/About";
+import StartRedirect from "@/pages/StartRedirect";
+import WalletHome from "@/pages/Wallet/Home";
+import Sections from "@/pages/Wallet/Sections";
+import Movements from "@/pages/Wallet/Movements";
+import ListHome from "@/pages/List/Home";
+import Backups from "@/pages/Backups";
+import Settings from "@/pages/Settings";
+import About from "@/pages/About";
 
 import { useScheduledTaskCleanup } from "./hooks/useScheduledTaskCleanup"
 

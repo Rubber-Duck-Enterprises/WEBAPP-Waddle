@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import { useTaskListStore } from "../../../stores/TaskListStore";
-import UITextInput from "../../UI/UITextInput";
-import UITextArea from "../../UI/UITextArea";
-import UISelect from "../../UI/UISelect";
-import UIButton from "../../UI/UIButton";
+import React, { useState, useEffect } from "react";
+import { nanoid } from "nanoid";
+
+import UITextInput from "@/components/UI/UITextInput";
+import UITextArea from "@/components/UI/UITextArea";
+import UISelect from "@/components/UI/UISelect";
+import UIButton from "@/components/UI/UIButton";
+
+import { useTaskListStore } from "@/stores/TaskListStore";
 
 type Props = {
   activeListId: string | "all";
@@ -24,7 +27,7 @@ export const getCreateTaskModal = ({ activeListId, onConfirm, onCancel }: Props)
 };
 
 const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel }) => {
-  const { taskLists } = useTaskListStore();
+  const { taskLists, addTagToList, getTagsForList, addTaskList } = useTaskListStore();
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
@@ -35,6 +38,29 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
 
   const isValid = title.trim().length > 0 && (activeListId !== "all" || selectedListId);
   const finalListId = activeListId === "all" ? selectedListId : activeListId;
+  const suggestedTags = getTagsForList(finalListId);
+
+  // Asegura que exista al menos una lista ("General")
+  useEffect(() => {
+    const alreadyExists = taskLists.some((l) => l.name.toLowerCase() === "general");
+
+    if (taskLists.length === 0 || !alreadyExists) {
+      const generalList = {
+        id: nanoid(),
+        name: "General",
+        color: "#2196f3",
+        icon: "📋",
+        createdAt: Date.now(),
+      };
+      addTaskList(generalList);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (taskLists.length === 1 && activeListId === "all") {
+      setSelectedListId(taskLists[0].id);
+    }
+  }, [taskLists, activeListId]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -86,7 +112,13 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
         placeholder="Etiquetas separadas por coma (ej. trabajo, urgente)"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
+        list="tag-suggestions"
       />
+      <datalist id="tag-suggestions">
+        {suggestedTags.map((tag) => (
+          <option key={tag.id} value={tag.name} />
+        ))}
+      </datalist>
 
       {/* Selector de lista si está en "Todas" */}
       {activeListId === "all" && (
@@ -106,6 +138,15 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
         <UIButton
           onClick={() => {
             if (isValid) {
+              const parsedTags = tags
+                .split(",")
+                .map((t) => t.trim())
+                .filter(Boolean);
+
+              parsedTags.forEach((name) => {
+                addTagToList(finalListId, { id: nanoid(), name });
+              });
+
               onConfirm({
                 title: title.trim(),
                 dueDate: dueDate || undefined,
@@ -113,7 +154,7 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
                 listId: finalListId,
                 priority,
                 repeat: repeat || null,
-                tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+                tags: parsedTags,
               });
             }
           }}

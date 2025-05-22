@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Expense, Section } from "../../../types";
-import UITextInput from "../../UI/UITextInput";
-import UITextArea from "../../UI/UITextArea";
-import UISelect from "../../UI/UISelect";
-import UIButton from "../../UI/UIButton";
+import { Expense, Section } from "@/types";
+import UITextInput from "@/components/UI/UITextInput";
+import UITextArea from "@/components/UI/UITextArea";
+import UISelect from "@/components/UI/UISelect";
+import UIButton from "@/components/UI/UIButton";
 
 interface Props {
   expense: Expense;

@@ -1,23 +1,28 @@
-import React, {useEffect} from "react";
+import React, { useEffect, useState } from "react";
 import { isWithinInterval, parseISO } from "date-fns";
 
-import { useSectionStore } from "../../stores/sectionStore";
-import { useExpenseStore } from "../../stores/expenseStore";
-import { useDateRange } from "../../hooks/useDateRange";
-import { useModal } from "../../context/ModalContext";
-import { getAddGeneralExpenseModal } from "../../components/Modal/Presets/AddGeneralExpenseModal";
+import { useSectionStore } from "@/stores/sectionStore";
+import { useExpenseStore } from "@/stores/expenseStore";
+import { useDateRange } from "@/hooks/useDateRange";
+import { useModal } from "@/context/ModalContext";
+import { getAddIncomeModal } from "@/components/Modal/Presets/Wallet/AddIncomeModal";
+import { getAddExpenseModal } from "@/components/Modal/Presets/Wallet/AddExpenseModal";
 
-import DateFilterBar from "../../components/ToolWallet/Home/DateFilterBar";
-import BalanceCard from "../../components/ToolWallet/Home/BalanceCard";
-import SectionSelector from "../../components/ToolWallet/Home/SectionSelector";
-import SectionBalanceCard from "../../components/ToolWallet/Home/SectionBalanceCard";
+import DateFilterBar from "@/components/ToolWallet/Home/DateFilterBar";
+import BalanceCard from "@/components/ToolWallet/Home/BalanceCard";
+import SectionSelector from "@/components/ToolWallet/Home/SectionSelector";
+import SectionBalanceCard from "@/components/ToolWallet/SectionCards/SectionBalanceCard";
 
 import WalletLayout from "../../layouts/WalletLayout";
 
 const WalletHome: React.FC = () => {
   const { showModal, hideModal } = useModal();
   const { addExpense, expenses } = useExpenseStore();
-  const [onlyGeneral, setOnlyGeneral] = React.useState<boolean>(false);
+  const { sections } = useSectionStore();
+
+  const [onlyGeneral, setOnlyGeneral] = useState<boolean>(false);
+  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   const {
     rangeType,
@@ -30,14 +35,23 @@ const WalletHome: React.FC = () => {
     endDate,
   } = useDateRange();
 
-  const { sections } = useSectionStore();
-  const [selectedSectionId, setSelectedSectionId] = React.useState<string | null>(
-    sections.length > 0 ? sections[0].id : null
+  const selectedSection = sections.find(
+    (s) => s.id === selectedSectionId && s.type !== "card"
   );
-  const selectedSection = sections.find((s) => s.id === selectedSectionId);
-  const sectionExpenses = expenses.filter(
-    (e) => e.category === selectedSection?.id || e.source === selectedSection?.id
+  const selectedCard = sections.find(
+    (s) => s.id === selectedCardId && s.type === "card"
   );
+
+  const sectionExpenses = selectedSection
+    ? expenses.filter(
+        (e) => e.category === selectedSection.id || e.source === selectedSection.id
+      )
+    : [];
+  const cardExpenses = selectedCard
+    ? expenses.filter(
+        (e) => e.category === selectedCard.id || e.source === selectedCard.id
+      )
+    : [];
 
   const allExpensesInRange = expenses.filter((e) => {
     const date = parseISO(e.date);
@@ -57,55 +71,79 @@ const WalletHome: React.FC = () => {
 
   const totalExpenses = realExpenses.reduce((acc, e) => acc + e.amount, 0);
   const balance = income + totalExpenses;
+
   const latest = [...allExpensesInRange]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3);
 
   const openModal = (type: "income" | "expense") => {
-    showModal(
-      getAddGeneralExpenseModal({
-        type,
-        onCancel: hideModal,
-        onConfirm: ({ description, amount, notes }) => {
-          addExpense({
-            description,
-            amount: type === "expense" ? -Math.abs(amount) : Math.abs(amount),
-            category: "general",
-            date: new Date().toISOString(),
-            notes,
-          });
-          hideModal();
-        },
-      })
-    );
+    const commonProps = {
+      sectionId: "general",
+      onCancel: hideModal,
+    };
+
+    if (type === "income") {
+      showModal(
+        getAddIncomeModal({
+          ...commonProps,
+          onConfirm: ({ description, amount, notes, category }) => {
+            addExpense({ description, amount, notes, category, date: new Date().toISOString() });
+            hideModal();
+          },
+        })
+      );
+    } else {
+      showModal(
+        getAddExpenseModal({
+          ...commonProps,
+          onConfirm: ({ description, amount, notes, source }) => {
+            addExpense({ description, amount, notes, source, category: "general", date: new Date().toISOString() });
+            hideModal();
+          },
+        })
+      );
+    }
   };
 
   const openSectionModal = (type: "income" | "expense", sectionId: string) => {
-    showModal(
-      getAddGeneralExpenseModal({
-        type,
-        sectionId,
-        onCancel: hideModal,
-        onConfirm: ({ description, amount, notes, source }) => {
-          addExpense({
-            description,
-            amount: type === "expense" ? -Math.abs(amount) : Math.abs(amount),
-            category: sectionId,
-            source,
-            date: new Date().toISOString(),
-            notes,
-          });
-          hideModal();
-        },
-      })
-    );
+    const section = sections.find((s) => s.id === sectionId);
+    if (!section) return;
+
+    const needsSource =
+      section.type === "passive" || section.cardSettings?.mode === "credit";
+
+    if (type === "income") {
+      showModal(
+        getAddIncomeModal({
+          sectionId,
+          onCancel: hideModal,
+          onConfirm: ({ description, amount, notes, category }) => {
+            addExpense({ description, amount, notes, category, date: new Date().toISOString() });
+            hideModal();
+          },
+        })
+      );
+    } else {
+      showModal(
+        getAddExpenseModal({
+          sectionId,
+          needsSource,
+          onCancel: hideModal,
+          onConfirm: ({ description, amount, notes, source }) => {
+            addExpense({ description, amount, notes, source, category: sectionId, date: new Date().toISOString() });
+            hideModal();
+          },
+        })
+      );
+    }
   };
 
   useEffect(() => {
-    if (sections.length > 0 && !selectedSectionId) {
-      setSelectedSectionId(sections[0].id);
-    }
-  }, [sections, selectedSectionId]);
+    const defaultSection = sections.find((s) => s.type !== "card");
+    const defaultCard = sections.find((s) => s.type === "card");
+    if (!selectedSectionId && defaultSection) setSelectedSectionId(defaultSection.id);
+    if (!selectedCardId && defaultCard) setSelectedCardId(defaultCard.id);
+  }, [sections]);
 
   return (
     <WalletLayout>
@@ -132,25 +170,51 @@ const WalletHome: React.FC = () => {
         />
       </div>
 
-      {sections.length > 0 && (
-        <div style={{ padding: "0 1rem", paddingBottom: "1rem" }}>
-          <SectionSelector
-            sections={sections}
-            selectedId={selectedSectionId}
-            onSelect={setSelectedSectionId}
-          />
+      {/* Apartados */}
+      <div style={{ padding: "0 1rem", paddingBottom: "2rem" }}>
+        {selectedSection && (
+          <>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Apartados</h2>
 
-          {selectedSection && (
-            <SectionBalanceCard 
+            <SectionSelector
+              sections={sections.filter((s) => s.type !== "card")}
+              selectedId={selectedSectionId}
+              onSelect={setSelectedSectionId}
+            />
+
+            <SectionBalanceCard
               section={selectedSection}
               expenses={sectionExpenses}
-              onAdd={openSectionModal}
               startDate={startDate}
               endDate={endDate}
+              onAdd={openSectionModal}
             />
-          )}
-        </div>
-      )}
+          </>
+        )}
+      </div>
+
+      {/* Tarjetas */}
+      <div style={{ padding: "0 1rem", paddingBottom: "2rem" }}>
+        {selectedCard && (
+          <>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Tarjetas</h2>
+
+            <SectionSelector
+              sections={sections.filter((s) => s.type === "card")}
+              selectedId={selectedCardId}
+              onSelect={setSelectedCardId}
+            />
+
+            <SectionBalanceCard
+              section={selectedCard}
+              expenses={cardExpenses}
+              startDate={startDate}
+              endDate={endDate}
+              onAdd={openSectionModal}
+            />
+          </>
+        )}
+      </div>
     </WalletLayout>
   );
 };

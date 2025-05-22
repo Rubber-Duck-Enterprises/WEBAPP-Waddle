@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import localforage from "localforage";
-import { Expense } from "../types";
+import { Expense, ExpenseKind } from "@/types";
 
 interface ExpenseStore {
   expenses: Expense[];
@@ -17,10 +17,16 @@ export const useExpenseStore = create<ExpenseStore>()(
     (set, get) => ({
       expenses: [],
       addExpense: (expense) => {
+        const kind: ExpenseKind =
+          expense.kind ??
+          (expense.amount < 0 ? "expense" : "income");
+
         const newExpense: Expense = {
           ...expense,
           id: nanoid(),
+          kind,
         };
+
         set({ expenses: [...get().expenses, newExpense] });
       },
       updateExpense: (id, updatedExpense) => {

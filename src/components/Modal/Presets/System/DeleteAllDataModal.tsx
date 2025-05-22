@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import UIButton from "../../UI/UIButton";
-import UITextInput from "../../UI/UITextInput";
+import UIButton from "@/components/UI/UIButton";
+import UITextInput from "@/components/UI/UITextInput";
 
 type Props = {
   onConfirm: () => void;

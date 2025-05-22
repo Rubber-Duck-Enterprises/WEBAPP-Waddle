@@ -1,5 +1,5 @@
 import React from "react";
-import UIBulletItem from "../../UI/UIBulletItem";
+import UIBulletItem from "@/components/UI/UIBulletItem";
 
 interface Props {
   rangeType: "month" | "week" | "all" | "custom";
@@ -27,16 +27,16 @@ const DateFilterBar: React.FC<Props> = ({
       paddingBottom: "0",
     }}
   >
-    {["month", "week", "all", "custom"].map((type) => (
+    {["all", "month", "week", "custom"].map((type) => (
       <UIBulletItem
         key={type}
         onClick={() => setRangeType(type as any)}
         active={rangeType === type}
         color="#ffcd00"
       >
+        {type === "all" && "Todo"}
         {type === "month" && "Mes"}
         {type === "week" && "Semana"}
-        {type === "all" && "Todo"}
         {type === "custom" && "Rango"}
       </UIBulletItem>
     ))}

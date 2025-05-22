@@ -3,12 +3,12 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiPlus } from "react-icons/fi";
 
-import { useModal } from "../../context/ModalContext";
-import { getCreateTaskListModal } from "../Modal/Presets/CreateTaskListModal";
-import { getCreateTaskModal } from "../Modal/Presets/CreateTaskModal";
+import { useModal } from "@/context/ModalContext";
+import { getCreateTaskListModal } from "@/components/Modal/Presets/List/CreateTaskListModal";
+import { getCreateTaskModal } from "@/components/Modal/Presets/List/CreateTaskModal";
 
-import { useTaskListStore } from "../../stores/TaskListStore";
-import { useTaskStore } from "../../stores/TaskStore";
+import { useTaskListStore } from "@/stores/TaskListStore";
+import { useTaskStore } from "@/stores/TaskStore";
 
 type Props = {
   activeListId: string | "all";
@@ -22,6 +22,20 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
   const { addTask } = useTaskStore();
 
   const actions = [
+    { 
+      label: "Agregar lista", emoji: "📝", 
+      onClick: () => {
+        showModal(
+          getCreateTaskListModal({
+            onCancel: hideModal,
+            onConfirm: ({ name, color, icon }) => {
+              addTaskList({ name, color, icon });
+              hideModal();
+            }
+          })
+        );
+      } 
+    },
     { 
       label: "Agregar tarea", emoji: "➕", 
       onClick: () => {
@@ -45,20 +59,6 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
           })
         );
       }
-    },
-    { 
-      label: "Agregar lista", emoji: "📝", 
-      onClick: () => {
-        showModal(
-          getCreateTaskListModal({
-            onCancel: hideModal,
-            onConfirm: ({ name, color, icon }) => {
-              addTaskList({ name, color, icon });
-              hideModal();
-            }
-          })
-        );
-      } 
     },
   ];
 

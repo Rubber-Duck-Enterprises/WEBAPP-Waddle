@@ -27,7 +27,7 @@ const UIBalanceAmount: React.FC<Props> = ({ amount }) => {
       const ease = 1 - Math.pow(1 - progress, 3);
       const currentValue = startValue + diff * ease;
   
-      setDisplayAmount(Math.round(currentValue));
+      setDisplayAmount(currentValue);
   
       if (progress < 1) {
         requestAnimationFrame(animate);

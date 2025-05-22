@@ -1,10 +1,10 @@
 import React from "react";
 
-import UIBalanceAmount from "../../UI/UIBalanceAmount";
-import UIIncomeExpenseSummary from "../../UI/UIIncomeExpenseSummary";
+import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
+import UIIncomeExpenseSummary from "@/components/UI/UIIncomeExpenseSummary";
 import TransactionList from "./TransactionList";
 
-import { Expense, Section } from "../../../types";
+import { Expense, Section } from "@/types";
 
 interface Props {
   income: number;

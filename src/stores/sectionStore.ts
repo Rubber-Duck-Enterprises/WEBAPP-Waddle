@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import localforage from "localforage";
-import { Section } from "../types";
+import { Section } from "@/types";
 import { nanoid } from "nanoid";
 
 interface SectionStore {
@@ -19,6 +19,7 @@ export const useSectionStore = create<SectionStore>()(
         const newSection: Section = {
           id: nanoid(),
           createdAt: new Date().toISOString(),
+          type: section.type ?? "standard",
           ...section,
         };
         set({ sections: [...get().sections, newSection] });
