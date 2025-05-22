@@ -57,23 +57,21 @@ const UICreditInfoSummary: React.FC<Props> = ({ amount, used, limit, cutoffDays,
         }}
       >
         <UIBalanceAmount amount={amount} />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "100%",
-            gap: "0.5rem",
-          }}
-        >
-          <div>
-            <div>Uso: <strong>{percentUsed}%</strong></div>
-            <div>de <strong>${limit.toLocaleString()}</strong></div>
-          </div>
-          <div>
-            <div>Días para corte: <strong>{displayCutoff}</strong></div>
-            <div>Días para pago: <strong>{displayPayment}</strong></div>
-          </div>
+        <div>
+          <div>Uso: <strong>{percentUsed}%</strong></div>
+          <div>de <strong>${limit.toLocaleString()}</strong></div>
         </div>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          width: "100%",
+          gap: "0.5rem",
+        }}
+      >
+        <div>Días para corte: <strong>{displayCutoff}</strong></div>
+        <div>Días para pago: <strong>{displayPayment}</strong></div>
       </div>
     </div>
   );
