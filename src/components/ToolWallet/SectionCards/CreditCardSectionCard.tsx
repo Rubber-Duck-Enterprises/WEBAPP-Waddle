@@ -48,11 +48,15 @@ const CreditCardSectionCard: React.FC<Props> = ({
   });
 
   const creditUsed = filteredExpenses
-    .filter((e) => e.category === section.id && e.amount < 0 && !e.adjustment)
-    .reduce((acc, e) => acc + Math.abs(e.amount), 0);
+  .filter((e) => e.category === section.id && (e.kind === "debt" || e.kind === "payment"))
+  .reduce((acc, e) => {
+    const value = e.kind === "debt"
+      ? Math.abs(e.amount)
+      : -Math.abs(e.amount);
+    return acc + value;
+  }, 0);
 
   const available = Math.max(creditLimit - creditUsed, 0);
-  const latest = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 
   const handlePayCreditCard = () => {
     showModal(
@@ -64,17 +68,19 @@ const CreditCardSectionCard: React.FC<Props> = ({
           const source = sections.find((s) => s.id === sourceId);
 
           addExpense({
-            description: `Pago a tarjeta ${section.icon || "💳"} ${section.name}`,
+            description: `Pago a tarjeta ${section.name}`,
             amount: -Math.abs(amount),
             category: sourceId,
+            kind: "payment",
             notes,
             date: now,
           });
 
           addExpense({
-            description: `Pago desde ${source?.icon || "📁"} ${source?.name}`,
+            description: `Pago desde ${source?.name}`,
             amount: Math.abs(amount),
             category: section.id,
+            kind: "payment",
             notes,
             date: now,
           });
@@ -97,9 +103,9 @@ const CreditCardSectionCard: React.FC<Props> = ({
             amount: -Math.abs(amount),
             category: section.id,
             notes,
+            kind: "debt",
             date: new Date().toISOString(),
           });
-
           hideModal();
         },
       })
@@ -129,15 +135,30 @@ const CreditCardSectionCard: React.FC<Props> = ({
         cutoffDays={cutoffDays < 0 ? 30 + cutoffDays : cutoffDays}
         paymentDays={paymentDays < 0 ? 30 + paymentDays : paymentDays}
       />
-      <TransactionList latest={latest} sections={[]} />
+      <TransactionList
+        latest={filteredExpenses
+          .filter((e) => e.kind === "debt" || e.kind === "payment")
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .slice(0, 3)}
+        sections={sections}
+      />
+
 
       <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
-        <UIButton variant="danger" fullWidth onClick={handleAddExpense}>
-          + Gasto
-        </UIButton>
-        <UIButton variant="primary" fullWidth onClick={handlePayCreditCard}>
-          Pagar tarjeta
-        </UIButton>
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            width: "100%",
+          }}
+        >
+          <UIButton variant="danger" fullWidth onClick={handleAddExpense}>
+            + Gasto
+          </UIButton>
+          <UIButton variant="primary" fullWidth onClick={handlePayCreditCard}>
+            Pagar tarjeta
+          </UIButton>
+        </div>
       </div>
     </div>
   );

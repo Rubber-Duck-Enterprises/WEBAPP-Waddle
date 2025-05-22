@@ -34,7 +34,7 @@ const UICreditInfoSummary: React.FC<Props> = ({ used, limit, cutoffDays, payment
     const interval = setInterval(() => {
       current += step;
       i++;
-      setDisplay(Math.round(current));
+      setDisplay(current);
       if (i >= stepCount) {
         clearInterval(interval);
         setDisplay(target);

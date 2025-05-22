@@ -90,25 +90,33 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSe
           </UISelect>
 
           {(cardMode === "credit" || cardMode === "both") && (
-            <div style={{ display: "flex", gap: "0.75rem" }}>
-              <UITextInput
-                type="number"
-                min={1}
-                max={31}
-                placeholder="Día corte"
-                value={cutoffDate}
-                onChange={(e) => setCutoffDate(e.target.value)}
-                style={{ flex: 1 }}
-              />
-              <UITextInput
-                type="number"
-                min={1}
-                max={31}
-                placeholder="Día pago"
-                value={paymentDate}
-                onChange={(e) => setPaymentDate(e.target.value)}
-                style={{ flex: 1 }}
-              />
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "1rem",
+                  width: "100%",
+                }}
+              >
+                <UITextInput
+                  type="number"
+                  min={1}
+                  max={31}
+                  placeholder="Día corte"
+                  value={cutoffDate}
+                  onChange={(e) => setCutoffDate(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <UITextInput
+                  type="number"
+                  min={1}
+                  max={31}
+                  placeholder="Día pago"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+              </div>
               <UITextInput
                 type="number"
                 min={1}

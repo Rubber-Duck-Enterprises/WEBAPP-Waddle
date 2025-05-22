@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { parseISO, isWithinInterval } from "date-fns";
+import { parseISO, isWithinInterval, differenceInCalendarDays } from "date-fns";
 import { Section, Expense } from "@/types";
 
 import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
+import UICreditInfoSummary from "@/components/UI/UICreditInfoSummary";
 import UIIncomeExpenseSummary from "@/components/UI/UIIncomeExpenseSummary";
-import UIProgressBar from "@/components/UI/UIProgressBar";
 import TransactionList from "@/components/ToolWallet/Home/TransactionList";
 import UIButton from "@/components/UI/UIButton";
 import AdjustBalanceModal from "@/components/Modal/Presets/Wallet/AdjustBalanceModal";
@@ -31,6 +31,16 @@ const BothCardSectionCard: React.FC<Props> = ({
   endDate,
   onAdd,
 }) => {
+  const today = new Date();
+  const cutoffDay = Number(section.cardSettings?.cutoffDate) || 1;
+  const paymentDay = Number(section.cardSettings?.paymentDate) || 10;
+
+  const cutoffDate = new Date(today.getFullYear(), today.getMonth(), cutoffDay);
+  const paymentDate = new Date(today.getFullYear(), today.getMonth(), paymentDay);
+
+  const cutoffDays = differenceInCalendarDays(cutoffDate, today);
+  const paymentDays = differenceInCalendarDays(paymentDate, today);
+
   const [activeMode, setActiveMode] = useState<"credit" | "debit">("debit");
 
   const { showModal, hideModal } = useModal();
@@ -54,14 +64,17 @@ const BothCardSectionCard: React.FC<Props> = ({
     .reduce((acc, e) => acc + e.amount, 0);
 
   const balance = income + totalExpenses;
-  const goal = section.goal || 0;
-  const progress = goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
 
   const creditUsed = filteredExpenses
-    .filter((e) => e.category === section.id && e.amount < 0 && !e.adjustment)
-    .reduce((acc, e) => acc + Math.abs(e.amount), 0);
+    .filter((e) => e.category === section.id && (e.kind === "debt" || e.kind === "payment"))
+    .reduce((acc, e) => {
+      const value = e.kind === "debt"
+        ? Math.abs(e.amount)
+        : -Math.abs(e.amount);
+      return acc + value;
+    }, 0);
 
-  const creditAvailable = Math.max(creditLimit - creditUsed, 0);
+  const available = Math.max(creditLimit - creditUsed, 0);
   const latest = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 
   const handleAdjust = () => {
@@ -90,27 +103,6 @@ const BothCardSectionCard: React.FC<Props> = ({
     );
   };
 
-  const handleAddCreditExpense = () => {
-    showModal(
-      getAddCreditCardExpenseModal({
-        section,
-        available: creditAvailable,
-        onCancel: hideModal,
-        onConfirm: ({ amount, description, notes }) => {
-          addExpense({
-            description,
-            amount: -Math.abs(amount),
-            category: section.id,
-            notes,
-            date: new Date().toISOString(),
-          });
-
-          hideModal();
-        },
-      })
-    );
-  };
-
   const handlePayCreditCard = () => {
     showModal(
       getPayCreditCardModal({
@@ -121,21 +113,44 @@ const BothCardSectionCard: React.FC<Props> = ({
           const source = sections.find((s) => s.id === sourceId);
 
           addExpense({
-            description: `Pago a tarjeta ${section.icon || "💳"} ${section.name}`,
+            description: `Pago a tarjeta ${section.name}`,
             amount: -Math.abs(amount),
             category: sourceId,
+            kind: "payment",
             notes,
             date: now,
           });
 
           addExpense({
-            description: `Pago desde ${source?.icon || "📁"} ${source?.name}`,
+            description: `Pago desde ${source?.name}`,
             amount: Math.abs(amount),
             category: section.id,
+            kind: "payment",
             notes,
             date: now,
           });
 
+          hideModal();
+        },
+      })
+    );
+  };
+
+  const handleAddCreditExpense = () => {
+    showModal(
+      getAddCreditCardExpenseModal({
+        section,
+        available,
+        onCancel: hideModal,
+        onConfirm: ({ amount, description, notes }) => {
+          addExpense({
+            description,
+            amount: -Math.abs(amount),
+            category: section.id,
+            notes,
+            kind: "debt",
+            date: new Date().toISOString(),
+          });
           hideModal();
         },
       })
@@ -186,28 +201,25 @@ const BothCardSectionCard: React.FC<Props> = ({
         </label>
       </div>
 
-      {activeMode === "credit" && (
-        <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
-          Límite: <strong>${creditLimit.toLocaleString()}</strong><br />
-          Usado: <strong>${creditUsed.toLocaleString()}</strong><br />
-          Disponible: <strong>${creditAvailable.toLocaleString()}</strong>
-        </div>
-      )}
-
-      {activeMode === "debit" && goal > 0 && (
+      {activeMode === "debit" && (
         <>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
-            <span style={{ fontSize: "0.85rem" }}>Progreso</span>
-            <span style={{ fontSize: "0.85rem", fontWeight: "bold" }}>
-              ${balance.toLocaleString()} / ${goal.toLocaleString()}
-            </span>
-          </div>
-          <UIProgressBar value={progress} max={100} />
+          <UIBalanceAmount amount={balance} />
+          <UIIncomeExpenseSummary income={income} totalExpenses={totalExpenses} />
         </>
       )}
 
-      <UIBalanceAmount amount={activeMode === "credit" ? creditAvailable : balance} />
-      <UIIncomeExpenseSummary income={income} totalExpenses={totalExpenses} />
+      {activeMode === "credit" && (
+        <>
+          <UIBalanceAmount amount={available} />
+          <UICreditInfoSummary
+            used={creditUsed}
+            limit={creditLimit}
+            cutoffDays={cutoffDays < 0 ? 30 + cutoffDays : cutoffDays}
+            paymentDays={paymentDays < 0 ? 30 + paymentDays : paymentDays}
+          />
+        </>
+      )}
+
       <TransactionList latest={latest} sections={[]} />
 
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
