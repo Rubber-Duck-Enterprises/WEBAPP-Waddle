@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import UIToggle from "../../components/UI/UIToggle";
-import UIButton from "../../components/UI/UIButton";
+import UIButton from "@/components/UI/UIButton";
+import UIToggle from "@/components/UI/UIToggle";
 import DrawerLink from "./DrawerLink";
-import { useTheme } from "../../hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 type Props = {
   isOpen: boolean;

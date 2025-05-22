@@ -1,5 +1,5 @@
 import React from "react";
-import { Expense, Section } from "../../../types";
+import { Expense, Section } from "@/types";
 
 interface Props {
   latest: Expense[];

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json' assert { type: 'json' };
+import path from 'path';
 
 export default defineConfig({
   define: {
@@ -54,5 +55,10 @@ export default defineConfig({
   },
   server: {
     allowedHosts: ['.ngrok-free.app'],
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
 });

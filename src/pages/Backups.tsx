@@ -1,12 +1,12 @@
 // pages/BackupPage.tsx
 import React from "react";
 import localforage from "localforage";
-import UIButton from "../components/UI/UIButton";
+import UIButton from "@/components/UI/UIButton";
 import { FiPlus } from "react-icons/fi";
-import DefaultLayout from "../layouts/DefaultLayout";
-import { useModal } from "../context/ModalContext";
-import { getImportSuccessModal } from "../components/Modal/Presets/ImportSuccessModal";
-import { getDeleteAllDataModal } from "../components/Modal/Presets/DeleteAllDataModal";
+import DefaultLayout from "@/layouts/DefaultLayout";
+import { useModal } from "@/context/ModalContext";
+import { getImportSuccessModal } from "@/components/Modal/Presets/System/ImportSuccessModal";
+import { getDeleteAllDataModal } from "@/components/Modal/Presets/System/DeleteAllDataModal";
 
 type SectionKey =
   | "waddle-sections"

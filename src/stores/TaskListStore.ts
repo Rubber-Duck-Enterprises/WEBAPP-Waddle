@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import localforage from "localforage";
-import { TaskList, Tag } from "../types";
+import { TaskList, Tag } from "@/types";
 
 interface TaskListStore {
   taskLists: TaskList[];

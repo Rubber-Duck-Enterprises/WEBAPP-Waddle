@@ -1,79 +1,69 @@
 import React, { useState } from "react";
 import { FiPlus } from "react-icons/fi";
 
-import UITextInput from "../../UI/UITextInput";
-import UIButton from "../../UI/UIButton";
-import UISelect from "../../UI/UISelect";
+import UITextInput from "@/components/UI/UITextInput";
+import UIButton from "@/components/UI/UIButton";
+import UISelect from "@/components/UI/UISelect";
 
-import { useSettingsStore } from "../../../stores/settingsStore";
-import { CardMode, SectionType } from "../../../types";
+import { useSettingsStore } from "@/stores/settingsStore";
+
+import {
+  Section,
+  SectionType,
+  CardMode,
+} from "@/types";
 
 type Props = {
   name: string;
-  initialValues: {
-    goal: number;
-    color: string;
-    icon: string;
-    type: SectionType;
-    cardSettings?: {
-      mode: CardMode;
-      cutoffDate?: string;
-      paymentDate?: string;
-    };
-  };
   onConfirm: (config: {
     goal: number;
     color: string;
     icon: string;
-    cardSettings?: {
-      mode: CardMode;
-      cutoffDate?: string;
-      paymentDate?: string;
-    };
+    type: SectionType;
+    cardSettings?: Section["cardSettings"];
   }) => void;
   onCancel: () => void;
+  goToSettings: () => void;
 };
 
-export const getEditSectionModal = ({ name, initialValues, onConfirm, onCancel }: Props) => {
-  return <EditSectionModal name={name} initialValues={initialValues} onConfirm={onConfirm} onCancel={onCancel} />;
+export const getCreateSectionModal = ({ name, onConfirm, onCancel, goToSettings }: Props) => {
+  return <CreateSectionModal name={name} onConfirm={onConfirm} onCancel={onCancel} goToSettings={goToSettings} />;
 };
 
-const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onCancel }) => {
+const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSettings }) => {
   const { favouriteColors, favouriteEmojis } = useSettingsStore();
 
-  const [goal, setGoal] = useState<number>(initialValues.goal);
-  const [color, setColor] = useState<string>(
-    favouriteColors.includes(initialValues.color) ? initialValues.color : favouriteColors[0] || "#FFD700"
-  );
-  const [customColor, setCustomColor] = useState<string>(
-    favouriteColors.includes(initialValues.color) ? "" : initialValues.color
-  );
-
-  const [icon, setIcon] = useState<string>(
-    favouriteEmojis.includes(initialValues.icon) ? initialValues.icon : favouriteEmojis[0] || "💰"
-  );
-  const [customEmoji, setCustomEmoji] = useState<string>(
-    favouriteEmojis.includes(initialValues.icon) ? "" : initialValues.icon
-  );
-
-  const [cardMode, setCardMode] = useState<CardMode>(initialValues.cardSettings?.mode || "debit");
-  const [cutoffDate, setCutoffDate] = useState<string>(initialValues.cardSettings?.cutoffDate || "");
-  const [paymentDate, setPaymentDate] = useState<string>(initialValues.cardSettings?.paymentDate || "");
+  const [goal, setGoal] = useState<number | null>(null);
+  const [color, setColor] = useState<string>(favouriteColors[0] || "#FFD700");
+  const [icon, setIcon] = useState<string>(favouriteEmojis[0] || "💰");
+  const [customColor, setCustomColor] = useState<string>("");
+  const [customEmoji, setCustomEmoji] = useState<string>("");
+  const [type, setType] = useState<SectionType>("standard");
+  const [cardMode, setCardMode] = useState<CardMode>("debit");
+  const [cutoffDate, setCutoffDate] = useState<string>("");
+  const [paymentDate, setPaymentDate] = useState<string>("");
+  const [creditLimit, setCreditLimit] = useState<number>(0);
 
   const effectiveColor = customColor || color;
   const effectiveEmoji = customEmoji || icon;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Editar apartado</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>Configurar nuevo apartado</h3>
       <p style={{ color: "var(--text-secondary)" }}>
         Nombre: <strong>{name}</strong>
       </p>
-      <p style={{ color: "var(--text-secondary)" }}>
-        Tipo: <strong>{getSectionTypeLabel(initialValues.type)}</strong>
-      </p>
 
-      {initialValues.type === "savings" && (
+      {/* Tipo */}
+      <UISelect value={type} onChange={(e) => setType(e.target.value as SectionType)}>
+        <option value="standard">Estándar</option>
+        <option value="passive">Pasivo (solo gastos)</option>
+        <option value="card">Tarjeta</option>
+        <option value="savings">Ahorro</option>
+      </UISelect>
+
+      {/* Meta ahorro */}
+      {type === "savings" && (
         <>
           <UITextInput
             type="number"
@@ -90,7 +80,8 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
         </>
       )}
 
-      {initialValues.type === "card" && (
+      {/* Configuración tarjeta */}
+      {type === "card" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           <UISelect value={cardMode} onChange={(e) => setCardMode(e.target.value as CardMode)}>
             <option value="debit">Débito</option>
@@ -118,6 +109,13 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
                 onChange={(e) => setPaymentDate(e.target.value)}
                 style={{ flex: 1 }}
               />
+              <UITextInput
+                type="number"
+                min={1}
+                placeholder="Límite de crédito"
+                value={creditLimit}
+                onChange={(e) => setCreditLimit(Number(e.target.value))}
+              />
             </div>
           )}
         </div>
@@ -125,9 +123,21 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
 
       {/* Icono */}
       <div>
-        <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>😃 Icono:</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>😃 Icono:</p>
+        </div>
+
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", flex: 1 }}>
+          {/* Lista de emojis scrollable */}
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              overflowX: "auto",
+              paddingBottom: "0.25rem",
+              flex: 1,
+            }}
+          >
             {favouriteEmojis.map((emoji) => (
               <button
                 key={emoji}
@@ -151,27 +161,34 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
               </button>
             ))}
           </div>
+
+          {/* Botón para ir a configuración */}
+          <UIButton
+            onClick={goToSettings}
+            style={{ minWidth: "36px", minHeight: "36px", padding: 0 }}
+            variant="secondary"
+          >
+            <FiPlus size={16} />
+          </UIButton>
         </div>
-        <UITextInput
-          type="text"
-          maxLength={2}
-          placeholder="🔣"
-          value={customEmoji}
-          onChange={(e) => setCustomEmoji(e.target.value)}
-          style={{
-            width: "60px",
-            textAlign: "center",
-            fontSize: "1.5rem",
-            marginTop: "0.5rem",
-          }}
-        />
       </div>
 
       {/* Color */}
       <div>
-        <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>🎨 Color:</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <p style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>🎨 Color:</p>
+        </div>
+
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", flex: 1 }}>
+          {/* Lista con scroll */}
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              overflowX: "auto",
+              flex: 1,
+            }}
+          >
             {favouriteColors.map((c) => (
               <button
                 key={c}
@@ -194,6 +211,7 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
             ))}
           </div>
 
+          {/* Selector libre */}
           <div
             style={{
               position: "relative",
@@ -206,13 +224,15 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
           >
             <input
               type="color"
-              value={customColor || "#ffd600"}
+              value={customColor || '#ffd600'}
               onChange={(e) => setCustomColor(e.target.value)}
               style={{
                 width: "100%",
                 height: "100%",
                 border: "none",
                 borderRadius: "50%",
+                outline: "none",
+                padding: 0,
                 appearance: "none",
                 background: "transparent",
                 cursor: "pointer",
@@ -223,6 +243,9 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
                 position: "absolute",
                 inset: 0,
                 backgroundColor: "rgba(255, 255, 255, 0.1)",
+                color: "black",
+                fontSize: "1rem",
+                fontWeight: "bold",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -243,42 +266,29 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
         <UIButton
           onClick={() =>
             onConfirm({
-              goal,
+              goal: goal ?? 0,
               color: effectiveColor,
               icon: effectiveEmoji,
+              type,
               cardSettings:
-                initialValues.type === "card"
+                type === "card"
                   ? {
-                      mode: cardMode,
-                      cutoffDate,
-                      paymentDate,
-                    }
+                    mode: cardMode,
+                    cutoffDate,
+                    paymentDate,
+                    creditLimit,
+                  }
                   : undefined,
             })
           }
           variant="primary"
-          disabled={initialValues.type === "savings" && (!goal || goal <= 0)}
+          disabled={type === "savings" && (!goal || goal <= 0)}
         >
-          Guardar
+          Crear
         </UIButton>
       </div>
     </div>
   );
 };
 
-function getSectionTypeLabel(type: SectionType): string {
-  switch (type) {
-    case "standard":
-      return "Estándar";
-    case "passive":
-      return "Pasivo";
-    case "card":
-      return "Tarjeta";
-    case "savings":
-      return "Ahorro";
-    default:
-      return "Desconocido";
-  }
-}
-
-export default EditSectionModal;
+export default CreateSectionModal;

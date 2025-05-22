@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { nanoid } from "nanoid";
 
-import UITextInput from "../../UI/UITextInput";
-import UITextArea from "../../UI/UITextArea";
-import UISelect from "../../UI/UISelect";
-import UIButton from "../../UI/UIButton";
+import UITextInput from "@/components/UI/UITextInput";
+import UITextArea from "@/components/UI/UITextArea";
+import UISelect from "@/components/UI/UISelect";
+import UIButton from "@/components/UI/UIButton";
 
-import { useTaskListStore } from "../../../stores/TaskListStore";
+import { useTaskListStore } from "@/stores/TaskListStore";
 
 type Props = {
   activeListId: string | "all";

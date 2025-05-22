@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useModal } from "../../context/ModalContext";
+import { useModal } from "@/context/ModalContext";
 import { AnimatePresence, motion } from "framer-motion";
 
 const Modal = () => {

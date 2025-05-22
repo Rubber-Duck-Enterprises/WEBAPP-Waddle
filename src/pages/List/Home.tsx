@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import { useTaskStore } from "../../stores/TaskStore";
-import { useTaskListStore } from "../../stores/TaskListStore";
+import { useTaskStore } from "@/stores/TaskStore";
+import { useTaskListStore } from "@/stores/TaskListStore";
 
-import ListLayout from "../../layouts/ListLayout";
-import TaskListGroup from "../../components/ToolList/Home/TaskListGroup";
-import UIButton from "../../components/UI/UIButton";
-import UIBulletItem from "../../components/UI/UIBulletItem";
-import { useModal } from "../../context/ModalContext";
-import { getEditTaskModal } from "../../components/Modal/Presets/EditTaskModal";
+import ListLayout from "@/layouts/ListLayout";
+import TaskListGroup from "@/components/ToolList/Home/TaskListGroup";
+import UIButton from "@/components/UI/UIButton";
+import UIBulletItem from "@/components/UI/UIBulletItem";
+import { useModal } from "@/context/ModalContext";
+import { getEditTaskModal } from "@/components/Modal/Presets/List/EditTaskModal";
 
 const ListHome: React.FC = () => {
   const { tasks, toggleTaskDone, updateTask, deleteTask } = useTaskStore();

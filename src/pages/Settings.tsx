@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import localforage from "localforage";
 
-import UIToggle from "../components/UI/UIToggle";
-import UISelect from "../components/UI/UISelect";
-import UIButton from "../components/UI/UIButton";
-import UITextInput from "../components/UI/UITextInput";
-import DefaultLayout from "../layouts/DefaultLayout";
-import { useModal } from "../context/ModalContext";
-import { getSavedSettingsModal } from "../components/Modal/Presets/SavedSettingsModal";
-import { getTasksDeletedModal } from "../components/Modal/Presets/TasksDeletedModal";
+import UIToggle from "@/components/UI/UIToggle";
+import UISelect from "@/components/UI/UISelect";
+import UIButton from "@/components/UI/UIButton";
+import UITextInput from "@/components/UI/UITextInput";
+import DefaultLayout from "@/layouts/DefaultLayout";
+import { useModal } from "@/context/ModalContext";
+import { getSavedSettingsModal } from "@/components/Modal/Presets/System/SavedSettingsModal";
+import { getTasksDeletedModal } from "@/components/Modal/Presets/List/TasksDeletedModal";
 
 import { useTheme } from "../hooks/useTheme";
 import { useSettingsStore } from "../stores/settingsStore";
@@ -335,10 +335,9 @@ const Settings: React.FC = () => {
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
             Define cuándo comienza y termina tu día. Las notificaciones se programarán a partir de este horario.
           </p>
-
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <label style={{ flex: 1 }}>
-              Mi día comienza a las:
+              Mi día comienza:
               <UITextInput
                 type="time"
                 value={useSettingsStore.getState().dayStartTime}
@@ -347,7 +346,7 @@ const Settings: React.FC = () => {
             </label>
 
             <label style={{ flex: 1 }}>
-              Termina a las:
+              Termina:
               <UITextInput
                 type="time"
                 value={useSettingsStore.getState().dayEndTime}

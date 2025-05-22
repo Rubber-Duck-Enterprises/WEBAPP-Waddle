@@ -14,6 +14,7 @@ export type Section = {
     mode: CardMode;
     cutoffDate?: string;
     paymentDate?: string;
+    creditLimit?: number;
   };
 };
 
@@ -26,6 +27,7 @@ export type Expense = {
   date: string;
   recurring?: boolean;
   notes?: string;
+  adjustment?: boolean;
 };
 
 export type ExpenseCategory = {

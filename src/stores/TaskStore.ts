@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import localforage from "localforage";
-import { Task } from "../types";
+import { Task } from "@/types";
 
 function getNextDueDate(current: string, repeat: Task["repeat"]): string {
   const date = new Date(current);

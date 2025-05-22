@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import localforage from "localforage";
-import { Section } from "../types";
+import { Section } from "@/types";
 import { nanoid } from "nanoid";
 
 interface SectionStore {

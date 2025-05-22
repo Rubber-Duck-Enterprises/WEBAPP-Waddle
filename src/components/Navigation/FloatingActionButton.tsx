@@ -3,12 +3,12 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiPlus } from "react-icons/fi";
 
-import { useModal } from "../../context/ModalContext";
-import { getCreateTaskListModal } from "../Modal/Presets/CreateTaskListModal";
-import { getCreateTaskModal } from "../Modal/Presets/CreateTaskModal";
+import { useModal } from "@/context/ModalContext";
+import { getCreateTaskListModal } from "@/components/Modal/Presets/List/CreateTaskListModal";
+import { getCreateTaskModal } from "@/components/Modal/Presets/List/CreateTaskModal";
 
-import { useTaskListStore } from "../../stores/TaskListStore";
-import { useTaskStore } from "../../stores/TaskStore";
+import { useTaskListStore } from "@/stores/TaskListStore";
+import { useTaskStore } from "@/stores/TaskStore";
 
 type Props = {
   activeListId: string | "all";

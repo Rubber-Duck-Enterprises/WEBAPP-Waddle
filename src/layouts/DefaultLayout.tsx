@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Drawer from "../components/Navigation/Drawer";
-import Header from "../components/Navigation/Header";
+import Drawer from "@/components/Navigation/Drawer";
+import Header from "@/components/Navigation/Header";
 import { motion } from "framer-motion";
 
 const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -1,14 +1,14 @@
 import React from "react";
 
-import { Expense } from "../../types";
-import { useModal } from "../../context/ModalContext";
-import { useExpenseStore } from "../../stores/expenseStore";
-import { useSectionStore } from "../../stores/sectionStore";
-import MovementItem from "../../components/ToolWallet/Movements/MovementItem";
-import TransferItem from "../../components/ToolWallet/Movements/TransferItem";
-import EditExpenseModal from "../../components/Modal/Presets/EditExpenseModal";
+import { Expense } from "@/types";
+import { useModal } from "@/context/ModalContext";
+import { useExpenseStore } from "@/stores/expenseStore";
+import { useSectionStore } from "@/stores/sectionStore";
+import MovementItem from "@/components/ToolWallet/Movements/MovementItem";
+import TransferItem from "@/components/ToolWallet/Movements/TransferItem";
+import EditExpenseModal from "@/components/Modal/Presets/Wallet/EditExpenseModal";
 
-import WalletLayout from "../../layouts/WalletLayout";
+import WalletLayout from "@/layouts/WalletLayout";
 
 const Movements: React.FC = () => {
   const groupedTransfers = new Set<string>();

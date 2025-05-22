@@ -2,7 +2,7 @@
 import React from "react";
 import { AnimatePresence } from "framer-motion";
 import TaskItem from "./TaskListItem";
-import { Task, TaskList } from "../../../types";
+import { Task, TaskList } from "@/types";
 
 interface Props {
   tasks: Task[];

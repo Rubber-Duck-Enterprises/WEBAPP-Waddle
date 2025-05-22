@@ -1,5 +1,5 @@
 import React from "react";
-import UIButton from "../../UI/UIButton";
+import UIButton from "@/components/UI/UIButton";
 
 type Props = {
   onConfirm: () => void;

@@ -1,6 +1,6 @@
 // components/Modal/Presets/NotificationsRequestModal.tsx
 import React from "react";
-import UIButton from "../../UI/UIButton";
+import UIButton from "@/components/UI/UIButton";
 
 type Props = {
   onClose: () => void;
@@ -17,7 +17,7 @@ const NotificationsRequestModal: React.FC<Props> = ({ onClose }) => {
         const {
           requestPermissionAndToken,
           saveNotificationSettingsToFirestore,
-        } = await import("../../../firebase");
+        } = await import("@/firebase");
 
         const token = await requestPermissionAndToken();
 

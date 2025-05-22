@@ -1,8 +1,8 @@
 import React from "react";
 
-import { useKonamiUniversalCode  } from "../hooks/useKonamiCode";
+import { useKonamiUniversalCode  } from "@/hooks/useKonamiCode";
 
-import DefaultLayout from "../layouts/DefaultLayout";
+import DefaultLayout from "@/layouts/DefaultLayout";
 
 const About: React.FC = () => {
   const playQuack = () => {

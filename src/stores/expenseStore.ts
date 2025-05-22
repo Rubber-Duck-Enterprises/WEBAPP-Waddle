@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import localforage from "localforage";
-import { Expense } from "../types";
+import { Expense } from "@/types";
 
 interface ExpenseStore {
   expenses: Expense[];
