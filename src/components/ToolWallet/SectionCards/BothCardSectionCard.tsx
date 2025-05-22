@@ -55,11 +55,18 @@ const BothCardSectionCard: React.FC<Props> = ({
       (e.category === section.id || e.source === section.id);
   });
 
-  const income = filteredExpenses
+  const visibleExpenses = filteredExpenses.filter((e) => {
+    if (activeMode === "credit") {
+      return e.kind === "debt" || e.kind === "payment";
+    }
+    return !e.kind || e.kind === "income" || e.kind === "expense" || e.kind === undefined;
+  });
+
+  const income = visibleExpenses
     .filter((e) => e.amount > 0 && e.category === section.id)
     .reduce((acc, e) => acc + e.amount, 0);
 
-  const totalExpenses = filteredExpenses
+  const totalExpenses = visibleExpenses
     .filter((e) => e.amount < 0)
     .reduce((acc, e) => acc + e.amount, 0);
 
@@ -75,7 +82,6 @@ const BothCardSectionCard: React.FC<Props> = ({
     }, 0);
 
   const available = Math.max(creditLimit - creditUsed, 0);
-  const latest = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 
   const handleAdjust = () => {
     if (activeMode === "credit") return;
@@ -220,7 +226,10 @@ const BothCardSectionCard: React.FC<Props> = ({
         </>
       )}
 
-      <TransactionList latest={latest} sections={[]} />
+      <TransactionList
+        latest={[...visibleExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3)}
+        sections={sections}
+      />
 
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
         {activeMode === "debit" && (
