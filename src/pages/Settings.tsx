@@ -20,6 +20,7 @@ const Settings: React.FC = () => {
     deleteTime,
     deleteFrequency,
     deleteDayOfWeek,
+    startPath,
     setSetting,
     hydrated
   } = useSettingsStore();
@@ -155,6 +156,27 @@ const Settings: React.FC = () => {
             </UIButton>
           </div>
         )} */}
+
+        <div
+          style={{
+            display: "flex",
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "8px",
+            flexDirection: "column",
+            padding: "1rem",
+            gap: "1rem"
+          }}
+        >
+          <h3>🚪 Inicio automático</h3>
+          <UISelect
+            value={startPath}
+            onChange={(e) => setSetting("startPath", e.target.value)}
+          >
+            <option value="/wallet">Waddle Wallet</option>
+            <option value="/list">Wadddle List</option>
+          </UISelect>
+        </div>
 
         <div 
           style={{ 
