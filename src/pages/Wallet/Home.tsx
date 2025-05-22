@@ -172,43 +172,47 @@ const WalletHome: React.FC = () => {
 
       {/* Apartados */}
       <div style={{ padding: "0 1rem", paddingBottom: "2rem" }}>
-        <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Apartados</h2>
-
-        <SectionSelector
-          sections={sections.filter((s) => s.type !== "card")}
-          selectedId={selectedSectionId}
-          onSelect={setSelectedSectionId}
-        />
-
         {selectedSection && (
-          <SectionBalanceCard
-            section={selectedSection}
-            expenses={sectionExpenses}
-            startDate={startDate}
-            endDate={endDate}
-            onAdd={openSectionModal}
-          />
+          <>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Apartados</h2>
+
+            <SectionSelector
+              sections={sections.filter((s) => s.type !== "card")}
+              selectedId={selectedSectionId}
+              onSelect={setSelectedSectionId}
+            />
+
+            <SectionBalanceCard
+              section={selectedSection}
+              expenses={sectionExpenses}
+              startDate={startDate}
+              endDate={endDate}
+              onAdd={openSectionModal}
+            />
+          </>
         )}
       </div>
 
       {/* Tarjetas */}
       <div style={{ padding: "0 1rem", paddingBottom: "2rem" }}>
-        <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Tarjetas</h2>
-
-        <SectionSelector
-          sections={sections.filter((s) => s.type === "card")}
-          selectedId={selectedCardId}
-          onSelect={setSelectedCardId}
-        />
-
         {selectedCard && (
-          <SectionBalanceCard
-            section={selectedCard}
-            expenses={cardExpenses}
-            startDate={startDate}
-            endDate={endDate}
-            onAdd={openSectionModal}
-          />
+          <>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Tarjetas</h2>
+
+            <SectionSelector
+              sections={sections.filter((s) => s.type === "card")}
+              selectedId={selectedCardId}
+              onSelect={setSelectedCardId}
+            />
+
+            <SectionBalanceCard
+              section={selectedCard}
+              expenses={cardExpenses}
+              startDate={startDate}
+              endDate={endDate}
+              onAdd={openSectionModal}
+            />
+          </>
         )}
       </div>
     </WalletLayout>
