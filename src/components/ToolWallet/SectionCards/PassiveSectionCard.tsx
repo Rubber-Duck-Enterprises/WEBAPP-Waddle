@@ -62,7 +62,7 @@ const PassiveSectionCard: React.FC<Props> = ({
 
       <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
         <UIButton variant="danger" fullWidth onClick={() => onAdd("expense", section.id)}>
-          + Gasto
+          - Gasto
         </UIButton>
       </div>
     </div>

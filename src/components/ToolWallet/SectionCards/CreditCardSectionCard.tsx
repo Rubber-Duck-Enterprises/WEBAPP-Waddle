@@ -2,7 +2,6 @@ import React from "react";
 import { parseISO, isWithinInterval, differenceInCalendarDays } from "date-fns";
 import { Section, Expense } from "@/types";
 
-import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
 import UICreditInfoSummary from "@/components/UI/UICreditInfoSummary";
 import TransactionList from "@/components/ToolWallet/Home/TransactionList";
 import UIButton from "@/components/UI/UIButton";
@@ -128,8 +127,8 @@ const CreditCardSectionCard: React.FC<Props> = ({
     >
       <h2>{section.icon || "💳"} {section.name}</h2>
 
-      <UIBalanceAmount amount={available} />
       <UICreditInfoSummary
+        amount={available}
         used={creditUsed}
         limit={creditLimit}
         cutoffDays={cutoffDays < 0 ? 30 + cutoffDays : cutoffDays}
@@ -143,7 +142,6 @@ const CreditCardSectionCard: React.FC<Props> = ({
         sections={sections}
       />
 
-
       <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
         <div
           style={{
@@ -153,7 +151,7 @@ const CreditCardSectionCard: React.FC<Props> = ({
           }}
         >
           <UIButton variant="danger" fullWidth onClick={handleAddExpense}>
-            + Gasto
+            - Gasto
           </UIButton>
           <UIButton variant="primary" fullWidth onClick={handlePayCreditCard}>
             Pagar tarjeta

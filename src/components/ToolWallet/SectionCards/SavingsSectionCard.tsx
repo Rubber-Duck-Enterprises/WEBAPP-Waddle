@@ -123,7 +123,7 @@ const SavingsSectionCard: React.FC<Props> = ({
             + Ingreso
           </UIButton>
           <UIButton variant="danger" fullWidth onClick={() => onAdd("expense", section.id)}>
-            + Gasto
+            - Gasto
           </UIButton>
         </div>
         <UIButton

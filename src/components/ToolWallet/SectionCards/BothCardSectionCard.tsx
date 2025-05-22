@@ -216,8 +216,8 @@ const BothCardSectionCard: React.FC<Props> = ({
 
       {activeMode === "credit" && (
         <>
-          <UIBalanceAmount amount={available} />
           <UICreditInfoSummary
+            amount={available} 
             used={creditUsed}
             limit={creditLimit}
             cutoffDays={cutoffDays < 0 ? 30 + cutoffDays : cutoffDays}
@@ -245,7 +245,7 @@ const BothCardSectionCard: React.FC<Props> = ({
                 + Ingreso
               </UIButton>
               <UIButton variant="danger" fullWidth onClick={() => onAdd("expense", section.id, "debit")}>
-                + Gasto
+                - Gasto
               </UIButton>
             </div>
             <UIButton variant="secondary" fullWidth onClick={() =>
@@ -295,7 +295,7 @@ const BothCardSectionCard: React.FC<Props> = ({
             }}
           >
             <UIButton variant="danger" fullWidth onClick={handleAddCreditExpense}>
-              + Gasto
+              - Gasto
             </UIButton>
             <UIButton variant="primary" fullWidth onClick={handlePayCreditCard}>
               Pagar tarjeta
