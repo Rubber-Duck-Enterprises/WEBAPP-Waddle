@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 
 import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
 
 import "./UIBalanceAmount.css";
+
 interface Props {
   amount: number;
   used: number;
@@ -12,39 +13,7 @@ interface Props {
 }
 
 const UICreditInfoSummary: React.FC<Props> = ({ amount, used, limit, cutoffDays, paymentDays }) => {
-  const [displayUsed, setDisplayUsed] = useState(used);
-  const [displayCutoff ] = useState(cutoffDays);
-  const [displayPayment ] = useState(paymentDays);
-
-  const prevUsed = useRef(used);
-
-  const percentUsed = limit > 0 ? Math.round((displayUsed / limit) * 100) : 0;
-
-  const animate = (
-    ref: React.MutableRefObject<number>,
-    target: number,
-    setDisplay: React.Dispatch<React.SetStateAction<number>>
-  ) => {
-    const diff = target - ref.current;
-    if (diff === 0) return;
-    const stepCount = 20;
-    const step = diff / stepCount;
-    let current = ref.current;
-    let i = 0;
-
-    const interval = setInterval(() => {
-      current += step;
-      i++;
-      setDisplay(current);
-      if (i >= stepCount) {
-        clearInterval(interval);
-        setDisplay(target);
-        ref.current = target;
-      }
-    }, 20);
-  };
-
-  useEffect(() => animate(prevUsed, used, setDisplayUsed), [used]);
+  const percentUsed = limit > 0 ? Math.round((used / limit) * 100) : 0;
 
   return (
     <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
@@ -70,8 +39,8 @@ const UICreditInfoSummary: React.FC<Props> = ({ amount, used, limit, cutoffDays,
           gap: "0.5rem",
         }}
       >
-        <div>Días para corte: <strong>{displayCutoff}</strong></div>
-        <div>Días para pago: <strong>{displayPayment}</strong></div>
+        <div>Días para corte: <strong>{cutoffDays}</strong></div>
+        <div>Días para pago: <strong>{paymentDays}</strong></div>
       </div>
     </div>
   );
