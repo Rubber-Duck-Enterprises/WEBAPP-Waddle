@@ -8,13 +8,14 @@ import UIButton from "@/components/UI/UIButton";
 import UIBulletItem from "@/components/UI/UIBulletItem";
 import { useModal } from "@/context/ModalContext";
 import { getEditTaskModal } from "@/components/Modal/Presets/List/EditTaskModal";
+import { getCreateTaskListModal } from "@/components/Modal/Presets/List/CreateTaskListModal";
+import { getDeleteTaskListModal } from "@/components/Modal/Presets/List/DeleteTaskListModal";
 
 const ListHome: React.FC = () => {
   const { tasks, toggleTaskDone, updateTask, deleteTask } = useTaskStore();
-  const { taskLists, deleteTaskList  } = useTaskListStore();
+  const { taskLists, addTaskList, deleteTaskList, activeListId, setActiveListId } = useTaskListStore();
   const { showModal, hideModal } = useModal();
 
-  const [activeListId, setActiveListId] = useState<string | "all">("all");
   const [filter, setFilter] = useState<"all" | "done" | "pending">("pending");
 
   const deleteTasksFromList = (listId: string) => {
@@ -58,16 +59,42 @@ const ListHome: React.FC = () => {
               variant="danger"
               onClick={() => {
                 const list = taskLists.find((l) => l.id === activeListId);
-                if (list && confirm(`¿Eliminar la lista "${list.name}" y todas sus tareas?`)) {
-                  deleteTaskList(list.id);
-                  deleteTasksFromList(list.id);
-                  setActiveListId("all");
-                }
+                if (!list) return;
+
+                showModal(
+                  getDeleteTaskListModal({
+                    listName: list.name,
+                    onClose: hideModal,
+                    onConfirm: () => {
+                      deleteTaskList(list.id);
+                      deleteTasksFromList(list.id);
+                      setActiveListId("all");
+                      hideModal();
+                    },
+                  })
+                );
               }}
             >
               Eliminar
             </UIButton>
           )}
+
+          <UIButton
+            variant="primary"
+            onClick={() => {
+              showModal(
+                getCreateTaskListModal({
+                  onCancel: hideModal,
+                  onConfirm: ({ name, color, icon }) => {
+                    addTaskList({ name, color, icon });
+                    hideModal();
+                  }
+                })
+              );
+            }}
+          >
+            Nueva
+          </UIButton>
         </div>
 
         {/* Filtros */}

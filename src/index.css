@@ -12,6 +12,8 @@
   --text-primary: #000000;
   --text-secondary: #777777;
   --border-color: #ddd;
+  --safe-area-top: 0px;
+  --safe-area-bottom: 0px;
 
   /* App Theme */
   --primary-color: #ffcd00;

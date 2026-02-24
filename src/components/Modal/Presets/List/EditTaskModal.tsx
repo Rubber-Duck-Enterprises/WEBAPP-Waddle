@@ -27,12 +27,7 @@ const EditTaskModal: React.FC<Props> = ({
   const { taskLists, getTagsForList, addTagToList } = useTaskListStore();
 
   const [title, setTitle] = useState(task.title || "");
-  const [dueDate, setDueDate] = useState(task.dueDate || "");
   const [notes, setNotes] = useState(task.notes || "");
-  const [priority, setPriority] = useState(task.priority || "medium");
-  const [repeat, setRepeat] = useState<"daily" | "weekly" | "monthly" | null | undefined>(
-    task.repeat || null
-  );
   const [tags, setTags] = useState((task.tags || []).join(", "));
   const [selectedListId, setSelectedListId] = useState(task.listId || "");
 
@@ -52,12 +47,6 @@ const EditTaskModal: React.FC<Props> = ({
         onChange={(e) => setTitle(e.target.value)}
       />
 
-      <UITextInput
-        type="date"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
-      />
-
       <UITextArea
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
@@ -65,21 +54,8 @@ const EditTaskModal: React.FC<Props> = ({
         rows={3}
       />
 
-      <UISelect value={priority} onChange={(e) => setPriority(e.target.value as any)}>
-        <option value="low">Prioridad baja</option>
-        <option value="medium">Prioridad media</option>
-        <option value="high">Prioridad alta</option>
-      </UISelect>
-
-      <UISelect value={repeat || ""} onChange={(e) => setRepeat(e.target.value as any)}>
-        <option value="">No repetir</option>
-        <option value="daily">Repetir diario</option>
-        <option value="weekly">Repetir semanal</option>
-        <option value="monthly">Repetir mensual</option>
-      </UISelect>
-
       <UITextInput
-        placeholder="Etiquetas separadas por coma"
+        placeholder="Etiquetas"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
         list="tag-suggestions"
@@ -129,11 +105,11 @@ const EditTaskModal: React.FC<Props> = ({
 
                 onConfirm({
                   title: title.trim(),
-                  dueDate: dueDate || undefined,
+                  dueDate: undefined,
                   notes: notes.trim() || undefined,
                   listId: finalListId,
-                  priority,
-                  repeat,
+                  priority: undefined,
+                  repeat: undefined,
                   tags: parsedTags,
                 });
               }

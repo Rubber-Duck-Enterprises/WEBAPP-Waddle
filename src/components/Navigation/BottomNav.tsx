@@ -21,10 +21,9 @@ const BottomNav: React.FC = () => {
         borderTop: "1px solid var(--border-color)",
         background: "var(--background)",
         position: "fixed",
-        bottom: 0,
+        bottom: "var(--safe-area-bottom)",
         width: "100%",
         height: "56px",
-        zIndex: 100,
       }}
     >
       {navItems.map((item) => {

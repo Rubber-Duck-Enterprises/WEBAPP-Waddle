@@ -30,3 +30,28 @@ dist-ssr
 # builds
 dev-dist/
 out/
+
+# Android (Gradle)
+android/.gradle/
+android/build/
+android/app/build/
+android/captures/
+android/.idea/
+android/*.iml
+android/local.properties
+android/.project
+android/.classpath
+android/.settings/
+
+# iOS (Xcode / CocoaPods)
+ios/App/Pods/
+ios/Pods/
+ios/build/
+ios/DerivedData/
+**/*.xcuserdata/
+**/*.xccheckout
+**/*.xcscmblueprint
+
+# Swift Package Manager (si lo usas)
+ios/.build/
+ios/SourcePackages/

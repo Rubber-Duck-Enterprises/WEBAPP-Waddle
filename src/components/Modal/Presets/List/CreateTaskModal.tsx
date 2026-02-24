@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
 
 import UITextInput from "@/components/UI/UITextInput";
@@ -29,22 +29,20 @@ export const getCreateTaskModal = ({ activeListId, onConfirm, onCancel }: Props)
 const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel }) => {
   const { taskLists, addTagToList, getTagsForList, addTaskList } = useTaskListStore();
   const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [repeat, setRepeat] = useState<"daily" | "weekly" | "monthly" | "">("");
   const [tags, setTags] = useState("");
   const [selectedListId, setSelectedListId] = useState("");
 
   const isValid = title.trim().length > 0 && (activeListId !== "all" || selectedListId);
   const finalListId = activeListId === "all" ? selectedListId : activeListId;
   const suggestedTags = getTagsForList(finalListId);
+  const initializedRef = useRef(false);
 
-  // Asegura que exista al menos una lista ("General")
   useEffect(() => {
-    const alreadyExists = taskLists.some((l) => l.name.toLowerCase() === "general");
+    if (initializedRef.current) return;
 
-    if (taskLists.length === 0 || !alreadyExists) {
+    const alreadyExists = taskLists.some((l) => l.name.toLowerCase() === "general");
+    if (!alreadyExists && taskLists.length <= 0) {
       const generalList = {
         id: nanoid(),
         name: "General",
@@ -54,7 +52,9 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
       };
       addTaskList(generalList);
     }
-  }, []);
+
+    initializedRef.current = true;
+  }, [taskLists, addTaskList]);
 
   useEffect(() => {
     if (taskLists.length === 1 && activeListId === "all") {
@@ -64,19 +64,12 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Agregar nueva tarea</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>⭐ Agregar tarea</h3>
 
       <UITextInput
         placeholder="Título de la tarea"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-      />
-
-      <UITextInput
-        type="date"
-        placeholder="Fecha límite (opcional)"
-        value={dueDate}
-        onChange={(e) => setDueDate(e.target.value)}
       />
 
       <UITextArea
@@ -86,30 +79,8 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
         rows={3}
       />
 
-      {/* Prioridad */}
-      <UISelect
-        value={priority}
-        onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high")}
-      >
-        <option value="low">Prioridad baja</option>
-        <option value="medium">Prioridad media</option>
-        <option value="high">Prioridad alta</option>
-      </UISelect>
-
-      {/* Repetición */}
-      <UISelect
-        value={repeat}
-        onChange={(e) => setRepeat(e.target.value as "daily" | "weekly" | "monthly" | "")}
-      >
-        <option value="">No repetir</option>
-        <option value="daily">Repetir diario</option>
-        <option value="weekly">Repetir semanal</option>
-        <option value="monthly">Repetir mensual</option>
-      </UISelect>
-
-      {/* Tags */}
       <UITextInput
-        placeholder="Etiquetas separadas por coma (ej. trabajo, urgente)"
+        placeholder="Etiquetas"
         value={tags}
         onChange={(e) => setTags(e.target.value)}
         list="tag-suggestions"
@@ -149,11 +120,11 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
 
               onConfirm({
                 title: title.trim(),
-                dueDate: dueDate || undefined,
+                dueDate: undefined,
                 notes: notes.trim() || undefined,
                 listId: finalListId,
-                priority,
-                repeat: repeat || null,
+                priority: undefined,
+                repeat: undefined,
                 tags: parsedTags,
               });
             }
