@@ -105,11 +105,8 @@ const EditTaskModal: React.FC<Props> = ({
 
                 onConfirm({
                   title: title.trim(),
-                  dueDate: undefined,
                   notes: notes.trim() || undefined,
                   listId: finalListId,
-                  priority: undefined,
-                  repeat: undefined,
                   tags: parsedTags,
                 });
               }

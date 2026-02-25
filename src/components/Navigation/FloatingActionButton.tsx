@@ -26,17 +26,17 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
             activeListId,
             onCancel: hideModal,
             onConfirm: ({ title, dueDate, notes, listId, priority, repeat, tags }) => {
-              addTask({
-                title,
-                dueDate,
-                notes,
-                listId,
-                priority,
-                repeat,
-                tags,
-              });
-              
-              hideModal();
+              if (title) {
+                addTask({
+                  title,
+                  dueDate,
+                  notes,
+                  listId,
+                  priority,
+                  repeat,
+                  tags,
+                });
+              }
             },
           })
         );}}

@@ -1,24 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
 
+import { Task } from "@/types/index"
 import UITextInput from "@/components/UI/UITextInput";
 import UITextArea from "@/components/UI/UITextArea";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
 
 import { useTaskListStore } from "@/stores/TaskListStore";
+import { useModal } from "@/context/ModalContext";
 
 type Props = {
   activeListId: string | "all";
-  onConfirm: (task: {
-    title: string;
-    dueDate?: string;
-    notes?: string;
-    listId?: string;
-    priority?: "low" | "medium" | "high";
-    repeat?: "daily" | "weekly" | "monthly" | null;
-    tags?: string[];
-  }) => void;
+  onConfirm: (task: Partial<Task>) => void;
   onCancel: () => void;
 };
 
@@ -32,11 +26,23 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState("");
   const [selectedListId, setSelectedListId] = useState("");
+  const [isCreatingMore, setIsCreatingMore] = useState(false);
 
-  const isValid = title.trim().length > 0 && (activeListId !== "all" || selectedListId);
-  const finalListId = activeListId === "all" ? selectedListId : activeListId;
+  const hasList = activeListId !== "all" || selectedListId.trim().length > 0;
+  const isValid = title.trim().length > 0 && hasList;
+  const finalListId = activeListId === "all" ? selectedListId.trim() : activeListId;
   const suggestedTags = getTagsForList(finalListId);
   const initializedRef = useRef(false);
+
+  const { hideModal } = useModal();
+
+  const onToggleMore = () => { setIsCreatingMore(!isCreatingMore) }
+
+  const resetTaskData = () => {
+    setTitle("");
+    setNotes("");
+    setTags("");
+  }
 
   useEffect(() => {
     if (initializedRef.current) return;
@@ -103,16 +109,51 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
         </UISelect>
       )}
 
+      <div
+        style={{
+          alignItems: "center",
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: ".5rem",
+          marginBottom: ".5rem",
+        }}
+      >
+        <label
+          htmlFor="isCreatingMore"
+        >
+          Crear otra
+        </label>
+        <input
+          id="isCreatingMore"
+          style={{
+            width: "18px",
+            height: "18px",
+            cursor: "pointer",
+            accentColor: "var(--primary-color)",
+            opacity: isCreatingMore ? "1" : ".5",
+          }}
+          type="checkbox" 
+          checked={isCreatingMore} 
+          onChange={onToggleMore} 
+        />
+      </div>
+
       {/* Botones */}
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
         <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
         <UIButton
           onClick={() => {
-            if (isValid) {
+            const cleanTitle = title.trim();
+            const cleanListId = finalListId?.trim();
+
+            if (!cleanTitle) return;
+            if (!cleanListId) return; 
+
+            try {
               const parsedTags = tags
-                .split(",")
-                .map((t) => t.trim())
-                .filter(Boolean);
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean);
 
               parsedTags.forEach((name) => {
                 addTagToList(finalListId, { id: nanoid(), name });
@@ -120,13 +161,20 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
 
               onConfirm({
                 title: title.trim(),
-                dueDate: undefined,
                 notes: notes.trim() || undefined,
                 listId: finalListId,
-                priority: undefined,
-                repeat: undefined,
                 tags: parsedTags,
+                createdAt: new Date().toISOString(),
               });
+
+              resetTaskData();
+
+              if (!isCreatingMore) { 
+                console.log("💩 Cerrando alerta desde adentro", isCreatingMore);
+                hideModal();
+              }
+            } catch (error) {
+              console.log("Error al crear tarea", error);
             }
           }}
           disabled={!isValid}
