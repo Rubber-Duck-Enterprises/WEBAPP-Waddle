@@ -19,15 +19,15 @@ const CreateTaskListModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
   const [customColor, setCustomColor] = useState("");
   const [customEmoji, setCustomEmoji] = useState("");
 
-  const colorOptions = ["#2196f3", "#4caf50", "#e91e63", "#ff9800", "#9c27b0"];
-  const emojiOptions = ["✅", "📋", "📝", "🎯", "🗓️", "💼", "🔖"];
+  const colorOptions = ["#2196f3", "#4caf50", "#e91e63", "#9c27b0"];
+  const emojiOptions = ["✅", "📋", "🎯", "🗓️"];
 
   const effectiveColor = customColor || color;
   const effectiveEmoji = customEmoji || icon;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Crear nueva lista</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>⭐ Crear lista</h3>
       
       {/* 📝 Nombre de la lista */}
       <UITextInput

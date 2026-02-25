@@ -26,7 +26,7 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "0.75rem",
+        gap: "1.25rem",
         background: backgroundColor,
         padding: "0.75rem 1rem",
         borderRadius: "8px",
@@ -36,7 +36,18 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
         overflowY: "hidden",
       }}
     >
-      <input type="checkbox" checked={task.isDone} onChange={onToggleDone} />
+      <input
+        style={{
+          width: "18px",
+          height: "18px",
+          cursor: "pointer",
+          accentColor: baseColor,
+          opacity: task.isDone ? "1" : ".5",
+        }}
+        type="checkbox" 
+        checked={task.isDone} 
+        onChange={onToggleDone} 
+      />
 
       <div style={{ flex: 1 }}>
         <p
@@ -45,9 +56,22 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
             marginBottom: "8px",
             textDecoration: task.isDone ? "line-through" : "none",
             color: task.isDone ? "var(--text-secondary)" : "var(--text-primary)",
+            fontWeight: "800",
           }}
         >
           {task.title}
+        </p>
+
+        <p
+          style={{
+            margin: 0,
+            marginBottom: "8px",
+            textDecoration: task.isDone ? "line-through" : "none",
+            color: "var(--text-secondary)",
+            fontSize: ".8rem",
+          }}
+        >
+          {task.notes}
         </p>
 
         <div
@@ -59,17 +83,6 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
             color: "var(--text-secondary)",
           }}
         >
-          {task.dueDate && <span>📅 {new Date(task.dueDate).toLocaleDateString()}</span>}
-          {task.priority && (
-            <span>
-              ⚠️ {{
-                low: "Baja",
-                medium: "Media",
-                high: "Alta",
-              }[task.priority]}
-            </span>
-          )}
-          {task.repeat && <span>🔁 {task.repeat}</span>}
           {task.tags && task.tags.length > 0 && <span>🏷️ {task.tags.join(", ")}</span>}
           {list && <span>{list.icon || "📁"} {list.name}</span>}
         </div>

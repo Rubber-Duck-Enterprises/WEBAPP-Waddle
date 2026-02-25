@@ -15,7 +15,7 @@ const ListLayout: React.FC<{ children: React.ReactNode; activeListId: string | "
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw" }}>
       <Header onOpenMenu={() => setDrawerOpen(true)} />
 
-      <main style={{ flex: 1, overflowY: "auto", paddingBottom: "56px" }}>
+      <main style={{ flex: 1, overflowY: "auto" }}>
         <motion.div
           key="page-content"
           initial={{ opacity: 0, x: 30 }}

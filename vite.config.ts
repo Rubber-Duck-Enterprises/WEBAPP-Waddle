@@ -50,9 +50,6 @@ export default defineConfig({
     }),
   ],
   base: '/',
-  build: {
-    outDir: 'out',
-  },
   server: {
     allowedHosts: ['.ngrok-free.app'],
   },

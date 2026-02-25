@@ -58,6 +58,8 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
           transition: "left 0.3s ease-in-out, background-color 0.3s ease-in-out",
           zIndex: 1000,
           padding: "1rem",
+          paddingTop: "calc(1rem + var(--safe-area-top))",
+          paddingBottom: "calc(1rem + var(--safe-area-bottom))",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
