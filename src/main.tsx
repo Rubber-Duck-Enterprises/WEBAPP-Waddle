@@ -4,7 +4,9 @@ import { registerSW } from 'virtual:pwa-register';
 
 import App from '@/App.tsx';
 import Modal from '@/components/Modal';
+import PopUp from './components/PopUp';
 import { ModalProvider } from '@/context/ModalContext';
+import { PopUpProvider } from './context/PopUpContext';
 
 import { Capacitor } from '@capacitor/core';
 import { SafeArea } from 'capacitor-plugin-safe-area';
@@ -39,8 +41,11 @@ registerSW({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ModalProvider>
+    <PopUpProvider>
       <App />
       <Modal />
+      <PopUp />
+    </PopUpProvider>
     </ModalProvider>
   </StrictMode>
 );
