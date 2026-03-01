@@ -2,8 +2,11 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import NotificationsInitializer from "./components/Modal/NotificationsInitializer";
+import { AuthProvider } from "@/context/AuthContext";
+import { RequireAuth } from "@/guards/RequireAuth";
 
 // Paginas
+import Login from "@/pages/Auth/Login";
 import StartRedirect from "@/pages/StartRedirect";
 import WalletHome from "@/pages/Wallet/Home";
 import Sections from "@/pages/Wallet/Sections";
@@ -23,19 +26,48 @@ const AnimatedRoutes = () => {
       <Routes location={location} key={location.pathname}>
         {/* Redirect to Start Page */}
         <Route path="/" element={<StartRedirect />} />
+        <Route path="/login" element={<Login />} />
 
         {/* Wallet Routes */}
-        <Route path="/wallet" element={<WalletHome />} />
-        <Route path="/wallet/sections" element={<Sections />} />
-        <Route path="/wallet/movements" element={<Movements />} />
+        <Route path="/wallet" element={
+          <RequireAuth>
+            <WalletHome />
+          </RequireAuth>
+        }/>
+        <Route path="/wallet/sections" element={
+          <RequireAuth>
+            <Sections />
+          </RequireAuth>
+        }/>
+        <Route path="/wallet/movements" element={
+          <RequireAuth>
+            <Movements />
+          </RequireAuth>
+        }/>
 
         {/* List Routes */}
-        <Route path="/list" element={<ListHome />} />
+        <Route path="/list" element={
+          <RequireAuth>
+            <ListHome />
+          </RequireAuth>
+        } />
 
         {/* Other Routes */}
-        <Route path="/backups" element={<Backups />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/backups" element={
+          <RequireAuth>
+            <Backups />
+          </RequireAuth>
+        } />
+        <Route path="/settings" element={
+          <RequireAuth>
+            <Settings />
+          </RequireAuth>
+        } />
+        <Route path="/about" element={
+          <RequireAuth>
+            <About />
+          </RequireAuth>
+        } />
 
         {/* Catch-all Route */}
         <Route path="*" element={<StartRedirect />} />
@@ -50,8 +82,10 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <NotificationsInitializer />
-      <AnimatedRoutes />
+      <AuthProvider>
+        <NotificationsInitializer />
+        <AnimatedRoutes />
+      </AuthProvider>
     </Router>
   );
 };

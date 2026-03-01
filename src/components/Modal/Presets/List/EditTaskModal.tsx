@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { nanoid } from "nanoid";
 import { Task } from "@/types";
-import { useTaskListStore } from "@/stores/TaskListStore";
+import { useTaskListStore } from "@/stores/taskListStore";
 import UITextInput from "@/components/UI/UITextInput";
 import UITextArea from "@/components/UI/UITextArea";
 import UISelect from "@/components/UI/UISelect";

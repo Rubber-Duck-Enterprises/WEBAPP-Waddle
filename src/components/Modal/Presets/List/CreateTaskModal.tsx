@@ -7,8 +7,9 @@ import UITextArea from "@/components/UI/UITextArea";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
 
-import { useTaskListStore } from "@/stores/TaskListStore";
+import { useTaskListStore } from "@/stores/taskListStore";
 import { useModal } from "@/context/ModalContext";
+import { usePopUp } from "@/context/PopUpContext";
 
 type Props = {
   activeListId: string | "all";
@@ -28,13 +29,12 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
   const [selectedListId, setSelectedListId] = useState("");
   const [isCreatingMore, setIsCreatingMore] = useState(false);
 
-  const hasList = activeListId !== "all" || selectedListId.trim().length > 0;
-  const isValid = title.trim().length > 0 && hasList;
   const finalListId = activeListId === "all" ? selectedListId.trim() : activeListId;
   const suggestedTags = getTagsForList(finalListId);
   const initializedRef = useRef(false);
 
   const { hideModal } = useModal();
+  const { showPopUp } = usePopUp();
 
   const onToggleMore = () => { setIsCreatingMore(!isCreatingMore) }
 
@@ -146,8 +146,14 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
             const cleanTitle = title.trim();
             const cleanListId = finalListId?.trim();
 
-            if (!cleanTitle) return;
-            if (!cleanListId) return; 
+            if (!cleanTitle) {
+              showPopUp("DANGER", "Revisa el titulo de la tarea.");
+              return
+            };
+            if (!cleanListId) {
+              showPopUp("DANGER", "Selecciona una lista.");
+              return
+            }; 
 
             try {
               const parsedTags = tags
@@ -168,16 +174,16 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
               });
 
               resetTaskData();
+              showPopUp("SUCCESS", "Tarea creada!");
 
               if (!isCreatingMore) { 
-                console.log("💩 Cerrando alerta desde adentro", isCreatingMore);
                 hideModal();
               }
             } catch (error) {
-              console.log("Error al crear tarea", error);
+              showPopUp("DANGER", "Error al crear tarea.");
+              console.log("CreateTaskModal - Error al crear tarea", error);
             }
           }}
-          disabled={!isValid}
           variant="primary"
         >
           Crear

@@ -17,7 +17,7 @@ const NotificationsRequestModal: React.FC<Props> = ({ onClose }) => {
         const {
           requestPermissionAndToken,
           saveNotificationSettingsToFirestore,
-        } = await import("@/firebase");
+        } = await import("@/lib/firebase");
 
         const token = await requestPermissionAndToken();
 

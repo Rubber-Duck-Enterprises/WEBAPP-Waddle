@@ -6,7 +6,7 @@ import { FiPlus } from "react-icons/fi";
 import { useModal } from "@/context/ModalContext";
 import { getCreateTaskModal } from "@/components/Modal/Presets/List/CreateTaskModal";
 
-import { useTaskStore } from "@/stores/TaskStore";
+import { useTaskStore } from "@/stores/taskStore";
 
 type Props = {
   activeListId: string | "all";
