@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import UITextInput from "@/components/UI/UITextInput";
 import UIButton from "@/components/UI/UIButton";
 
+import { usePopUp } from "@/context/PopUpContext";
+
 type Props = {
   onConfirm: (config: { name: string; color: string; icon: string }) => void;
   onCancel: () => void;
@@ -24,6 +26,8 @@ const CreateTaskListModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
 
   const effectiveColor = customColor || color;
   const effectiveEmoji = customEmoji || icon;
+
+  const { showPopUp } = usePopUp();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -117,11 +121,19 @@ const CreateTaskListModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
         </UIButton>
         <UIButton
           onClick={() => {
-            if (name.trim()) {
+            try {
+              if (!name) {
+                showPopUp("DANGER", "Revisa el nombre de la lista.");
+                return;
+              }
+              
               onConfirm({ name: name.trim(), color: effectiveColor, icon: effectiveEmoji });
+              showPopUp("SUCCESS", "Lista creada!");
+            } catch (error) {
+              showPopUp("DANGER", "Error al crear lista.");
+              console.error("CreateTaskListModal - Error al crear lista.", error);
             }
           }}
-          disabled={!name.trim()}
           variant="primary"
         >
           Crear

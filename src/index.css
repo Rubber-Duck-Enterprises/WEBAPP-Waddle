@@ -24,6 +24,9 @@
   --success-bg: #4caf501a;
   --danger-bg: #f443361a;
   --information-bg: #2196f31a;
+  --success-bg-popup: #4caf4f36;
+  --danger-bg-popup: #f4433636;
+  --information-bg-popup: #2196f336;
 
   /* UI Components */
   --btn-default-bg: #ccc;

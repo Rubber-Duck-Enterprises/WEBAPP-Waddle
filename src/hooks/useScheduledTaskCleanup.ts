@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useTaskStore } from "@/stores/TaskStore";
+import { useTaskStore } from "@/stores/taskStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useScheduledTaskCleanup = () => {

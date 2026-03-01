@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useTaskStore } from "@/stores/TaskStore";
-import { useTaskListStore } from "@/stores/TaskListStore";
+import { useTaskStore } from "@/stores/taskStore";
+import { useTaskListStore } from "@/stores/taskListStore";
 
 import ListLayout from "@/layouts/ListLayout";
 import TaskListGroup from "@/components/ToolList/Home/TaskListGroup";
+import FloatingActionButton from "@/components/Navigation/FloatingActionButton";
 import UIButton from "@/components/UI/UIButton";
 import UIBulletItem from "@/components/UI/UIBulletItem";
 import { useModal } from "@/context/ModalContext";
@@ -25,7 +26,7 @@ const ListHome: React.FC = () => {
   };
 
   return (
-    <ListLayout activeListId={activeListId}>
+    <ListLayout>
       <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Select de listas */}
         <div
@@ -152,6 +153,7 @@ const ListHome: React.FC = () => {
           }}
         />
       </div>
+      <FloatingActionButton activeListId={activeListId} />
     </ListLayout>
   );
 };

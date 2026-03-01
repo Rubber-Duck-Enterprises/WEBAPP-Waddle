@@ -1,0 +1,17 @@
+{
+  "entry": [
+    "index.html",
+    "src/main.tsx",
+    "src/main.ts",
+    "src/App.tsx",
+    "vite.config.*",
+    "capacitor.config.*"
+  ],
+  "project": ["src/**/*.{ts,tsx,js,jsx}"],
+  "ignore": [
+    "ios/**",
+    "android/**",
+    "public/sw.js",
+    "public/firebase-messaging-sw.js"
+  ]
+}

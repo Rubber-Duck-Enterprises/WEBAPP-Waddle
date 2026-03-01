@@ -12,10 +12,10 @@ import { useModal } from "@/context/ModalContext";
 import { getSavedSettingsModal } from "@/components/Modal/Presets/System/SavedSettingsModal";
 import { getTasksDeletedModal } from "@/components/Modal/Presets/List/TasksDeletedModal";
 
-import { useTheme } from "../hooks/useTheme";
-import { useSettingsStore } from "../stores/settingsStore";
-import { useTaskStore } from "../stores/TaskStore";
-import { signInWithGoogle, saveBackupToCloud } from "../firebase";
+import { useTheme } from "@/hooks/useTheme";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { useTaskStore } from "@/stores/taskStore";
+import { signInWithGoogle, saveBackupToCloud } from "@/lib/firebase";
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ const Settings: React.FC = () => {
   };
 
   const requestNotificationAccess = async () => {
-    const { requestPermissionAndToken } = await import("../firebase");
+    const { requestPermissionAndToken } = await import("@/lib/firebase");
     const token = await requestPermissionAndToken();
     
     setNotificationPermission(Notification.permission);
@@ -180,7 +180,7 @@ const Settings: React.FC = () => {
             <UIButton
               variant="secondary"
               onClick={async () => {
-                const { requestPermissionAndToken } = await import("../firebase");
+                const { requestPermissionAndToken } = await import("@/lib/firebase");
                 const token = await requestPermissionAndToken();
                 if (token) {
                   await navigator.clipboard.writeText(token);
@@ -394,7 +394,7 @@ const Settings: React.FC = () => {
                   cursor: "pointer",
                 }}
                 onClick={async () => {
-                  const { requestPermissionAndToken, saveNotificationSettingsToFirestore } = await import("../firebase");
+                  const { requestPermissionAndToken, saveNotificationSettingsToFirestore } = await import("@/lib/firebase");
 
                   const token = await requestPermissionAndToken();
                   const user = await signInWithGoogle();
@@ -424,8 +424,6 @@ const Settings: React.FC = () => {
                 <UIButton
                   variant="danger"
                   onClick={async () => {
-                    const { signOutAndRestoreAnonymous } = await import("../firebase");
-                    await signOutAndRestoreAnonymous();
                     alert("🔌 Sesión cerrada y restaurado como anónimo.");
                   }}
                 >

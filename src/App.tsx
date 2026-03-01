@@ -25,17 +25,31 @@ const AnimatedRoutes = () => {
         <Route path="/" element={<StartRedirect />} />
 
         {/* Wallet Routes */}
-        <Route path="/wallet" element={<WalletHome />} />
-        <Route path="/wallet/sections" element={<Sections />} />
-        <Route path="/wallet/movements" element={<Movements />} />
+        <Route path="/wallet" element={
+            <WalletHome />
+        }/>
+        <Route path="/wallet/sections" element={
+            <Sections />
+        }/>
+        <Route path="/wallet/movements" element={
+            <Movements />
+        }/>
 
         {/* List Routes */}
-        <Route path="/list" element={<ListHome />} />
+        <Route path="/list" element={
+            <ListHome />
+        } />
 
         {/* Other Routes */}
-        <Route path="/backups" element={<Backups />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/backups" element={
+            <Backups />
+        } />
+        <Route path="/settings" element={
+            <Settings />
+        } />
+        <Route path="/about" element={
+            <About />
+        } />
 
         {/* Catch-all Route */}
         <Route path="*" element={<StartRedirect />} />
