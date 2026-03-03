@@ -53,7 +53,7 @@ const TransferFundsModal: React.FC<Props> = ({ fromSection, onCancel, onConfirm 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3>Transferir desde {fromSection.icon || "📁"} {fromSection.name}</h3>
+      <h3>🛫 Transferir desde {fromSection.icon || "📁"} {fromSection.name}</h3>
 
       <div style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>
         Saldo disponible: ${balanceAvailable.toLocaleString()}

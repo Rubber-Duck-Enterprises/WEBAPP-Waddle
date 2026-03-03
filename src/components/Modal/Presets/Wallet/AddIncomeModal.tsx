@@ -18,12 +18,12 @@ export const getAddIncomeModal = (props: Props) => <AddIncomeModal {...props} />
 
 const AddIncomeModal: React.FC<Props> = ({ sectionId = "general", onConfirm, onCancel }) => {
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Agregar ingreso</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>🤑 Agregar ingreso</h3>
 
       <UITextInput
         placeholder="Descripción"
@@ -35,7 +35,7 @@ const AddIncomeModal: React.FC<Props> = ({ sectionId = "general", onConfirm, onC
         type="number"
         placeholder="Monto"
         value={amount}
-        onChange={(e) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(e.target.value)}
         min={0.01}
         step={0.01}
       />
@@ -50,11 +50,11 @@ const AddIncomeModal: React.FC<Props> = ({ sectionId = "general", onConfirm, onC
         <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
         <UIButton
           variant="primary"
-          disabled={!description || amount <= 0}
+          disabled={!description || Number(amount) <= 0}
           onClick={() =>
             onConfirm({
               description,
-              amount: Math.abs(amount),
+              amount: Math.abs(Number(amount)),
               notes,
               category: sectionId,
             })

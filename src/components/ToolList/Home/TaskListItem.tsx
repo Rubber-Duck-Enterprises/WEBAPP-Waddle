@@ -98,7 +98,7 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
             color: "var(--text-secondary)",
             cursor: "pointer",
           }}
-          aria-label="Editar tarea"
+          aria-label=" ✏️ Editar tarea"
         >
           <FiEdit size={24} />
         </button>

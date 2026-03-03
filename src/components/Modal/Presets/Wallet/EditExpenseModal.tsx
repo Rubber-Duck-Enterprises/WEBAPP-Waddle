@@ -14,7 +14,9 @@ interface Props {
 
 const EditExpenseModal: React.FC<Props> = ({ expense, sections, onCancel, onConfirm }) => {
   const [description, setDescription] = useState(expense.description);
-  const [amount, setAmount] = useState(Math.abs(expense.amount));
+  const [amount, setAmount] = useState(
+    expense.amount ? String(Math.abs(expense.amount)) : ""
+  );
   const [notes, setNotes] = useState(expense.notes || "");
   const [category, setCategory] = useState(expense.category);
   const [type, setType] = useState<"income" | "expense">(expense.amount >= 0 ? "income" : "expense");
@@ -23,7 +25,7 @@ const EditExpenseModal: React.FC<Props> = ({ expense, sections, onCancel, onConf
   const handleSubmit = () => {
     onConfirm({
       description,
-      amount: type === "expense" ? -Math.abs(amount) : Math.abs(amount),
+      amount: type === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount)),
       notes,
       category,
       date: new Date(date).toISOString(),
@@ -32,7 +34,7 @@ const EditExpenseModal: React.FC<Props> = ({ expense, sections, onCancel, onConf
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3>Editar movimiento</h3>
+      <h3>✏️ Editar movimiento</h3>
 
       <UITextInput
         placeholder="Descripción"
@@ -44,7 +46,9 @@ const EditExpenseModal: React.FC<Props> = ({ expense, sections, onCancel, onConf
         type="number"
         placeholder="Monto"
         value={amount}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(Number(e.target.value))}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setAmount(e.target.value)
+        }
       />
 
       <UISelect

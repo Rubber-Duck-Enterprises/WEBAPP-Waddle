@@ -3,7 +3,6 @@ import { parseISO, isWithinInterval } from "date-fns";
 import { Section, Expense } from "@/types";
 
 import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
-import UIIncomeExpenseSummary from "@/components/UI/UIIncomeExpenseSummary";
 import TransactionList from "@/components/ToolWallet/Home/TransactionList";
 import UIButton from "@/components/UI/UIButton";
 
@@ -57,7 +56,6 @@ const PassiveSectionCard: React.FC<Props> = ({
       </h2>
 
       <UIBalanceAmount amount={balance} />
-      <UIIncomeExpenseSummary income={income} totalExpenses={totalExpenses} />
       <TransactionList latest={latest} sections={[]} />
 
       <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
