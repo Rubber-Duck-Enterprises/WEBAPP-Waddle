@@ -39,7 +39,7 @@ const EditTaskModal: React.FC<Props> = ({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Editar tarea</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>✏️ Editar tarea</h3>
 
       <UITextInput
         placeholder="Título de la tarea"

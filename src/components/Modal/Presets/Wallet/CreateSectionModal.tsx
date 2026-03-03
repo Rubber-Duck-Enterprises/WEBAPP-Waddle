@@ -30,7 +30,7 @@ export const getCreateSectionModal = ({ name, onConfirm, onCancel, goToSettings 
   return <CreateSectionModal name={name} onConfirm={onConfirm} onCancel={onCancel} goToSettings={goToSettings} />;
 };
 
-const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSettings }) => {
+const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
   const { favouriteColors, favouriteEmojis } = useSettingsStore();
 
   const [goal, setGoal] = useState<number | null>(null);
@@ -49,7 +49,7 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSe
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Configurar nuevo apartado</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>⭐ Crear apartado.</h3>
       <p style={{ color: "var(--text-secondary)" }}>
         Nombre: <strong>{name}</strong>
       </p>
@@ -58,7 +58,7 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSe
       <UISelect value={type} onChange={(e) => setType(e.target.value as SectionType)}>
         <option value="standard">Estándar</option>
         <option value="passive">Pasivo (solo gastos)</option>
-        <option value="card">Tarjeta</option>
+        {/* <option value="card">Tarjeta</option> */}
         <option value="savings">Ahorro</option>
       </UISelect>
 
@@ -170,14 +170,15 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSe
             ))}
           </div>
 
-          {/* Botón para ir a configuración */}
-          <UIButton
-            onClick={goToSettings}
-            style={{ minWidth: "36px", minHeight: "36px", padding: 0 }}
-            variant="secondary"
-          >
-            <FiPlus size={16} />
-          </UIButton>
+          {/* Input para poner emoji personalizado*/}
+          <UITextInput
+            type="text"
+            maxLength={2}
+            placeholder="👋"
+            value={customEmoji}
+            onChange={(e) => setCustomEmoji(e.target.value)}
+            style={{ width: "60px", textAlign: "center", fontSize: "1.5rem" }}
+          />
         </div>
       </div>
 

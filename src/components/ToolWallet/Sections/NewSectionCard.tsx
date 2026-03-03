@@ -17,7 +17,7 @@ const NewSectionCard: React.FC<Props> = ({ name, onChange, onCreate }) => (
       boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     }}
   >
-    <h3 style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>Nuevo apartado</h3>
+    <h3 style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>⭐ Nuevo apartado</h3>
     <div style={{ display: "flex", gap: "0.5rem" }}>
       <div style={{ flex: 1 }}>
         <UITextInput
