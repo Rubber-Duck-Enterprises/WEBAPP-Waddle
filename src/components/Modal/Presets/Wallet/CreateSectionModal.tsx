@@ -30,7 +30,7 @@ export const getCreateSectionModal = ({ name, onConfirm, onCancel, goToSettings 
   return <CreateSectionModal name={name} onConfirm={onConfirm} onCancel={onCancel} goToSettings={goToSettings} />;
 };
 
-const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSettings }) => {
+const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
   const { favouriteColors, favouriteEmojis } = useSettingsStore();
 
   const [goal, setGoal] = useState<number | null>(null);
@@ -49,7 +49,7 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel, goToSe
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>⭐ Crear apartado</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>⭐ Crear apartado.</h3>
       <p style={{ color: "var(--text-secondary)" }}>
         Nombre: <strong>{name}</strong>
       </p>
