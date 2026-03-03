@@ -65,7 +65,7 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Editar apartado</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>✏️ Editar apartado</h3>
       <p style={{ color: "var(--text-secondary)" }}>
         Nombre: <strong>{name}</strong>
       </p>

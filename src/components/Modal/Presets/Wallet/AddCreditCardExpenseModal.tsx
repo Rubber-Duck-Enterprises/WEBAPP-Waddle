@@ -31,11 +31,11 @@ const AddCreditCardExpenseModal: React.FC<Props> = ({
   onCancel,
   onConfirm,
 }) => {
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
 
-  const isValid = amount > 0 && amount <= available && description.trim() !== "";
+  const isValid = Number(amount) > 0 && Number(amount) <= available && description.trim() !== "";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -54,7 +54,7 @@ const AddCreditCardExpenseModal: React.FC<Props> = ({
         min={0.01}
         max={available}
         step={0.01}
-        onChange={(e) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(e.target.value)}
       />
 
       <UITextInput
@@ -74,7 +74,7 @@ const AddCreditCardExpenseModal: React.FC<Props> = ({
         <UIButton
           variant="danger"
           disabled={!isValid}
-          onClick={() => onConfirm({ amount, description, notes })}
+          onClick={() => onConfirm({ amount: Number(amount), description, notes })}
         >
           Agregar gasto
         </UIButton>

@@ -22,7 +22,7 @@ const Sections: React.FC = () => {
     if (!name.trim()) {
       showModal(
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <h3>Campo vacío</h3>
+          <h3>👀 Campo vacío</h3>
           <p>Por favor escribe un nombre antes de crear el apartado.</p>
           <UIButton 
             onClick={hideModal} 

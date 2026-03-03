@@ -22,7 +22,7 @@ export const getPayCreditCardModal = ({ section, onCancel, onConfirm }: Props) =
 const PayCreditCardModal: React.FC<Props> = ({ section, onCancel, onConfirm }) => {
   const { sections } = useSectionStore();
   const [sourceId, setSourceId] = useState("");
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
 
   const availableSources = sections.filter(
@@ -48,7 +48,7 @@ const PayCreditCardModal: React.FC<Props> = ({ section, onCancel, onConfirm }) =
         type="number"
         placeholder="Monto"
         value={amount}
-        onChange={(e) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(e.target.value)}
         min={0.01}
         step={0.01}
       />
@@ -63,8 +63,8 @@ const PayCreditCardModal: React.FC<Props> = ({ section, onCancel, onConfirm }) =
         <UIButton variant="default" onClick={onCancel}>Cancelar</UIButton>
         <UIButton
           variant="primary"
-          disabled={!sourceId || amount <= 0}
-          onClick={() => onConfirm({ sourceId, amount, notes })}
+          disabled={!sourceId || Number(amount) <= 0}
+          onClick={() => onConfirm({ sourceId, amount : Number(amount), notes })}
         >
           Confirmar pago
         </UIButton>

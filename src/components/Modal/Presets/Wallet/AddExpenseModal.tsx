@@ -27,7 +27,7 @@ const AddExpenseModal: React.FC<Props> = ({
   const { sections } = useSectionStore();
 
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
   const [source, setSource] = useState<string>("");
   const [paymentMode, setPaymentMode] = useState<"credit" | "debit">("debit");
@@ -39,7 +39,7 @@ const AddExpenseModal: React.FC<Props> = ({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3 style={{ color: "var(--text-primary)" }}>Agregar gasto</h3>
+      <h3 style={{ color: "var(--text-primary)" }}>💸 Agregar gasto</h3>
 
       <UITextInput
         placeholder="Descripción"
@@ -51,7 +51,7 @@ const AddExpenseModal: React.FC<Props> = ({
         type="number"
         placeholder="Monto"
         value={amount}
-        onChange={(e) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(e.target.value)}
         min={0.01}
         step={0.01}
       />
@@ -90,11 +90,11 @@ const AddExpenseModal: React.FC<Props> = ({
         <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
         <UIButton
           variant="primary"
-          disabled={!description || amount <= 0 || (needsSource && !source)}
+          disabled={!description || Number(amount) <= 0 || (needsSource && !source)}
           onClick={() =>
             onConfirm({
               description,
-              amount: -Math.abs(amount),
+              amount: -Math.abs(Number(amount)),
               source: needsSource ? source : undefined,
               notes: `${notes}${isBothCard ? ` [modo: ${paymentMode}]` : ""}`,
             })
