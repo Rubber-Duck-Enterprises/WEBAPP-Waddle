@@ -58,7 +58,7 @@ const Sections: React.FC = () => {
         updateSection(section.id, { goal: null });
       }
     });
-  }, []);
+  }, []); // 💩 BORRAR 15/04/2026
 
   return (
     <WalletLayout>
