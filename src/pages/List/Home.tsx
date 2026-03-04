@@ -26,7 +26,7 @@ const ListHome: React.FC = () => {
   };
 
   return (
-    <ListLayout>
+    <ListLayout floating={<FloatingActionButton activeListId={activeListId} />}>
       <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Select de listas */}
         <div
@@ -153,7 +153,6 @@ const ListHome: React.FC = () => {
           }}
         />
       </div>
-      <FloatingActionButton activeListId={activeListId} />
     </ListLayout>
   );
 };
