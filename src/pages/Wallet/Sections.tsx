@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useModal } from "@/context/ModalContext";
@@ -51,6 +51,14 @@ const Sections: React.FC = () => {
       })
     );
   };
+
+  useEffect(() => {
+    sections.forEach(section => {
+      if (section.goal === 0) {
+        updateSection(section.id, { goal: null });
+      }
+    });
+  }, []);
 
   return (
     <WalletLayout>

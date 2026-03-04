@@ -29,7 +29,7 @@ const SectionItem: React.FC<Props> = ({ section, onEdit, onDelete }) => (
         <h4 style={{ margin: 0, color: "var(--text-primary)" }}>{section.name}</h4>
         
         {
-          section.goal && (
+          section.goal && section.goal > 0 && (
             <small style={{ color: "var(--text-secondary)" }}>
               {section.goal ? `🎯 Meta: $${section.goal.toLocaleString()}` : "Sin meta"}
             </small>
