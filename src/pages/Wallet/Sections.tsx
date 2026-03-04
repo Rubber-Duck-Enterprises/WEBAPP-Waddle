@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useModal } from "@/context/ModalContext";
@@ -52,6 +52,14 @@ const Sections: React.FC = () => {
     );
   };
 
+  useEffect(() => {
+    sections.forEach(section => {
+      if (section.goal === 0) {
+        updateSection(section.id, { goal: null });
+      }
+    });
+  }, []); // 💩 BORRAR 15/04/2026
+
   return (
     <WalletLayout>
       <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -66,7 +74,7 @@ const Sections: React.FC = () => {
                   getEditSectionModal({
                     name: section.name,
                     initialValues: {
-                      goal: section.goal || 0,
+                      goal: section.goal || null,
                       color: section.color || "",
                       icon: section.icon || "",
                       type: section.type || "standard",

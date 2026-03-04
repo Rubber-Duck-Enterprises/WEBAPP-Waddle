@@ -27,9 +27,14 @@ const SectionItem: React.FC<Props> = ({ section, onEdit, onDelete }) => (
       <div style={{ fontSize: "2rem" }}>{section.icon || "📁"}</div>
       <div>
         <h4 style={{ margin: 0, color: "var(--text-primary)" }}>{section.name}</h4>
-        <small style={{ color: "var(--text-secondary)" }}>
-          {section.goal ? `🎯 Meta: $${section.goal.toLocaleString()}` : "Sin meta"}
-        </small>
+        
+        {
+          section.goal && section.goal > 0 && (
+            <small style={{ color: "var(--text-secondary)" }}>
+              {section.goal ? `🎯 Meta: $${section.goal.toLocaleString()}` : "Sin meta"}
+            </small>
+          )
+        }
       </div>
     </div>
     <div style={{ display: "flex", gap: "0.5rem" }}>

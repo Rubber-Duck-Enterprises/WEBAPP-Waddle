@@ -7,6 +7,7 @@ import { useSectionStore } from "@/stores/sectionStore";
 import MovementItem from "@/components/ToolWallet/Movements/MovementItem";
 import TransferItem from "@/components/ToolWallet/Movements/TransferItem";
 import EditExpenseModal from "@/components/Modal/Presets/Wallet/EditExpenseModal";
+import { getConfirmDeleteMovmentModal } from "@/components/Modal/Presets/Wallet/ConfirmDeleteMovmentModal";
 
 import WalletLayout from "@/layouts/WalletLayout";
 
@@ -24,9 +25,15 @@ const Movements: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("¿Estás seguro de eliminar este movimiento?")) {
-      deleteExpense(id);
-    }
+    showModal(
+      getConfirmDeleteMovmentModal({
+        onCancel: hideModal,
+        onConfirm: () => {
+          deleteExpense(id);
+          hideModal();
+        },
+      })
+    );
   };
 
   const handleEdit = (expenseToEdit: Expense) => {

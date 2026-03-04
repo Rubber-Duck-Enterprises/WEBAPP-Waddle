@@ -48,8 +48,8 @@ const DebitCardSectionCard: React.FC<Props> = ({
     .reduce((acc, e) => acc + e.amount, 0);
 
   const balance = income + totalExpenses;
-  const goal = section.goal || 0;
-  const progress = goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
+  const goal = section.goal || null;
+  const progress = goal && goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
 
   const latest = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
 
@@ -95,7 +95,7 @@ const DebitCardSectionCard: React.FC<Props> = ({
         {section.icon || "💳"} {section.name}
       </h2>
 
-      {goal > 0 && (
+      {goal && goal > 0 && (
         <>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
             <span style={{ fontSize: "0.85rem" }}>Progreso</span>

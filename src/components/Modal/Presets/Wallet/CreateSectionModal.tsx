@@ -16,7 +16,7 @@ import {
 type Props = {
   name: string;
   onConfirm: (config: {
-    goal: number;
+    goal: number | null;
     color: string;
     icon: string;
     type: SectionType;
@@ -275,7 +275,7 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
         <UIButton
           onClick={() =>
             onConfirm({
-              goal: goal ?? 0,
+              goal: goal ?? null,
               color: effectiveColor,
               icon: effectiveEmoji,
               type,

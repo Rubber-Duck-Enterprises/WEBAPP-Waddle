@@ -6,7 +6,7 @@ export type ExpenseKind = "expense" | "income" | "debt" | "payment";
 export type Section = {
   id: string;
   name: string;
-  goal?: number;
+  goal?: number | null;
   color?: string;
   icon?: string;
   createdAt: string;

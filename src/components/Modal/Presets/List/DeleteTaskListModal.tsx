@@ -13,7 +13,7 @@ export const getDeleteTaskListModal = ({ listName, onConfirm, onClose }: Props) 
 
 const DeleteTaskListModal: React.FC<Props> = ({ listName, onConfirm, onClose }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-    <h3>💥Cuidado!</h3>
+    <h3>💥 Cuidado!</h3>
     <p style={{ color: "var(--text-secondary)" }}>
       {`Estas a punto de eliminar la lista "${listName}" y todas sus tareas`}
     </p>
