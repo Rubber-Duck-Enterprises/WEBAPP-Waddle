@@ -11,7 +11,7 @@ import { CardMode, SectionType } from "@/types";
 type Props = {
   name: string;
   initialValues: {
-    goal: number;
+    goal: number | null;
     color: string;
     icon: string;
     type: SectionType;
@@ -22,7 +22,7 @@ type Props = {
     };
   };
   onConfirm: (config: {
-    goal: number;
+    goal: number | null;
     color: string;
     icon: string;
     cardSettings?: {
@@ -41,7 +41,7 @@ export const getEditSectionModal = ({ name, initialValues, onConfirm, onCancel }
 const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onCancel }) => {
   const { favouriteColors, favouriteEmojis } = useSettingsStore();
 
-  const [goal, setGoal] = useState<number>(initialValues.goal);
+  const [goal, setGoal] = useState<number | null>(initialValues.goal);
   const [color, setColor] = useState<string>(
     favouriteColors.includes(initialValues.color) ? initialValues.color : favouriteColors[0] || "#FFD700"
   );

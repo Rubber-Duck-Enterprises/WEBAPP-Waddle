@@ -30,7 +30,7 @@ const TaskListGroup: React.FC<Props> = ({
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", paddingBottom: "3.5rem" }}>
       {(["pending", "done", ...(filter !== "all" ? ["all"] : [])] as ("pending" | "done" | "all")[]).map((section) =>
         getVisible(section) ? (
           <div key={section}>

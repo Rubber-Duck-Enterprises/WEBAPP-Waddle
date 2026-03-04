@@ -1,11 +1,8 @@
-// components/UI/FloatingActionButton.tsx
-import React from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { FiPlus } from "react-icons/fi";
 
 import { useModal } from "@/context/ModalContext";
 import { getCreateTaskModal } from "@/components/Modal/Presets/List/CreateTaskModal";
-
 import { useTaskStore } from "@/stores/taskStore";
 
 type Props = {
@@ -14,13 +11,23 @@ type Props = {
 
 const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
   const { showModal, hideModal } = useModal();
-
   const { addTask } = useTaskStore();
 
+  const ref = useRef<HTMLButtonElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisible(true);
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <>
-      <motion.button
-        onClick={() => {
+    <button
+      ref={ref}
+      onClick={() => {
         showModal(
           getCreateTaskModal({
             activeListId,
@@ -39,13 +46,17 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
               }
             },
           })
-        );}}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        style={fabStyle}
-      >
-        <FiPlus size={32} />
-      </motion.button>
-    </>
+        );
+      }}
+      style={{
+        ...fabStyle,
+        opacity: visible ? 1 : 0,
+        transform: visible ? "scale(1)" : "scale(0.8)",
+        transition: "opacity 0.25s ease, transform 0.25s ease",
+      }}
+    >
+      <FiPlus size={32} />
+    </button>
   );
 };
 
@@ -56,8 +67,8 @@ const fabStyle: React.CSSProperties = {
   alignItems: "center",
   bottom: "1.5rem",
   right: "1.5rem",
-  width: "56px",
-  height: "56px",
+  width: "48px",
+  height: "48px",
   borderRadius: "50%",
   backgroundColor: "var(--information-color)",
   color: "#fff",

@@ -13,7 +13,7 @@ const AdjustBalanceModal: React.FC<Props> = ({ currentBalance, onConfirm, onCanc
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h3>Ajustar balance</h3>
+      <h3>⚙️ Ajustar balance</h3>
       <p>Balance actual: <strong>${currentBalance.toLocaleString()}</strong></p>
       <UITextInput
         type="number"

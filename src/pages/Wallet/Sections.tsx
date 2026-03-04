@@ -66,7 +66,7 @@ const Sections: React.FC = () => {
                   getEditSectionModal({
                     name: section.name,
                     initialValues: {
-                      goal: section.goal || 0,
+                      goal: section.goal || null,
                       color: section.color || "",
                       icon: section.icon || "",
                       type: section.type || "standard",
