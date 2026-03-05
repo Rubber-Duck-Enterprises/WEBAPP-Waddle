@@ -40,25 +40,35 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       await initAuthPersistence();
 
       const unsub = onAuthStateChanged(auth, async (u) => {
+        console.log("🔥 onAuthStateChanged", { uid: u?.uid || "null", lastHandled: lastHandledScopeRef.current });
+        
         // anti re-entrada
         if (processingRef.current) return;
 
         const nextScope = u?.uid ?? "anon";
 
-        // ✅ si el scope no cambió, NO hagas nada (evita “refresh”)
-        if (lastHandledScopeRef.current === nextScope) return;
+        // ✅ si el scope no cambió, NO hagas nada (evita "refresh")
+        if (lastHandledScopeRef.current === nextScope) {
+          console.log("⏭️ Scope no cambió, skipping");
+          return;
+        }
 
         processingRef.current = true;
         setLoading(true);
 
         try {
           const prevScope = useSessionStore.getState().scope;
+          const isFirstLoad = lastHandledScopeRef.current === null;
 
           if (u) {
+            console.log("👤 Usuario autenticado", { uid: u.uid, prevScope, nextScope });
+            
+            // ✅ Cambiar scope ANTES de rehydrate
             setUser(u, false);
 
-            // ✅ SOLO si venimos de anon -> uid
-            const isAnonToUser = prevScope === "anon" && nextScope !== "anon";
+            // 🚧 MIGRACIÓN TEMPORALMENTE DESHABILITADA PARA DEBUG
+            // const isAnonToUser = prevScope === "anon" && nextScope !== "anon" && !isFirstLoad;
+            const isAnonToUser = false;
 
             if (isAnonToUser) {
               // ✅ y SOLO si ese uid aún no fue manejado (no volver a preguntar)
@@ -124,12 +134,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
               }
             }
           } else {
+            console.log("👻 Usuario anónimo", { prevScope, nextScope });
             setAnon();
           }
 
-          // ✅ flujo normal SOLO si cambió scope y no hubo modal
-          resetUserStoresToEmpty();
+          // ✅ Solo rehydrate, NO reset
+          console.log("🔄 Ejecutando rehydrate", { nextScope });
           await rehydrateAllStores();
+          console.log("✅ Rehydrate completado");
 
           lastHandledScopeRef.current = nextScope;
         } finally {

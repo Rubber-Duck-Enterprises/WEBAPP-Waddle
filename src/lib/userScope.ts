@@ -5,5 +5,7 @@ export function setScopeGetter(fn: () => string) {
 }
 
 export function getScope() {
-  return _getScope();
+  const scope = _getScope();
+  console.log("📍 getScope() llamado:", scope);
+  return scope;
 }
