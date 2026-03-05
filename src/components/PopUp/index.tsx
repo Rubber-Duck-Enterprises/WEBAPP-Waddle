@@ -105,10 +105,11 @@ function Toast({ id, variant, content, onClose, autoCloseMs = 4500 }: ToastProps
         <div
           style={{
             minWidth: 0,
+            width: "100%",
+            maxWidth: "40vw",
             flex: "1 1 auto",
             fontSize: 14,
             color: "var(--text-primary)",
-            whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
           }}
