@@ -1,10 +1,15 @@
-import React, { createContext, useContext, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, initAuthPersistence, signInWithGoogle, signOutOnly } from "@/lib/firebase";
 
 import { useSessionStore } from "@/stores/sessionStore";
 import { setScopeGetter } from "@/lib/userScope";
 import { resetUserStoresToEmpty, rehydrateAllStores } from "@/lib/resetUserStores";
+
+import { useModal } from "@/context/ModalContext";
+import { getMigrateAnonDataModal } from "@/components/Modal/Presets/Account/MigrateAnonDataModal";
+import { hasAnonData, migrateAnonToUserAllStores, clearAnonData } from "@/lib/userScopedMigrations";
+import { wasMigrationHandled, markMigrationHandled } from "@/lib/migrationFlags";
 
 type AuthCtx = {
   user: User | null;
@@ -20,6 +25,11 @@ const Ctx = createContext<AuthCtx | null>(null);
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { user, loading, scope, isPro, setAnon, setUser, setLoading } = useSessionStore();
+  const { showModal, hideModal } = useModal();
+
+  // ✅ evita que el handler corra múltiples veces para el mismo estado
+  const lastHandledScopeRef = useRef<string | null>(null);
+  const processingRef = useRef(false);
 
   useEffect(() => {
     setScopeGetter(() => useSessionStore.getState().scope);
@@ -30,23 +40,107 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       await initAuthPersistence();
 
       const unsub = onAuthStateChanged(auth, async (u) => {
+        // anti re-entrada
+        if (processingRef.current) return;
+
+        const nextScope = u?.uid ?? "anon";
+
+        // ✅ si el scope no cambió, NO hagas nada (evita “refresh”)
+        if (lastHandledScopeRef.current === nextScope) return;
+
+        processingRef.current = true;
         setLoading(true);
 
-        if (u) {
-          setUser(u, false);
-        } else {
-          setAnon();
+        try {
+          const prevScope = useSessionStore.getState().scope;
+
+          if (u) {
+            setUser(u, false);
+
+            // ✅ SOLO si venimos de anon -> uid
+            const isAnonToUser = prevScope === "anon" && nextScope !== "anon";
+
+            if (isAnonToUser) {
+              // ✅ y SOLO si ese uid aún no fue manejado (no volver a preguntar)
+              try {
+                const alreadyHandled = await wasMigrationHandled(u.uid);
+
+                if (!alreadyHandled) {
+                  const anonHasData = await hasAnonData();
+
+                  if (anonHasData) {
+                    // mostramos modal y salimos (el modal se encarga del reset/rehydrate)
+                    showModal(
+                      getMigrateAnonDataModal({
+                        onConfirm: async () => {
+                          try {
+                            await migrateAnonToUserAllStores(u.uid);
+                            await markMigrationHandled(u.uid);
+                          } catch (err) {
+                            console.error("❌ Migration failed:", err);
+                            // si falla, no marcamos handled para permitir reintento
+                          } finally {
+                            hideModal();
+                            resetUserStoresToEmpty();
+                            await rehydrateAllStores();
+                            lastHandledScopeRef.current = nextScope;
+                            setLoading(false);
+                            processingRef.current = false;
+                          }
+                        },
+                        onCancel: async () => {
+                          try {
+                            await clearAnonData();
+                            await markMigrationHandled(u.uid);
+                          } catch (err) {
+                            console.error("❌ Clear anonymous data failed:", err);
+                            // Intentar marcar como handled de todos modos para no bloquear al usuario
+                            try {
+                              await markMigrationHandled(u.uid);
+                            } catch (markErr) {
+                              console.error("❌ Failed to mark migration as handled:", markErr);
+                            }
+                          } finally {
+                            hideModal();
+                            resetUserStoresToEmpty();
+                            await rehydrateAllStores();
+                            lastHandledScopeRef.current = nextScope;
+                            setLoading(false);
+                            processingRef.current = false;
+                          }
+                        },
+                      })
+                    );
+
+                    return; // 👈 IMPORTANTÍSIMO: no continúes con el flujo normal
+                  }
+
+                  // No hay data anon, igual marcamos handled para no volver a checar
+                  await markMigrationHandled(u.uid);
+                }
+              } catch (err) {
+                console.error("❌ Migration check failed:", err);
+                // Si falla la verificación, continuar con flujo normal sin bloquear auth
+              }
+            }
+          } else {
+            setAnon();
+          }
+
+          // ✅ flujo normal SOLO si cambió scope y no hubo modal
+          resetUserStoresToEmpty();
+          await rehydrateAllStores();
+
+          lastHandledScopeRef.current = nextScope;
+        } finally {
+          setLoading(false);
+          processingRef.current = false;
         }
-
-        resetUserStoresToEmpty();
-        await rehydrateAllStores();
-
-        setLoading(false);
       });
 
       return () => unsub();
     })();
-  }, [setAnon, setUser, setLoading]);
+  }, [setAnon, setUser, setLoading, showModal, hideModal]);
 
   const api = useMemo<AuthCtx>(
     () => ({
