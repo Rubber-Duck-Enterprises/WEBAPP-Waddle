@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import localforage from "localforage";
 import { Section } from "@/types";
 import { nanoid } from "nanoid";
+import { createScopedStorage } from "@/lib/scopedStorage";
 
 interface SectionStore {
   sections: Section[];
@@ -43,7 +44,7 @@ export const useSectionStore = create<SectionStore>()(
     }),
     {
       name: "waddle-sections",
-      storage: createJSONStorage(() => localforage),
+      storage: createJSONStorage(() => createScopedStorage(localforage)),
     }
   )
 );

@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import localforage from "localforage";
 import { Task } from "@/types";
+import { createScopedStorage } from "@/lib/scopedStorage";
 
 function getNextDueDate(current: string, repeat: Task["repeat"]): string {
   const date = new Date(current);
@@ -72,7 +73,7 @@ export const useTaskStore = create<TaskStore>()(
     }),
     {
       name: "waddle-tasks",
-      storage: createJSONStorage(() => localforage),
+      storage: createJSONStorage(() => createScopedStorage(localforage)),
     }
   )
 );

@@ -4,6 +4,7 @@ import UIButton from "@/components/UI/UIButton";
 import UIToggle from "@/components/UI/UIToggle";
 import DrawerLink from "./DrawerLink";
 import { useTheme } from "@/hooks/useTheme";
+import { useAuth } from "@/context/AuthContext";
 
 type Props = {
   isOpen: boolean;
@@ -14,6 +15,8 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+
+  const { user, loading, logoutToAnon } = useAuth();
 
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
@@ -42,6 +45,25 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
       navigate(path);
     }
     onClose();
+  };
+
+  const handleAuthAction = async () => {
+    if (loading) return;
+
+    // Si es anon -> manda a login
+    if (!user) {
+      handleNavigate("/login");
+      return;
+    }
+
+    // Si hay user -> logout a anon
+    try {
+      await logoutToAnon();
+      // opcional: manda a wallet o donde quieras
+      navigate("/wallet", { replace: true });
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -86,21 +108,37 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         <div>
+          {/* Auth action */}
+          <div style={{ marginTop: "1rem" }}>
+            {/* Info opcional */}
+            {!loading && user && (
+              <div style={{ marginBottom: "0.5rem", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                <div style={{ fontWeight: 700, color: "var(--text-primary)" }}>
+                  {user.displayName || "Usuario"}
+                </div>
+                <div style={{ opacity: 0.85 }}>{user.email}</div>
+              </div>
+            )}
+
+            <UIButton
+              onClick={handleAuthAction}
+              variant={user ? "secondary" : "primary"}
+              fullWidth
+              disabled={loading}
+            >
+              {loading ? "..." : user ? "🚪 Cerrar sesión" : "🔐 Iniciar sesión"}
+            </UIButton>
+          </div>
+
           {deferredPrompt && (
-            <div style={{ marginTop: "1rem" }}>
+            <div style={{ marginTop: "0.75rem" }}>
               <UIButton onClick={handleInstallClick} variant="secondary" fullWidth>
                 📲 Instalar app
               </UIButton>
             </div>
           )}
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              margin: "1rem 0",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "center", margin: "1rem 0" }}>
             <UIToggle
               label={theme === "light" ? "🌞 Claro" : "🌚 Oscuro"}
               checked={theme === "dark"}
@@ -108,13 +146,7 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div
-            style={{
-              fontSize: "0.75rem",
-              color: "var(--text-secondary)",
-              textAlign: "center",
-            }}
-          >
+          <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", textAlign: "center" }}>
             v{__APP_VERSION__}
           </div>
         </div>

@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import localforage from "localforage";
+import { createScopedStorage } from "@/lib/scopedStorage";
 
 type SettingKey = Exclude<keyof SettingsStore, "hydrated" | "setSetting">;
 
@@ -40,7 +41,7 @@ export const useSettingsStore = create<SettingsStore>()(
     }),
     {
       name: "waddle-settings",
-      storage: createJSONStorage(() => localforage),
+      storage: createJSONStorage(() => createScopedStorage(localforage)),
       onRehydrateStorage: () => (state, error) => {
         if (!error && state?.hydrated !== undefined) {
           useSettingsStore.setState({ hydrated: true });

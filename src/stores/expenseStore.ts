@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import localforage from "localforage";
 import { Expense, ExpenseKind } from "@/types";
+import { createScopedStorage } from "@/lib/scopedStorage";
 
 interface ExpenseStore {
   expenses: Expense[];
@@ -45,7 +46,7 @@ export const useExpenseStore = create<ExpenseStore>()(
     }),
     {
       name: "waddle-expenses",
-      storage: createJSONStorage(() => localforage),
+      storage: createJSONStorage(() => createScopedStorage(localforage)),
     }
   )
 );

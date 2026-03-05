@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { nanoid } from "nanoid";
 import localforage from "localforage";
 import { TaskList, Tag } from "@/types";
+import { createScopedStorage } from "@/lib/scopedStorage";
 
 type ListId = string | "all";
 
@@ -73,7 +74,7 @@ export const useTaskListStore = create<TaskListStore>()(
     }),
     {
       name: "waddle-task-lists",
-      storage: createJSONStorage(() => localforage),
+      storage: createJSONStorage(() => createScopedStorage(localforage)),
       partialize: (state) => ({
         taskLists: state.taskLists,
         tagsByList: state.tagsByList,

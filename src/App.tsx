@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { AnimatePresence } from "framer-motion";
 import NotificationsInitializer from "./components/Modal/NotificationsInitializer";
 
-// Paginas
 import StartRedirect from "@/pages/StartRedirect";
 import WalletHome from "@/pages/Wallet/Home";
 import Sections from "@/pages/Wallet/Sections";
@@ -12,8 +11,12 @@ import ListHome from "@/pages/List/Home";
 import Backups from "@/pages/Backups";
 import Settings from "@/pages/Settings";
 import About from "@/pages/About";
+import Login from "@/pages/Auth/Login";
 
-import { useScheduledTaskCleanup } from "./hooks/useScheduledTaskCleanup"
+import { useScheduledTaskCleanup } from "./hooks/useScheduledTaskCleanup";
+
+import { AuthProvider } from "@/context/AuthContext";
+import { PublicRoute, AnyUserRoute, AuthOnlyRoute } from "@/routes/guards";
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -21,37 +24,80 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        {/* Redirect to Start Page */}
+        {/* Redirect */}
         <Route path="/" element={<StartRedirect />} />
 
-        {/* Wallet Routes */}
-        <Route path="/wallet" element={
-            <WalletHome />
-        }/>
-        <Route path="/wallet/sections" element={
-            <Sections />
-        }/>
-        <Route path="/wallet/movements" element={
-            <Movements />
-        }/>
+        {/* Public */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <PublicRoute>
+              <About />
+            </PublicRoute>
+          }
+        />
 
-        {/* List Routes */}
-        <Route path="/list" element={
-            <ListHome />
-        } />
+        {/* AnyUser (anon o auth) */}
+        <Route
+          path="/wallet"
+          element={
+            <AnyUserRoute>
+              <WalletHome />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/wallet/sections"
+          element={
+            <AnyUserRoute>
+              <Sections />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/wallet/movements"
+          element={
+            <AnyUserRoute>
+              <Movements />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/list"
+          element={
+            <AnyUserRoute>
+              <ListHome />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <AnyUserRoute>
+              <Settings />
+            </AnyUserRoute>
+          }
+        />
 
-        {/* Other Routes */}
-        <Route path="/backups" element={
-            <Backups />
-        } />
-        <Route path="/settings" element={
-            <Settings />
-        } />
-        <Route path="/about" element={
-            <About />
-        } />
+        {/* AuthOnly */}
+        <Route
+          path="/backups"
+          element={
+            <AuthOnlyRoute>
+              <Backups />
+            </AuthOnlyRoute>
+          }
+        />
 
-        {/* Catch-all Route */}
+        {/* Catch-all */}
         <Route path="*" element={<StartRedirect />} />
       </Routes>
     </AnimatePresence>
@@ -60,13 +106,14 @@ const AnimatedRoutes = () => {
 
 const App: React.FC = () => {
   useScheduledTaskCleanup();
-  
 
   return (
-    <Router>
-      <NotificationsInitializer />
-      <AnimatedRoutes />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <NotificationsInitializer />
+        <AnimatedRoutes />
+      </Router>
+    </AuthProvider>
   );
 };
 
