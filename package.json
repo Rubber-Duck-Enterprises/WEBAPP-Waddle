@@ -1,7 +1,7 @@
 {
   "name": "waddle",
   "private": true,
-  "version": "0.6.0a3-beta",
+  "version": "0.6.0a5-beta",
   "type": "module",
   "scripts": {
     "build": "tsc -b && vite build",
