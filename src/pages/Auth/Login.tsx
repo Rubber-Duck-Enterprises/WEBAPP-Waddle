@@ -171,7 +171,7 @@ const Login: React.FC = () => {
       const u = await signUpWithEmail(email.trim(), password, displayName.trim() || undefined);
 
       if (u) {
-        showPopUp("SUCCESS", "Cuenta creada. Revisa tu correo para verificar tu email.");
+        showPopUp("SUCCESS", "Cuenta creada.");
         goApp();
       }
     } catch (e: any) {
