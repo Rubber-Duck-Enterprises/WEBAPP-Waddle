@@ -6,6 +6,8 @@ import { nanoid } from "nanoid";
 
 interface SectionStore {
   sections: Section[];
+  hasFirstWallet: boolean;
+  setFirstWalletWasCreated: () => void;
   addSection: (section: Omit<Section, "id" | "createdAt">) => void;
   updateSection: (id: string, updated: Partial<Omit<Section, "id" | "createdAt">>) => void;
   deleteSection: (id: string) => void;
@@ -15,6 +17,10 @@ export const useSectionStore = create<SectionStore>()(
   persist(
     (set, get) => ({
       sections: [],
+      hasFirstWallet: false,
+      setFirstWalletWasCreated: () => {
+        set({ hasFirstWallet: true })
+      },
       addSection: (section) => {
         const newSection: Section = {
           id: nanoid(),

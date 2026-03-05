@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { isWithinInterval, parseISO } from "date-fns";
 
 import { useSectionStore } from "@/stores/sectionStore";
@@ -18,7 +18,14 @@ import WalletLayout from "../../layouts/WalletLayout";
 const WalletHome: React.FC = () => {
   const { showModal, hideModal } = useModal();
   const { addExpense, expenses } = useExpenseStore();
-  const { sections } = useSectionStore();
+  const initializedRef = useRef(false);
+
+  const { 
+    sections, 
+    hasFirstWallet, 
+    setFirstWalletWasCreated,
+    addSection
+  } = useSectionStore();
 
   const [onlyGeneral, setOnlyGeneral] = useState<boolean>(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -144,6 +151,23 @@ const WalletHome: React.FC = () => {
     if (!selectedSectionId && defaultSection) setSelectedSectionId(defaultSection.id);
     if (!selectedCardId && defaultCard) setSelectedCardId(defaultCard.id);
   }, [sections]);
+
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    if (hasFirstWallet || sections.length > 0) return;
+
+    addSection({ 
+      name: "Efectivo", 
+      goal: null, 
+      color: "#4caf50", 
+      icon: "💵", 
+      type: "standard", 
+      cardSettings: undefined
+    });
+
+    setFirstWalletWasCreated();
+  }, []);
 
   return (
     <WalletLayout>
