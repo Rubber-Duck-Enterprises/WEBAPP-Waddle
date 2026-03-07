@@ -7,7 +7,7 @@ import UITextArea from "@/components/UI/UITextArea";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
 
-import { useTaskListStore } from "@/stores/taskListStore";
+import { useListStore } from "@/stores/listStore";
 import { useModal } from "@/context/ModalContext";
 import { usePopUp } from "@/context/PopUpContext";
 
@@ -22,7 +22,7 @@ export const getCreateTaskModal = ({ activeListId, onConfirm, onCancel }: Props)
 };
 
 const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel }) => {
-  const { taskLists, addTagToList, getTagsForList, addTaskList } = useTaskListStore();
+  const { taskLists, addTagToList, getTagsForList, addTaskList } = useListStore();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState("");

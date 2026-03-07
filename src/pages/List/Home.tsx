@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useTaskStore } from "@/stores/taskStore";
-import { useTaskListStore } from "@/stores/taskListStore";
+import { useListStore } from "@/stores/listStore";
 
 import ListLayout from "@/layouts/ListLayout";
 import TaskListGroup from "@/components/ToolList/Home/TaskListGroup";
@@ -13,8 +12,17 @@ import { getCreateTaskListModal } from "@/components/Modal/Presets/List/CreateTa
 import { getDeleteTaskListModal } from "@/components/Modal/Presets/List/DeleteTaskListModal";
 
 const ListHome: React.FC = () => {
-  const { tasks, toggleTaskDone, updateTask, deleteTask } = useTaskStore();
-  const { taskLists, addTaskList, deleteTaskList, activeListId, setActiveListId } = useTaskListStore();
+  const {
+    taskLists,
+    activeListId,
+    tasks, 
+    addTaskList,
+    deleteTaskList,
+    setActiveListId,
+    toggleTaskDone, 
+    updateTask, 
+    deleteTask,
+  } = useListStore();
   const { showModal, hideModal } = useModal();
 
   const [filter, setFilter] = useState<"all" | "done" | "pending">("pending");

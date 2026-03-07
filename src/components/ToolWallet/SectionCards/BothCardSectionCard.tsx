@@ -13,8 +13,7 @@ import { getAddCreditCardExpenseModal } from "@/components/Modal/Presets/Wallet/
 import { getPayCreditCardModal } from "@/components/Modal/Presets/Wallet/PayCreditCardModal";
 
 import { useModal } from "@/context/ModalContext";
-import { useExpenseStore } from "@/stores/expenseStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useWalletStore } from "@/stores/walletStore";
 
 interface Props {
   section: Section;
@@ -44,8 +43,7 @@ const BothCardSectionCard: React.FC<Props> = ({
   const [activeMode, setActiveMode] = useState<"credit" | "debit">("debit");
 
   const { showModal, hideModal } = useModal();
-  const { addExpense } = useExpenseStore();
-  const { sections } = useSectionStore();
+  const { sections, addExpense } = useWalletStore();
 
   const creditLimit = section.cardSettings?.creditLimit || 0;
 

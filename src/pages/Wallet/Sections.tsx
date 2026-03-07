@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useModal } from "@/context/ModalContext";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { getCreateSectionModal }  from "@/components/Modal/Presets/Wallet/CreateSectionModal";
 import { getDeleteSectionModal }  from "@/components/Modal/Presets/Wallet/DeleteSectionModal";
 import { getEditSectionModal } from "@/components/Modal/Presets/Wallet/EditSectionModal";
@@ -14,7 +14,7 @@ import WalletLayout from "../../layouts/WalletLayout";
 
 const Sections: React.FC = () => {
   const navigate = useNavigate();
-  const { sections, addSection, deleteSection, updateSection } = useSectionStore();
+  const { sections, addSection, deleteSection, updateSection } = useWalletStore();
   const { showModal, hideModal } = useModal();
   const [name, setName] = useState("");
 

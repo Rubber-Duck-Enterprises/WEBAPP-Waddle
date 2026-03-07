@@ -2,8 +2,7 @@ import React from "react";
 
 import { Expense } from "@/types";
 import { useModal } from "@/context/ModalContext";
-import { useExpenseStore } from "@/stores/expenseStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useWalletStore } from "@/stores/walletStore";
 import MovementItem from "@/components/ToolWallet/Movements/MovementItem";
 import TransferItem from "@/components/ToolWallet/Movements/TransferItem";
 import EditExpenseModal from "@/components/Modal/Presets/Wallet/EditExpenseModal";
@@ -13,8 +12,7 @@ import WalletLayout from "@/layouts/WalletLayout";
 
 const Movements: React.FC = () => {
   const groupedTransfers = new Set<string>();
-  const { expenses, deleteExpense, updateExpense } = useExpenseStore();
-  const { sections } = useSectionStore();
+  const { sections, expenses, deleteExpense, updateExpense } = useWalletStore();
   const { showModal, hideModal } = useModal();
 
   const isTransfer = (expense: Expense): boolean => {

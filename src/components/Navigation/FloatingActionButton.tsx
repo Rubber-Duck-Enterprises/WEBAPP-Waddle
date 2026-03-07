@@ -3,7 +3,7 @@ import { FiPlus } from "react-icons/fi";
 
 import { useModal } from "@/context/ModalContext";
 import { getCreateTaskModal } from "@/components/Modal/Presets/List/CreateTaskModal";
-import { useTaskStore } from "@/stores/taskStore";
+import { useListStore } from "@/stores/listStore";
 
 type Props = {
   activeListId: string | "all";
@@ -11,7 +11,7 @@ type Props = {
 
 const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
   const { showModal, hideModal } = useModal();
-  const { addTask } = useTaskStore();
+  const { addTask } = useListStore();
 
   const ref = useRef<HTMLButtonElement | null>(null);
   const [visible, setVisible] = useState(false);

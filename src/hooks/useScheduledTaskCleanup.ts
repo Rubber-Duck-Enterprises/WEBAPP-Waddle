@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useTaskStore } from "@/stores/taskStore";
+import { useListStore } from "@/stores/listStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 
 export const useScheduledTaskCleanup = () => {
@@ -59,7 +59,7 @@ export const useScheduledTaskCleanup = () => {
       console.log(`🕐 Próxima limpieza en ${Math.round(delay / 1000)} segundos`);
 
       timeoutRef.current = setTimeout(() => {
-        const { tasks, deleteTask } = useTaskStore.getState();
+        const { tasks, deleteTask } = useListStore.getState();
         const completed = tasks.filter((t) => t.isDone);
 
         if (completed.length > 0) {

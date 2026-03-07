@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { isWithinInterval, parseISO } from "date-fns";
 
-import { useSectionStore } from "@/stores/sectionStore";
-import { useExpenseStore } from "@/stores/expenseStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { useDateRange } from "@/hooks/useDateRange";
 import { useModal } from "@/context/ModalContext";
 import { getAddIncomeModal } from "@/components/Modal/Presets/Wallet/AddIncomeModal";
@@ -17,15 +16,15 @@ import WalletLayout from "../../layouts/WalletLayout";
 
 const WalletHome: React.FC = () => {
   const { showModal, hideModal } = useModal();
-  const { addExpense, expenses } = useExpenseStore();
-  const initializedRef = useRef(false);
-
-  const { 
+  const {
     sections, 
     hasFirstWallet, 
+    expenses,
     setFirstWalletWasCreated,
-    addSection
-  } = useSectionStore();
+    addSection,
+    addExpense,
+  } = useWalletStore();
+  const initializedRef = useRef(false);
 
   const [onlyGeneral, setOnlyGeneral] = useState<boolean>(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);

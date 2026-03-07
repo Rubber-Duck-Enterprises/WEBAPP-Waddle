@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import UITextInput from "@/components/UI/UITextInput";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { Section } from "@/types";
 
 interface Props {
@@ -20,7 +20,7 @@ export const getPayCreditCardModal = ({ section, onCancel, onConfirm }: Props) =
 );
 
 const PayCreditCardModal: React.FC<Props> = ({ section, onCancel, onConfirm }) => {
-  const { sections } = useSectionStore();
+  const { sections } = useWalletStore();
   const [sourceId, setSourceId] = useState("");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");

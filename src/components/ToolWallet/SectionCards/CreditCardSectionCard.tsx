@@ -7,8 +7,7 @@ import TransactionList from "@/components/ToolWallet/Home/TransactionList";
 import UIButton from "@/components/UI/UIButton";
 
 import { useModal } from "@/context/ModalContext";
-import { useExpenseStore } from "@/stores/expenseStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { getPayCreditCardModal } from "@/components/Modal/Presets/Wallet/PayCreditCardModal";
 import { getAddCreditCardExpenseModal } from "@/components/Modal/Presets/Wallet/AddCreditCardExpenseModal";
 
@@ -30,8 +29,7 @@ const CreditCardSectionCard: React.FC<Props> = ({
   const paymentDay = Number(section.cardSettings?.paymentDate) || 10;
 
   const { showModal, hideModal } = useModal();
-  const { addExpense } = useExpenseStore();
-  const { sections } = useSectionStore();
+  const { sections, addExpense } = useWalletStore();
 
   const today = new Date();
   const cutoffDate = new Date(today.getFullYear(), today.getMonth(), cutoffDay);

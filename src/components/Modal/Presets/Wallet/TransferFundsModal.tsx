@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useSectionStore } from "@/stores/sectionStore";
-import { useExpenseStore } from "@/stores/expenseStore";
+import { useWalletStore } from "@/stores/walletStore";
 
 import UITextInput from "@/components/UI/UITextInput";
 import UISelect from "@/components/UI/UISelect";
@@ -21,8 +20,7 @@ interface Props {
 export const getTransferFundsModal = (props: Props) => <TransferFundsModal {...props} />;
 
 const TransferFundsModal: React.FC<Props> = ({ fromSection, onCancel, onConfirm }) => {
-  const { sections } = useSectionStore();
-  const { expenses } = useExpenseStore();
+  const { sections, expenses } = useWalletStore();
 
   const [toId, setToId] = useState("");
   const [amount, setAmount] = useState(0);

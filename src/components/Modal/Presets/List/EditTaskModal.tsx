@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { nanoid } from "nanoid";
 import { Task } from "@/types";
-import { useTaskListStore } from "@/stores/taskListStore";
+import { useListStore } from "@/stores/listStore";
 import UITextInput from "@/components/UI/UITextInput";
 import UITextArea from "@/components/UI/UITextArea";
 import UISelect from "@/components/UI/UISelect";
@@ -24,7 +24,7 @@ const EditTaskModal: React.FC<Props> = ({
   onDelete,
   onCancel,
 }) => {
-  const { taskLists, getTagsForList, addTagToList } = useTaskListStore();
+  const { taskLists, getTagsForList, addTagToList } = useListStore();
 
   const [title, setTitle] = useState(task.title || "");
   const [notes, setNotes] = useState(task.notes || "");

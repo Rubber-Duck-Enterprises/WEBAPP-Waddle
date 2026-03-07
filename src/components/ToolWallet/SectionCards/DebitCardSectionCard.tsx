@@ -11,8 +11,7 @@ import AdjustBalanceModal from "@/components/Modal/Presets/Wallet/AdjustBalanceM
 import { getTransferFundsModal } from "@/components/Modal/Presets/Wallet/TransferFundsModal";
 
 import { useModal } from "@/context/ModalContext";
-import { useExpenseStore } from "@/stores/expenseStore";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useWalletStore } from "@/stores/walletStore";
 
 interface Props {
   section: Section;
@@ -30,8 +29,7 @@ const DebitCardSectionCard: React.FC<Props> = ({
   onAdd,
 }) => {
   const { showModal, hideModal } = useModal();
-  const { addExpense } = useExpenseStore();
-  const { sections } = useSectionStore();
+  const { sections, addExpense } = useWalletStore();
 
   const filteredExpenses = expenses.filter((e) => {
     const date = parseISO(e.date);

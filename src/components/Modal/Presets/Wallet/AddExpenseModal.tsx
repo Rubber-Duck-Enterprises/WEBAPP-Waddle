@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import UITextInput from "@/components/UI/UITextInput";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
-import { useSectionStore } from "@/stores/sectionStore";
+import { useWalletStore } from "@/stores/walletStore";
 
 interface Props {
   sectionId?: string;
@@ -24,7 +24,7 @@ const AddExpenseModal: React.FC<Props> = ({
   onConfirm,
   onCancel,
 }) => {
-  const { sections } = useSectionStore();
+  const { sections } = useWalletStore();
 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");

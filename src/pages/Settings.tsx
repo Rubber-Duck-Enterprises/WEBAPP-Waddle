@@ -14,7 +14,7 @@ import { getTasksDeletedModal } from "@/components/Modal/Presets/List/TasksDelet
 
 import { useTheme } from "@/hooks/useTheme";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { useTaskStore } from "@/stores/taskStore";
+import { useListStore } from "@/stores/listStore";
 import { signInWithGoogle, saveBackupToCloud } from "@/lib/firebase";
 
 const Settings: React.FC = () => {
@@ -49,8 +49,8 @@ const Settings: React.FC = () => {
   };
   
   const handleDeleteTasks = () => {
-    const completed = useTaskStore.getState().tasks.filter(t => t.isDone);
-    completed.forEach(t => useTaskStore.getState().deleteTask(t.id));
+    const completed = useListStore.getState().tasks.filter(t => t.isDone);
+    completed.forEach(t => useListStore.getState().deleteTask(t.id));
   
     showModal(getTasksDeletedModal({ count: completed.length, onClose: hideModal }));
   };
