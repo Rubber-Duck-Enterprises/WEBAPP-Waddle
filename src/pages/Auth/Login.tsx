@@ -210,7 +210,7 @@ const Login: React.FC = () => {
 
   if (user) {
     return (
-      <div style={{ padding: "1rem" }}>
+      <div style={{ padding: "1rem", margin: "auto", width: "100vw" }}>
         <div style={cardStyle}>
           <h2 style={titleStyle}>Ya iniciaste sesión</h2>
           <p style={subStyle}>Estás conectado como:</p>
