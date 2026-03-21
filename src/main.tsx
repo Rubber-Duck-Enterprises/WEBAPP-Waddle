@@ -7,6 +7,12 @@ import Modal from '@/components/Modal';
 import PopUp from './components/PopUp';
 import { ModalProvider } from '@/context/ModalContext';
 import { PopUpProvider } from './context/PopUpContext';
+import { setScopeGetter } from '@/lib/userScope';
+import { useSessionStore } from '@/stores/sessionStore';
+
+// Registrar el getter ANTES de cualquier render para que la rehydratación
+// automática de Zustand ya use el scope correcto desde el primer ciclo.
+setScopeGetter(() => useSessionStore.getState().scope);
 
 import { Capacitor } from '@capacitor/core';
 import { SafeArea } from 'capacitor-plugin-safe-area';

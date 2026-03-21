@@ -3,8 +3,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, initAuthPersistence, signInWithGoogle, signOutOnly } from "@/lib/firebase";
 
 import { useSessionStore } from "@/stores/sessionStore";
-import { setScopeGetter } from "@/lib/userScope";
-import { resetUserStoresToEmpty, rehydrateAllStores } from "@/lib/resetUserStores";
+import { pauseAllStores, resumeAllStores, resetUserStoresToEmpty, rehydrateAllStores } from "@/lib/resetUserStores";
 
 import { useModal } from "@/context/ModalContext";
 import { getMigrateAnonDataModal } from "@/components/Modal/Presets/Account/MigrateAnonDataModal";
@@ -32,10 +31,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const processingRef = useRef(false);
 
   useEffect(() => {
-    setScopeGetter(() => useSessionStore.getState().scope);
-  }, []);
-
-  useEffect(() => {
     (async () => {
       await initAuthPersistence();
 
@@ -55,6 +50,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
         processingRef.current = true;
         setLoading(true);
+
+        // Pausar persistencia ANTES de cambiar scope para evitar que
+        // setState/reset escriban datos del scope anterior al nuevo scope.
+        pauseAllStores();
 
         try {
           const prevScope = useSessionStore.getState().scope;
@@ -88,9 +87,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                             await markMigrationHandled(u.uid);
                           } catch (err) {
                             console.error("❌ Migration failed:", err);
-                            // si falla, no marcamos handled para permitir reintento
                           } finally {
                             hideModal();
+                            resumeAllStores();
                             resetUserStoresToEmpty();
                             await rehydrateAllStores();
                             lastHandledScopeRef.current = nextScope;
@@ -104,7 +103,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                             await markMigrationHandled(u.uid);
                           } catch (err) {
                             console.error("❌ Clear anonymous data failed:", err);
-                            // Intentar marcar como handled de todos modos para no bloquear al usuario
                             try {
                               await markMigrationHandled(u.uid);
                             } catch (markErr) {
@@ -112,6 +110,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                             }
                           } finally {
                             hideModal();
+                            resumeAllStores();
                             resetUserStoresToEmpty();
                             await rehydrateAllStores();
                             lastHandledScopeRef.current = nextScope;
@@ -138,8 +137,15 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
             setAnon();
           }
 
-          // ✅ Solo rehydrate, NO reset
-          console.log("🔄 Ejecutando rehydrate", { nextScope });
+          // Solo resetear si el scope cambió realmente (no en el primer load).
+          const isFirstLoad = lastHandledScopeRef.current === null;
+          if (!isFirstLoad) {
+            // Pausa ya activa — reset no escribe al storage
+            resetUserStoresToEmpty();
+          }
+          console.log("🔄 Ejecutando rehydrate", { nextScope, isFirstLoad });
+          // rehydrate reactiva internamente la persistencia al terminar
+          resumeAllStores();
           await rehydrateAllStores();
           console.log("✅ Rehydrate completado");
 

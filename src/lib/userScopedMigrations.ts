@@ -4,7 +4,7 @@ const BASES = [
   "waddle-expenses",
   "waddle-sections",
   "waddle-settings",
-  "waddle-task-lists",
+  "waddle-list",
   "waddle-tasks",
 ] as const;
 
@@ -32,7 +32,7 @@ function hasMeaningfulData(base: Base, raw: unknown) {
   if (base === "waddle-expenses") return isNonEmptyArray(state?.expenses);
   if (base === "waddle-sections") return isNonEmptyArray(state?.sections);
   if (base === "waddle-tasks") return isNonEmptyArray(state?.tasks);
-  if (base === "waddle-task-lists") return isNonEmptyArray(state?.taskLists) || !!state?.tagsByList;
+  if (base === "waddle-list") return isNonEmptyArray(state?.taskLists) || !!state?.tagsByList;
   if (base === "waddle-settings") return !!state;
   return false;
 }
@@ -71,7 +71,7 @@ function mergePersisted(base: Base, anonRaw: unknown, userRaw: unknown) {
     userState.tasks = merged;
   }
 
-  if (base === "waddle-task-lists") {
+  if (base === "waddle-list") {
     const mergedLists = uniqById([...(anonState.taskLists || []), ...(userState.taskLists || [])]);
     userState.taskLists = mergedLists;
 

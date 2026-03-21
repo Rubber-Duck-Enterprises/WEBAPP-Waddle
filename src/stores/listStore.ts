@@ -133,6 +133,7 @@ export const useListStore = create<TaskListStore>()(
       storage: createJSONStorage(() => createScopedStorage(localforage)),
       partialize: (state) => ({
         taskLists: state.taskLists,
+        tasks: state.tasks,
         tagsByList: state.tagsByList,
         activeListId: state.activeListId,
       }),
