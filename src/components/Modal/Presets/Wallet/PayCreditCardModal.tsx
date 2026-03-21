@@ -4,6 +4,7 @@ import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
 import { useWalletStore } from "@/stores/walletStore";
 import { Section } from "@/types";
+import { usePopUp } from "@/context/PopUpContext";
 
 interface Props {
   section: Section;
@@ -21,6 +22,7 @@ export const getPayCreditCardModal = ({ section, onCancel, onConfirm }: Props) =
 
 const PayCreditCardModal: React.FC<Props> = ({ section, onCancel, onConfirm }) => {
   const { sections } = useWalletStore();
+  const { showPopUp } = usePopUp();
   const [sourceId, setSourceId] = useState("");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
@@ -63,8 +65,24 @@ const PayCreditCardModal: React.FC<Props> = ({ section, onCancel, onConfirm }) =
         <UIButton variant="default" onClick={onCancel}>Cancelar</UIButton>
         <UIButton
           variant="primary"
-          disabled={!sourceId || Number(amount) <= 0}
-          onClick={() => onConfirm({ sourceId, amount : Number(amount), notes })}
+          disabled={false}
+          onClick={() => {
+            try {
+              if (!sourceId) {
+                showPopUp("DANGER", "Selecciona un origen.");
+                return;
+              }
+              if (Number(amount) <= 0) {
+                showPopUp("DANGER", "El monto debe ser mayor a 0.");
+                return;
+              }
+              onConfirm({ sourceId, amount: Number(amount), notes });
+              showPopUp("SUCCESS", "Pago registrado.");
+            } catch (error) {
+              showPopUp("DANGER", "Error al registrar el pago.");
+              console.error("PayCreditCardModal - Error:", error);
+            }
+          }}
         >
           Confirmar pago
         </UIButton>

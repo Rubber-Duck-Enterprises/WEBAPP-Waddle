@@ -3,6 +3,7 @@ import UITextInput from "@/components/UI/UITextInput";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
 import { useWalletStore } from "@/stores/walletStore";
+import { usePopUp } from "@/context/PopUpContext";
 
 interface Props {
   sectionId?: string;
@@ -25,6 +26,7 @@ const AddExpenseModal: React.FC<Props> = ({
   onCancel,
 }) => {
   const { sections } = useWalletStore();
+  const { showPopUp } = usePopUp();
 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -90,15 +92,33 @@ const AddExpenseModal: React.FC<Props> = ({
         <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
         <UIButton
           variant="primary"
-          disabled={!description || Number(amount) <= 0 || (needsSource && !source)}
-          onClick={() =>
-            onConfirm({
-              description,
-              amount: -Math.abs(Number(amount)),
-              source: needsSource ? source : undefined,
-              notes: `${notes}${isBothCard ? ` [modo: ${paymentMode}]` : ""}`,
-            })
-          }
+          disabled={false}
+          onClick={() => {
+            try {
+              if (!description.trim()) {
+                showPopUp("DANGER", "Escribe una descripción.");
+                return;
+              }
+              if (Number(amount) <= 0) {
+                showPopUp("DANGER", "El monto debe ser mayor a 0.");
+                return;
+              }
+              if (needsSource && !source) {
+                showPopUp("DANGER", "Selecciona un origen.");
+                return;
+              }
+              onConfirm({
+                description,
+                amount: -Math.abs(Number(amount)),
+                source: needsSource ? source : undefined,
+                notes: `${notes}${isBothCard ? ` [modo: ${paymentMode}]` : ""}`,
+              });
+              showPopUp("SUCCESS", "Gasto agregado.");
+            } catch (error) {
+              showPopUp("DANGER", "Error al agregar el gasto.");
+              console.error("AddExpenseModal - Error:", error);
+            }
+          }}
         >
           Guardar
         </UIButton>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import UITextInput from "@/components/UI/UITextInput";
 import UIButton from "@/components/UI/UIButton";
+import { usePopUp } from "@/context/PopUpContext";
 
 type Props = {
   sectionName: string;
@@ -19,6 +20,7 @@ export const getDeleteSectionModal = ({ sectionName, onConfirm, onCancel }: Prop
 };
 
 const DeleteSectionModal: React.FC<Props> = ({ sectionName, onConfirm, onCancel }) => {
+  const { showPopUp } = usePopUp();
   const [confirmText, setConfirmText] = useState("");
 
   const isValid = confirmText.trim() === sectionName;
@@ -44,7 +46,15 @@ const DeleteSectionModal: React.FC<Props> = ({ sectionName, onConfirm, onCancel 
           Cancelar
         </UIButton>
         <UIButton
-          onClick={onConfirm}
+          onClick={() => {
+            try {
+              onConfirm();
+              showPopUp("SUCCESS", `Apartado "${sectionName}" eliminado.`);
+            } catch (error) {
+              showPopUp("DANGER", "Error al eliminar el apartado.");
+              console.error("DeleteSectionModal - Error:", error);
+            }
+          }}
           disabled={!isValid}
           variant="danger"
         >

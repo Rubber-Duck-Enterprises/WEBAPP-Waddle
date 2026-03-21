@@ -7,6 +7,7 @@ import UISelect from "@/components/UI/UISelect";
 
 import { useSettingsStore } from "@/stores/settingsStore";
 import { CardMode, SectionType } from "@/types";
+import { usePopUp } from "@/context/PopUpContext";
 
 type Props = {
   name: string;
@@ -40,6 +41,7 @@ export const getEditSectionModal = ({ name, initialValues, onConfirm, onCancel }
 
 const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onCancel }) => {
   const { favouriteColors, favouriteEmojis } = useSettingsStore();
+  const { showPopUp } = usePopUp();
 
   const [goal, setGoal] = useState<number | null>(initialValues.goal);
   const [color, setColor] = useState<string>(
@@ -241,23 +243,29 @@ const EditSectionModal: React.FC<Props> = ({ name, initialValues, onConfirm, onC
           Cancelar
         </UIButton>
         <UIButton
-          onClick={() =>
-            onConfirm({
-              goal,
-              color: effectiveColor,
-              icon: effectiveEmoji,
-              cardSettings:
-                initialValues.type === "card"
-                  ? {
-                      mode: cardMode,
-                      cutoffDate,
-                      paymentDate,
-                    }
-                  : undefined,
-            })
-          }
+          onClick={() => {
+            try {
+              if (initialValues.type === "savings" && (!goal || goal <= 0)) {
+                showPopUp("DANGER", "Ingresa una meta de ahorro válida.");
+                return;
+              }
+              onConfirm({
+                goal,
+                color: effectiveColor,
+                icon: effectiveEmoji,
+                cardSettings:
+                  initialValues.type === "card"
+                    ? { mode: cardMode, cutoffDate, paymentDate }
+                    : undefined,
+              });
+              showPopUp("SUCCESS", "Apartado actualizado.");
+            } catch (error) {
+              showPopUp("DANGER", "Error al actualizar el apartado.");
+              console.error("EditSectionModal - Error:", error);
+            }
+          }}
           variant="primary"
-          disabled={initialValues.type === "savings" && (!goal || goal <= 0)}
+          disabled={false}
         >
           Guardar
         </UIButton>

@@ -4,6 +4,7 @@ import UITextInput from "@/components/UI/UITextInput";
 import UITextArea from "@/components/UI/UITextArea";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
+import { usePopUp } from "@/context/PopUpContext";
 
 interface Props {
   expense: Expense;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const EditExpenseModal: React.FC<Props> = ({ expense, sections, onCancel, onConfirm }) => {
+  const { showPopUp } = usePopUp();
   const [description, setDescription] = useState(expense.description);
   const [amount, setAmount] = useState(
     expense.amount ? String(Math.abs(expense.amount)) : ""
@@ -23,13 +25,27 @@ const EditExpenseModal: React.FC<Props> = ({ expense, sections, onCancel, onConf
   const [date, setDate] = useState(expense.date.slice(0, 10)); // yyyy-MM-dd
 
   const handleSubmit = () => {
-    onConfirm({
-      description,
-      amount: type === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount)),
-      notes,
-      category,
-      date: new Date(date).toISOString(),
-    });
+    try {
+      if (!description.trim()) {
+        showPopUp("DANGER", "Escribe una descripción.");
+        return;
+      }
+      if (!amount || Number(amount) <= 0) {
+        showPopUp("DANGER", "El monto debe ser mayor a 0.");
+        return;
+      }
+      onConfirm({
+        description,
+        amount: type === "expense" ? -Math.abs(Number(amount)) : Math.abs(Number(amount)),
+        notes,
+        category,
+        date: new Date(date).toISOString(),
+      });
+      showPopUp("SUCCESS", "Movimiento actualizado.");
+    } catch (error) {
+      showPopUp("DANGER", "Error al actualizar el movimiento.");
+      console.error("EditExpenseModal - Error:", error);
+    }
   };
 
   return (

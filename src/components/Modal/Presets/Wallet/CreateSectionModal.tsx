@@ -6,6 +6,7 @@ import UIButton from "@/components/UI/UIButton";
 import UISelect from "@/components/UI/UISelect";
 
 import { useSettingsStore } from "@/stores/settingsStore";
+import { usePopUp } from "@/context/PopUpContext";
 
 import {
   Section,
@@ -32,6 +33,7 @@ export const getCreateSectionModal = ({ name, onConfirm, onCancel, goToSettings 
 
 const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
   const { favouriteColors, favouriteEmojis } = useSettingsStore();
+  const { showPopUp } = usePopUp();
 
   const [goal, setGoal] = useState<number | null>(null);
   const [color, setColor] = useState<string>(favouriteColors[0] || "#FFD700");
@@ -273,25 +275,30 @@ const CreateSectionModal: React.FC<Props> = ({ name, onConfirm, onCancel }) => {
           Cancelar
         </UIButton>
         <UIButton
-          onClick={() =>
-            onConfirm({
-              goal: goal ?? null,
-              color: effectiveColor,
-              icon: effectiveEmoji,
-              type,
-              cardSettings:
-                type === "card"
-                  ? {
-                    mode: cardMode,
-                    cutoffDate,
-                    paymentDate,
-                    creditLimit,
-                  }
-                  : undefined,
-            })
-          }
+          onClick={() => {
+            try {
+              if (type === "savings" && (!goal || goal <= 0)) {
+                showPopUp("DANGER", "Ingresa una meta de ahorro válida.");
+                return;
+              }
+              onConfirm({
+                goal: goal ?? null,
+                color: effectiveColor,
+                icon: effectiveEmoji,
+                type,
+                cardSettings:
+                  type === "card"
+                    ? { mode: cardMode, cutoffDate, paymentDate, creditLimit }
+                    : undefined,
+              });
+              showPopUp("SUCCESS", "Apartado creado.");
+            } catch (error) {
+              showPopUp("DANGER", "Error al crear el apartado.");
+              console.error("CreateSectionModal - Error:", error);
+            }
+          }}
           variant="primary"
-          disabled={type === "savings" && (!goal || goal <= 0)}
+          disabled={false}
         >
           Crear
         </UIButton>

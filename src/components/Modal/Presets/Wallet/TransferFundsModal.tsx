@@ -6,6 +6,7 @@ import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
 
 import { Section } from "@/types";
+import { usePopUp } from "@/context/PopUpContext";
 
 interface Props {
   fromSection: Section;
@@ -21,9 +22,10 @@ export const getTransferFundsModal = (props: Props) => <TransferFundsModal {...p
 
 const TransferFundsModal: React.FC<Props> = ({ fromSection, onCancel, onConfirm }) => {
   const { sections, expenses } = useWalletStore();
+  const { showPopUp } = usePopUp();
 
   const [toId, setToId] = useState("");
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
 
   const calculateBalance = (sectionId: string): number => {
@@ -47,7 +49,7 @@ const TransferFundsModal: React.FC<Props> = ({ fromSection, onCancel, onConfirm 
     return true;
   });
 
-  const isValid = toId && amount > 0 && amount <= balanceAvailable;
+  const isValid = toId && Number(amount) > 0 && Number(amount) <= balanceAvailable;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -71,7 +73,7 @@ const TransferFundsModal: React.FC<Props> = ({ fromSection, onCancel, onConfirm 
         min={0.01}
         placeholder="Monto a transferir"
         value={amount}
-        onChange={(e) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(e.target.value)}
       />
 
       <UITextInput
@@ -84,11 +86,29 @@ const TransferFundsModal: React.FC<Props> = ({ fromSection, onCancel, onConfirm 
         <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
         <UIButton
           onClick={() => {
-            onConfirm({ toId, amount, notes });
-            onCancel();
+            try {
+              if (!toId) {
+                showPopUp("DANGER", "Selecciona un destino.");
+                return;
+              }
+              if (Number(amount) <= 0) {
+                showPopUp("DANGER", "El monto debe ser mayor a 0.");
+                return;
+              }
+              if (Number(amount) > balanceAvailable) {
+                showPopUp("DANGER", `Fondos insuficientes. Disponible: $${balanceAvailable.toLocaleString()}.`);
+                return;
+              }
+              onConfirm({ toId, amount: Number(amount), notes });
+              showPopUp("SUCCESS", "Transferencia realizada.");
+              onCancel();
+            } catch (error) {
+              showPopUp("DANGER", "Error al realizar la transferencia.");
+              console.error("TransferFundsModal - Error:", error);
+            }
           }}
           variant="primary"
-          disabled={!isValid}
+          disabled={false}
         >
           Transferir
         </UIButton>

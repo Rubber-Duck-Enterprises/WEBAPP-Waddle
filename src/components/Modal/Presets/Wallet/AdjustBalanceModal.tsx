@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import UITextInput from "@/components/UI/UITextInput";
 import UIButton from "@/components/UI/UIButton";
+import { usePopUp } from "@/context/PopUpContext";
 
 interface Props {
   currentBalance: number;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const AdjustBalanceModal: React.FC<Props> = ({ currentBalance, onConfirm, onCancel }) => {
+  const { showPopUp } = usePopUp();
   const [target, setTarget] = useState<number>(currentBalance);
 
   return (
@@ -25,8 +27,20 @@ const AdjustBalanceModal: React.FC<Props> = ({ currentBalance, onConfirm, onCanc
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
         <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
         <UIButton
-          onClick={() => onConfirm(target)}
-          disabled={target === currentBalance}
+          onClick={() => {
+            try {
+              if (target === currentBalance) {
+                showPopUp("INFO", "El balance es igual al actual, no hay cambios.");
+                return;
+              }
+              onConfirm(target);
+              showPopUp("SUCCESS", "Balance ajustado.");
+            } catch (error) {
+              showPopUp("DANGER", "Error al ajustar el balance.");
+              console.error("AdjustBalanceModal - Error:", error);
+            }
+          }}
+          disabled={false}
           variant="primary"
         >
           Ajustar

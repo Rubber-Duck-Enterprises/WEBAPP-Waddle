@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import UITextInput from "@/components/UI/UITextInput";
 import UIButton from "@/components/UI/UIButton";
+import { usePopUp } from "@/context/PopUpContext";
 
 interface Props {
   sectionId?: string;
@@ -17,6 +18,7 @@ interface Props {
 export const getAddIncomeModal = (props: Props) => <AddIncomeModal {...props} />;
 
 const AddIncomeModal: React.FC<Props> = ({ sectionId = "general", onConfirm, onCancel }) => {
+  const { showPopUp } = usePopUp();
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [notes, setNotes] = useState("");
@@ -50,15 +52,29 @@ const AddIncomeModal: React.FC<Props> = ({ sectionId = "general", onConfirm, onC
         <UIButton onClick={onCancel} variant="default">Cancelar</UIButton>
         <UIButton
           variant="primary"
-          disabled={!description || Number(amount) <= 0}
-          onClick={() =>
-            onConfirm({
-              description,
-              amount: Math.abs(Number(amount)),
-              notes,
-              category: sectionId,
-            })
-          }
+          disabled={false}
+          onClick={() => {
+            try {
+              if (!description.trim()) {
+                showPopUp("DANGER", "Escribe una descripción.");
+                return;
+              }
+              if (Number(amount) <= 0) {
+                showPopUp("DANGER", "El monto debe ser mayor a 0.");
+                return;
+              }
+              onConfirm({
+                description,
+                amount: Math.abs(Number(amount)),
+                notes,
+                category: sectionId,
+              });
+              showPopUp("SUCCESS", "Ingreso agregado.");
+            } catch (error) {
+              showPopUp("DANGER", "Error al agregar el ingreso.");
+              console.error("AddIncomeModal - Error:", error);
+            }
+          }}
         >
           Guardar
         </UIButton>

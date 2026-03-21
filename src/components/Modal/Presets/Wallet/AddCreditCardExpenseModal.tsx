@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import UITextInput from "@/components/UI/UITextInput";
 import UIButton from "@/components/UI/UIButton";
 import { Section } from "@/types";
+import { usePopUp } from "@/context/PopUpContext";
 
 interface Props {
   section: Section;
@@ -31,6 +32,7 @@ const AddCreditCardExpenseModal: React.FC<Props> = ({
   onCancel,
   onConfirm,
 }) => {
+  const { showPopUp } = usePopUp();
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
@@ -73,8 +75,28 @@ const AddCreditCardExpenseModal: React.FC<Props> = ({
         </UIButton>
         <UIButton
           variant="danger"
-          disabled={!isValid}
-          onClick={() => onConfirm({ amount: Number(amount), description, notes })}
+          disabled={false}
+          onClick={() => {
+            try {
+              if (!description.trim()) {
+                showPopUp("DANGER", "Escribe una descripción.");
+                return;
+              }
+              if (Number(amount) <= 0) {
+                showPopUp("DANGER", "El monto debe ser mayor a 0.");
+                return;
+              }
+              if (Number(amount) > available) {
+                showPopUp("DANGER", `Monto supera el disponible ($${available.toLocaleString()}).`);
+                return;
+              }
+              onConfirm({ amount: Number(amount), description, notes });
+              showPopUp("SUCCESS", "Gasto con tarjeta registrado.");
+            } catch (error) {
+              showPopUp("DANGER", "Error al registrar el gasto.");
+              console.error("AddCreditCardExpenseModal - Error:", error);
+            }
+          }}
         >
           Agregar gasto
         </UIButton>

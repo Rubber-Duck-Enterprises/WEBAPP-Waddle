@@ -1,5 +1,6 @@
 import React from "react";
 import UIButton from "@/components/UI/UIButton";
+import { usePopUp } from "@/context/PopUpContext";
 
 type Props = {
   onConfirm: () => void;
@@ -16,6 +17,7 @@ export const getConfirmDeleteMovmentModal = ({ onConfirm, onCancel }: Props) => 
 };
 
 const ConfirmDeleteMovmentModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
+  const { showPopUp } = usePopUp();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>
@@ -31,7 +33,15 @@ const ConfirmDeleteMovmentModal: React.FC<Props> = ({ onConfirm, onCancel }) => 
           Cancelar
         </UIButton>
 
-        <UIButton variant="danger" onClick={onConfirm}>
+        <UIButton variant="danger" onClick={() => {
+          try {
+            onConfirm();
+            showPopUp("SUCCESS", "Movimiento eliminado.");
+          } catch (error) {
+            showPopUp("DANGER", "Error al eliminar el movimiento.");
+            console.error("ConfirmDeleteMovmentModal - Error:", error);
+          }
+        }}>
           Eliminar
         </UIButton>
       </div>
