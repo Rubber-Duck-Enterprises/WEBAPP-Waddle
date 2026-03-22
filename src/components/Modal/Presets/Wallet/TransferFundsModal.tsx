@@ -49,8 +49,6 @@ const TransferFundsModal: React.FC<Props> = ({ fromSection, onCancel, onConfirm 
     return true;
   });
 
-  const isValid = toId && Number(amount) > 0 && Number(amount) <= balanceAvailable;
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3>🛫 Transferir desde {fromSection.icon || "📁"} {fromSection.name}</h3>

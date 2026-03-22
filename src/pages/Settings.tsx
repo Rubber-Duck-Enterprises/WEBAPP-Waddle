@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import localforage from "localforage";
 
 import UIToggle from "@/components/UI/UIToggle";
 import UISelect from "@/components/UI/UISelect";
@@ -15,7 +14,7 @@ import { getTasksDeletedModal } from "@/components/Modal/Presets/List/TasksDelet
 import { useTheme } from "@/hooks/useTheme";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useListStore } from "@/stores/listStore";
-import { signInWithGoogle, saveBackupToCloud } from "@/lib/firebase";
+import { signInWithGoogle,  } from "@/lib/firebase";
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -39,7 +38,7 @@ const Settings: React.FC = () => {
   const [localTime, setLocalTime] = useState("");
   const [localFreq, setLocalFreq] = useState<"daily" | "weekly">("daily");
   const [localDay, setLocalDay] = useState(0);
-
+  
   const saveSettings = () => {
     setSetting("deleteTime", localTime);
     setSetting("deleteFrequency", localFreq);
@@ -69,28 +68,6 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleCloudBackup = async () => {
-    if (!firebaseUser) {
-      alert("Debes iniciar sesión primero.");
-      return;
-    }
-
-    const keys: string[] = [
-      "waddle-sections",
-      "waddle-expenses",
-      "waddle-task-lists",
-      "waddle-tasks",
-    ];
-
-    const data: Record<string, any> = {};
-    for (const key of keys) {
-      data[key] = await localforage.getItem(key);
-    }
-
-    await saveBackupToCloud(data);
-    alert("☁️ Respaldo subido correctamente a la nube.");
-  };
-  
   useEffect(() => {
     if (hydrated) {
       setLocalTime(deleteTime);
@@ -430,10 +407,6 @@ const Settings: React.FC = () => {
                   🔌 Desconectar
                 </UIButton>
               </div>
-
-              <UIButton variant="primary" onClick={handleCloudBackup}>
-                ☁️ Hacer respaldo en la nube
-              </UIButton>
             </>
           )}
 

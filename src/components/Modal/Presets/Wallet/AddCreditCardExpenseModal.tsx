@@ -37,8 +37,6 @@ const AddCreditCardExpenseModal: React.FC<Props> = ({
   const [description, setDescription] = useState("");
   const [notes, setNotes] = useState("");
 
-  const isValid = Number(amount) > 0 && Number(amount) <= available && description.trim() !== "";
-
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <h3>Nuevo gasto con tarjeta {section.name}</h3>
