@@ -19,10 +19,3 @@ export function AuthOnlyRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-export function ProRoute({ children }: { children: React.ReactNode }) {
-  const { user, isPro, loading } = useAuth();
-  if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
-  if (!isPro) return <Navigate to="/upgrade" replace />;
-  return <>{children}</>;
-}

@@ -6,6 +6,7 @@ import UIToggle from "@/components/UI/UIToggle";
 import UISelect from "@/components/UI/UISelect";
 import UIButton from "@/components/UI/UIButton";
 import UITextInput from "@/components/UI/UITextInput";
+import GoogleSignInButton from "@/components/UI/GoogleSignInButton";
 import DefaultLayout from "@/layouts/DefaultLayout";
 import { useModal } from "@/context/ModalContext";
 import { getSavedSettingsModal } from "@/components/Modal/Presets/System/SavedSettingsModal";
@@ -56,16 +57,9 @@ const Settings: React.FC = () => {
 
   const requestNotificationAccess = async () => {
     const { requestPermissionAndToken } = await import("@/lib/firebase");
-    const token = await requestPermissionAndToken();
+    await requestPermissionAndToken();
     
     setNotificationPermission(Notification.permission);
-  
-    if (token) {
-      console.log("✅ Token FCM:", token);
-      console.log("✅ Notificaciones activadas");
-    } else {
-      console.log("❌ No se otorgaron permisos o ocurrió un error");
-    }
   };
 
   useEffect(() => {
@@ -137,38 +131,6 @@ const Settings: React.FC = () => {
             )}
           </>
         )}
-
-        {/* {notificationPermission === "granted" && (
-          <div
-            style={{
-              display: "flex",
-              backgroundColor: "var(--success-bg)",
-              border: "1px solid var(--success-color)",
-              borderRadius: "8px",
-              flexDirection: "column",
-              padding: "1rem",
-              gap: "1rem",
-            }}
-          >
-            <h3>🔔 Notificaciones activadas</h3>
-            <p style={{ color: "var(--text-secondary)" }}>
-              Las notificaciones están activadas. Recibirás alertas sobre eventos importantes como limpiezas automáticas.
-            </p>
-            <UIButton
-              variant="secondary"
-              onClick={async () => {
-                const { requestPermissionAndToken } = await import("@/lib/firebase");
-                const token = await requestPermissionAndToken();
-                if (token) {
-                  await navigator.clipboard.writeText(token);
-                  alert("🔗 Token FCM copiado al portapapeles.");
-                }
-              }}
-            >
-              Copiar token FCM
-            </UIButton>
-          </div>
-        )} */}
 
         <div
           style={{
@@ -358,18 +320,8 @@ const Settings: React.FC = () => {
               <p style={{ color: "var(--text-secondary)" }}>
                 Conectar cuenta de Google para respaldo en la nube
               </p>
-              <button
-                style={{
-                  alignItems: "center",
-                  display: "flex",
-                  backgroundColor: "white",
-                  border: "1px solid #ccc",
-                  borderRadius: "8px",
-                  padding: "0.5rem 1rem",
-                  color: "black",
-                  fontWeight: "bold",
-                  cursor: "pointer",
-                }}
+              <GoogleSignInButton
+                label="Conectar"
                 onClick={async () => {
                   const { requestPermissionAndToken, saveNotificationSettingsToFirestore } = await import("@/lib/firebase");
 
@@ -382,14 +334,7 @@ const Settings: React.FC = () => {
 
                   if (user) alert(`✅ Conectado como ${user.displayName}`);
                 }}
-              >
-                <img
-                  src="/assets/account/google.png"
-                  alt="Google Logo"
-                  style={{ width: "20px", marginRight: "0.5rem" }}
-                />
-                Conectar
-              </button>
+              />
             </div>
           ) : (
             <>

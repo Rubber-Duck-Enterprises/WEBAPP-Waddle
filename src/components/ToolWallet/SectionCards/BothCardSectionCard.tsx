@@ -7,13 +7,14 @@ import UICreditInfoSummary from "@/components/UI/UICreditInfoSummary";
 import UIIncomeExpenseSummary from "@/components/UI/UIIncomeExpenseSummary";
 import TransactionList from "@/components/ToolWallet/Home/TransactionList";
 import UIButton from "@/components/UI/UIButton";
-import AdjustBalanceModal from "@/components/Modal/Presets/Wallet/AdjustBalanceModal";
 import { getTransferFundsModal } from "@/components/Modal/Presets/Wallet/TransferFundsModal";
+import { createTransferExpenses, createAdjustBalanceHandler } from "@/utils/walletUtils";
 import { getAddCreditCardExpenseModal } from "@/components/Modal/Presets/Wallet/AddCreditCardExpenseModal";
 import { getPayCreditCardModal } from "@/components/Modal/Presets/Wallet/PayCreditCardModal";
 
 import { useModal } from "@/context/ModalContext";
 import { useWalletStore } from "@/stores/walletStore";
+import SectionCardContainer from "./SectionCardContainer";
 
 interface Props {
   section: Section;
@@ -83,28 +84,7 @@ const BothCardSectionCard: React.FC<Props> = ({
 
   const handleAdjust = () => {
     if (activeMode === "credit") return;
-
-    showModal(
-      <AdjustBalanceModal
-        currentBalance={balance}
-        onCancel={hideModal}
-        onConfirm={(target) => {
-          const diff = target - balance;
-          if (diff === 0) return;
-
-          addExpense({
-            description: "Ajuste manual",
-            amount: diff,
-            category: section.id,
-            date: new Date().toISOString(),
-            notes: "Ajuste de balance",
-            adjustment: true,
-          });
-
-          hideModal();
-        }}
-      />
-    );
+    createAdjustBalanceHandler({ balance, sectionId: section.id, addExpense, showModal, hideModal })();
   };
 
   const handlePayCreditCard = () => {
@@ -162,19 +142,7 @@ const BothCardSectionCard: React.FC<Props> = ({
   };
 
   return (
-    <div
-      style={{
-        background: `${section.color || "var(--surface)"}1A`,
-        borderRadius: "12px",
-        padding: "1rem",
-        border: `1px solid ${section.color || "var(--border-color)"}`,
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        color: "var(--text-primary)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.75rem",
-      }}
-    >
+    <SectionCardContainer section={section}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>{section.icon || "💳"} {section.name}</h2>
         <label style={{ fontSize: "0.85rem" }}>
@@ -252,25 +220,10 @@ const BothCardSectionCard: React.FC<Props> = ({
                   fromSection: section,
                   onCancel: hideModal,
                   onConfirm: ({ toId, amount, notes }) => {
-                    const now = new Date().toISOString();
                     const toSection = sections.find((s) => s.id === toId);
-
-                    addExpense({
-                      description: `Transferencia a ${toSection?.icon || "📁"} ${toSection?.name || toId}`,
-                      amount: -Math.abs(amount),
-                      category: section.id,
-                      notes,
-                      date: now,
-                    });
-
-                    addExpense({
-                      description: `Transferencia desde ${section.icon || "📁"} ${section.name}`,
-                      amount: Math.abs(amount),
-                      category: toId,
-                      notes,
-                      date: now,
-                    });
-
+                    if (toSection) {
+                      createTransferExpenses(section, toSection, amount, notes ?? "", addExpense);
+                    }
                     hideModal();
                   },
                 })
@@ -301,7 +254,7 @@ const BothCardSectionCard: React.FC<Props> = ({
           </div>
         )}
       </div>
-    </div>
+    </SectionCardContainer>
   );
 };
 

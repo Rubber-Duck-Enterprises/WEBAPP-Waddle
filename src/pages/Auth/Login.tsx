@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 
 import UIButton from "@/components/UI/UIButton";
 import UITextInput from "@/components/UI/UITextInput";
+import GoogleSignInButton from "@/components/UI/GoogleSignInButton";
 import { usePopUp } from "@/context/PopUpContext";
 
 type LocationState = { from?: { pathname?: string } };
@@ -315,29 +316,7 @@ const Login: React.FC = () => {
           <div style={dividerLine} />
         </div>
 
-        <button
-          style={{
-            alignItems: "center",
-            display: "flex",
-            backgroundColor: "white",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-            padding: "0.5rem 1rem",
-            color: "black",
-            fontWeight: "bold",
-            cursor: "pointer",
-            width: "100%",
-            justifyContent: "center"
-          }}
-          onClick={handleGoogle}
-        >
-          <img
-            src="/assets/account/google.png"
-            alt="Google Logo"
-            style={{ width: "20px", marginRight: "0.5rem" }}
-          />
-          Continuar con google
-        </button>
+        <GoogleSignInButton onClick={handleGoogle} disabled={busy} />
 
         <div style={{ marginTop: 10 }}>
           <UIButton variant="default" fullWidth disabled={busy} onClick={handleContinueAnon}>

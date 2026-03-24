@@ -119,19 +119,6 @@ export const requestPermissionAndToken = async (): Promise<string | null> => {
   }
 };
 
-// ☁ Backups: exige usuario real (ya no existe anon firebase)
-export const saveBackupToCloud = async (data: any): Promise<void> => {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Usuario no autenticado");
-
-  const ref = doc(db, "backups", user.uid);
-  await setDoc(ref, {
-    data,
-    updatedAt: new Date().toISOString(),
-    email: user.email,
-  });
-};
-
 // 🔔 Preferencias: SOLO si hay user (nada de public-users)
 export const saveNotificationSettingsToFirestore = async (fcmToken: string, user?: User | null) => {
   const activeUser = user ?? auth.currentUser;

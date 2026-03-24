@@ -1,17 +1,18 @@
 import React from "react";
-import { parseISO, isWithinInterval } from "date-fns";
 import { Section, Expense } from "@/types";
+import { useSectionFinancials } from "@/hooks/useSectionFinancials";
 
 import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
 import UIIncomeExpenseSummary from "@/components/UI/UIIncomeExpenseSummary";
 import UIProgressBar from "@/components/UI/UIProgressBar";
 import UIButton from "@/components/UI/UIButton";
 import TransactionList from "@/components/ToolWallet/Home/TransactionList";
-import AdjustBalanceModal from "@/components/Modal/Presets/Wallet/AdjustBalanceModal";
 import { getTransferFundsModal } from "@/components/Modal/Presets/Wallet/TransferFundsModal";
+import { createTransferExpenses, createAdjustBalanceHandler } from "@/utils/walletUtils";
 
 import { useModal } from "@/context/ModalContext";
 import { useWalletStore } from "@/stores/walletStore";
+import SectionCardContainer from "./SectionCardContainer";
 
 interface Props {
   section: Section;
@@ -31,64 +32,17 @@ const SavingsSectionCard: React.FC<Props> = ({
   const { showModal, hideModal } = useModal();
   const { sections, addExpense } = useWalletStore();
 
-  const filteredExpenses = expenses.filter((e) => {
-    const date = parseISO(e.date);
-    return isWithinInterval(date, { start: startDate, end: endDate }) &&
-      (e.category === section.id || e.source === section.id);
+  const { income, totalExpenses, balance, goal, progress, latest } = useSectionFinancials({
+    section,
+    expenses,
+    startDate,
+    endDate,
   });
 
-  const income = filteredExpenses
-    .filter((e) => e.amount > 0 && e.category === section.id)
-    .reduce((acc, e) => acc + e.amount, 0);
-
-  const totalExpenses = filteredExpenses
-    .filter((e) => e.amount < 0)
-    .reduce((acc, e) => acc + e.amount, 0);
-
-  const balance = income + totalExpenses;
-  const goal = section.goal || null;
-  const progress = goal && goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
-
-  const latest = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
-
-  const handleAdjust = () => {
-    showModal(
-      <AdjustBalanceModal
-        currentBalance={balance}
-        onCancel={hideModal}
-        onConfirm={(target) => {
-          const diff = target - balance;
-          if (diff === 0) return;
-
-          addExpense({
-            description: "Ajuste manual",
-            amount: diff,
-            category: section.id,
-            date: new Date().toISOString(),
-            notes: "Ajuste de balance",
-            adjustment: true,
-          });
-
-          hideModal();
-        }}
-      />
-    );
-  };
+  const handleAdjust = createAdjustBalanceHandler({ balance, sectionId: section.id, addExpense, showModal, hideModal });
 
   return (
-    <div
-      style={{
-        background: `${section.color || "var(--surface)"}1A`,
-        borderRadius: "12px",
-        padding: "1rem",
-        border: `1px solid ${section.color || "var(--border-color)"}`,
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        color: "var(--text-primary)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.75rem",
-      }}
-    >
+    <SectionCardContainer section={section}>
       <h2>
         {section.icon || "📁"} {section.name}
       </h2>
@@ -133,25 +87,10 @@ const SavingsSectionCard: React.FC<Props> = ({
                 fromSection: section,
                 onCancel: hideModal,
                 onConfirm: ({ toId, amount, notes }) => {
-                  const now = new Date().toISOString();
                   const toSection = sections.find((s) => s.id === toId);
-
-                  addExpense({
-                    description: `Transferencia a ${toSection?.icon || "📁"} ${toSection?.name || toId}`,
-                    amount: -Math.abs(amount),
-                    category: section.id,
-                    notes,
-                    date: now,
-                  });
-
-                  addExpense({
-                    description: `Transferencia desde ${section.icon || "📁"} ${section.name}`,
-                    amount: Math.abs(amount),
-                    category: toId,
-                    notes,
-                    date: now,
-                  });
-
+                  if (toSection) {
+                    createTransferExpenses(section, toSection, amount, notes ?? "", addExpense);
+                  }
                   hideModal();
                 },
               })
@@ -164,7 +103,7 @@ const SavingsSectionCard: React.FC<Props> = ({
           Ajustar balance
         </UIButton>
       </div>
-    </div>
+    </SectionCardContainer>
   );
 };
 

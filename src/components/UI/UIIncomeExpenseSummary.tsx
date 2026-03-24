@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
+import useAnimatedNumber from "../../hooks/useAnimatedNumber";
 import "./UIBalanceAmount.css";
 
 interface Props {
@@ -7,62 +8,19 @@ interface Props {
 }
 
 const UIIncomeExpenseSummary: React.FC<Props> = ({ income, totalExpenses }) => {
-  const [displayIncome, setDisplayIncome] = useState(income);
-  const [displayExpenses, setDisplayExpenses] = useState(totalExpenses);
-
-  const [incomeAnim, setIncomeAnim] = useState<"up" | "down" | "">("");
-  const [expenseAnim, setExpenseAnim] = useState<"up" | "down" | "">("");
-
-  const prevIncome = useRef(income);
-  const prevExpense = useRef(totalExpenses);
-
-  useEffect(() => {
-    animateValue(prevIncome, income, setDisplayIncome, setIncomeAnim);
-  }, [income]);
-
-  useEffect(() => {
-    animateValue(prevExpense, totalExpenses, setDisplayExpenses, setExpenseAnim);
-  }, [totalExpenses]);
-
-  const animateValue = (
-    ref: React.MutableRefObject<number>,
-    target: number,
-    setDisplay: React.Dispatch<React.SetStateAction<number>>,
-    setAnim: React.Dispatch<React.SetStateAction<"up" | "down" | "">>
-  ) => {
-    const diff = target - ref.current;
-    if (diff === 0) return;
-
-    setAnim(diff > 0 ? "up" : "down");
-
-    const stepCount = 20;
-    const step = diff / stepCount;
-    let current = ref.current;
-    let i = 0;
-
-    const interval = setInterval(() => {
-      current += step;
-      i++;
-      setDisplay(Math.round(current));
-      if (i >= stepCount) {
-        clearInterval(interval);
-        setDisplay(target);
-        setAnim("");
-        ref.current = target;
-      }
-    }, 20);
-  };
+  const { displayValue: displayIncome, animation: incomeAnim } = useAnimatedNumber(income);
+  const { displayValue: displayExpenses, animation: expenseAnim } = useAnimatedNumber(totalExpenses);
 
   return (
     <div style={{ display: "flex", gap: "1rem", fontSize: "0.9rem" }}>
       <span className={incomeAnim}>
         <span style={{ color: "var(--success-color)" }}>
-          + Ingresos: ${displayIncome.toLocaleString()}
+          + Ingresos: ${Math.round(displayIncome).toLocaleString()}
         </span>
       </span>
       <span className={expenseAnim}>
         <span style={{ color: "var(--danger-color)" }}>
-          - Gastos: ${Math.abs(displayExpenses).toLocaleString()}
+          - Gastos: ${Math.abs(Math.round(displayExpenses)).toLocaleString()}
         </span>
       </span>
     </div>

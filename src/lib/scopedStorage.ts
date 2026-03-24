@@ -17,25 +17,20 @@ export function createScopedStorage(base: StateStorage): StateStorage {
   return {
     getItem: (name: string) => {
       const key = scopedKey(name);
-      console.log("📖 getItem", { name, key });
       return base.getItem(key);
     },
     setItem: (name: string, value: string) => {
       if (_paused) {
-        console.log("⏸️ setItem bloqueado (pausado)", { name });
         return;
       }
       const key = scopedKey(name);
-      console.log("💾 setItem", { name, key, valueLength: value.length });
       return base.setItem(key, value);
     },
     removeItem: (name: string) => {
       if (_paused) {
-        console.log("⏸️ removeItem bloqueado (pausado)", { name });
         return;
       }
       const key = scopedKey(name);
-      console.log("🗑️ removeItem", { name, key });
       return base.removeItem(key);
     },
   };

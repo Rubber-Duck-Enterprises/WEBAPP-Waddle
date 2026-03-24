@@ -16,6 +16,7 @@ interface SettingsStore {
   favouriteColors: string[];
   dayStartTime: string;
   dayEndTime: string;
+  theme: "light" | "dark";
   hydrated: boolean;
   setFavouriteEmojis: (emojis: string[]) => void;
   setFavouriteColors: (colors: string[]) => void;
@@ -34,6 +35,7 @@ export const useSettingsStore = create<SettingsStore>()(
       favouriteColors: ["#4caf50", "#2196f3", "#e91e63"],
       dayStartTime: "08:00",
       dayEndTime: "22:00",
+      theme: "light",
       hydrated: false,
       setFavouriteEmojis: (emojis) => set({ favouriteEmojis: emojis }),
       setFavouriteColors: (colors) => set({ favouriteColors: colors }),
@@ -45,6 +47,10 @@ export const useSettingsStore = create<SettingsStore>()(
       onRehydrateStorage: () => (state, error) => {
         if (!error && state?.hydrated !== undefined) {
           useSettingsStore.setState({ hydrated: true });
+          document.documentElement.setAttribute(
+            "data-theme",
+            state.theme ?? "light"
+          );
         }
       },
     }

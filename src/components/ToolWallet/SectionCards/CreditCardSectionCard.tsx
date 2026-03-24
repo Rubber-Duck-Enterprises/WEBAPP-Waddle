@@ -10,6 +10,7 @@ import { useModal } from "@/context/ModalContext";
 import { useWalletStore } from "@/stores/walletStore";
 import { getPayCreditCardModal } from "@/components/Modal/Presets/Wallet/PayCreditCardModal";
 import { getAddCreditCardExpenseModal } from "@/components/Modal/Presets/Wallet/AddCreditCardExpenseModal";
+import SectionCardContainer from "./SectionCardContainer";
 
 interface Props {
   section: Section;
@@ -110,19 +111,7 @@ const CreditCardSectionCard: React.FC<Props> = ({
   };
 
   return (
-    <div
-      style={{
-        background: `${section.color || "var(--surface)"}1A`,
-        borderRadius: "12px",
-        padding: "1rem",
-        border: `1px solid ${section.color || "var(--border-color)"}`,
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        color: "var(--text-primary)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.75rem",
-      }}
-    >
+    <SectionCardContainer section={section}>
       <h2>{section.icon || "💳"} {section.name}</h2>
 
       <UICreditInfoSummary
@@ -156,7 +145,7 @@ const CreditCardSectionCard: React.FC<Props> = ({
           </UIButton>
         </div>
       </div>
-    </div>
+    </SectionCardContainer>
   );
 };
 

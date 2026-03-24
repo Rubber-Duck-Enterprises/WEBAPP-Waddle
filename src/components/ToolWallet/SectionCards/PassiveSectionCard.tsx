@@ -1,10 +1,11 @@
 import React from "react";
-import { parseISO, isWithinInterval } from "date-fns";
 import { Section, Expense } from "@/types";
+import { useSectionFinancials } from "@/hooks/useSectionFinancials";
 
 import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
 import TransactionList from "@/components/ToolWallet/Home/TransactionList";
 import UIButton from "@/components/UI/UIButton";
+import SectionCardContainer from "./SectionCardContainer";
 
 interface Props {
   section: Section;
@@ -22,35 +23,10 @@ const PassiveSectionCard: React.FC<Props> = ({
   onAdd,
 }) => {
 
-  const filteredExpenses = expenses.filter((e) => {
-    const date = parseISO(e.date);
-    return isWithinInterval(date, { start: startDate, end: endDate }) &&
-      (e.category === section.id || e.source === section.id);
-  });
-
-  const income = 0;
-
-  const totalExpenses = filteredExpenses
-    .filter((e) => e.amount < 0)
-    .reduce((acc, e) => acc + e.amount, 0);
-
-  const balance = income + totalExpenses;
-  const latest = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3);
+  const { balance, latest } = useSectionFinancials({ section, expenses, startDate, endDate });
 
   return (
-    <div
-      style={{
-        background: `${section.color || "var(--surface)"}1A`,
-        borderRadius: "12px",
-        padding: "1rem",
-        border: `1px solid ${section.color || "var(--border-color)"}`,
-        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        color: "var(--text-primary)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.75rem",
-      }}
-    >
+    <SectionCardContainer section={section}>
       <h2>
         {section.icon || "📁"} {section.name}
       </h2>
@@ -63,7 +39,7 @@ const PassiveSectionCard: React.FC<Props> = ({
           - Gasto
         </UIButton>
       </div>
-    </div>
+    </SectionCardContainer>
   );
 };
 

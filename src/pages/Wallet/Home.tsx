@@ -26,7 +26,7 @@ const WalletHome: React.FC = () => {
   } = useWalletStore();
   const initializedRef = useRef(false);
 
-  const [onlyGeneral, setOnlyGeneral] = useState<boolean>(false);
+  const [onlyGeneral] = useState<boolean>(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
@@ -81,35 +81,6 @@ const WalletHome: React.FC = () => {
   const latest = [...allExpensesInRange]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3);
-
-  const openModal = (type: "income" | "expense") => {
-    const commonProps = {
-      sectionId: "general",
-      onCancel: hideModal,
-    };
-
-    if (type === "income") {
-      showModal(
-        getAddIncomeModal({
-          ...commonProps,
-          onConfirm: ({ description, amount, notes, category }) => {
-            addExpense({ description, amount, notes, category, date: new Date().toISOString() });
-            hideModal();
-          },
-        })
-      );
-    } else {
-      showModal(
-        getAddExpenseModal({
-          ...commonProps,
-          onConfirm: ({ description, amount, notes, source }) => {
-            addExpense({ description, amount, notes, source, category: "general", date: new Date().toISOString() });
-            hideModal();
-          },
-        })
-      );
-    }
-  };
 
   const openSectionModal = (type: "income" | "expense", sectionId: string) => {
     const section = sections.find((s) => s.id === sectionId);
@@ -186,10 +157,6 @@ const WalletHome: React.FC = () => {
           balance={balance}
           latest={latest}
           sections={sections}
-          onlyGeneral={onlyGeneral}
-          expenses={allExpensesInRange}
-          setOnlyGeneral={setOnlyGeneral}
-          openModal={openModal}
         />
       </div>
 

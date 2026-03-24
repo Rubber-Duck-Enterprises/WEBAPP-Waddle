@@ -57,7 +57,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
         try {
           const prevScope = useSessionStore.getState().scope;
-          // const isFirstLoad = lastHandledScopeRef.current === null;
 
           if (u) {
             console.log("👤 Usuario autenticado", { uid: u.uid, prevScope, nextScope });
@@ -66,7 +65,6 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
             setUser(u, false);
 
             // 🚧 MIGRACIÓN TEMPORALMENTE DESHABILITADA PARA DEBUG
-            // const isAnonToUser = prevScope === "anon" && nextScope !== "anon" && !isFirstLoad;
             const isAnonToUser = false;
 
             if (isAnonToUser) {

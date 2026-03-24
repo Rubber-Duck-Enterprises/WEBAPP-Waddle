@@ -229,30 +229,6 @@ const BackupPage: React.FC = () => {
               </UIButton>
             </div>
 
-            {/* Free Tier indicator */}
-            {/* {!isPro && (
-              // <div
-              //   style={{
-              //     backgroundColor: "var(--surface-alt, var(--surface))",
-              //     border: "1px solid var(--border-color)",
-              //     borderRadius: "6px",
-              //     padding: "0.75rem",
-              //     fontSize: "0.85rem",
-              //     color: "var(--text-secondary)",
-              //     display: "flex",
-              //     alignItems: "center",
-              //     justifyContent: "space-between",
-              //     gap: "0.5rem",
-              //     flexWrap: "wrap",
-              //   }}
-              // >
-              //   <span>🔒 Plan gratuito: 1 slot de respaldo en la nube</span>
-              //   <UIButton variant="primary" style={{ fontSize: "0.8rem", padding: "0.4rem 0.75rem" }}>
-              //     ⭐ Actualizar a Pro
-              //   </UIButton>
-              // </div>
-            )} */}
-
             {/* Pro history */}
             {isPro && (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>

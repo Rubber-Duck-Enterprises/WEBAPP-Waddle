@@ -12,10 +12,6 @@ interface Props {
   balance: number;
   latest: Expense[];
   sections: Section[];
-  onlyGeneral: boolean;
-  expenses: Expense[];
-  setOnlyGeneral: (value: boolean) => void;
-  openModal: (type: "income" | "expense") => void;
 }
 
 const BalanceCard: React.FC<Props> = ({ 
