@@ -57,6 +57,7 @@ interface ShoppingState {
   updateTripStatus: (tripId: string, status: ShoppingTripStatus) => void;
   startTrip: (tripId: string) => void;
   completeTrip: (tripId: string) => void;
+  cancelTrip: (tripId: string) => void;
   deleteTrip: (tripId: string) => void;
 
   // --- Items dentro de un trip ---
@@ -241,6 +242,15 @@ export const useShoppingStore = create<ShoppingState>()(
       },
       deleteTrip: (tripId) => {
         set({ trips: get().trips.filter((t) => t.id !== tripId) });
+      },
+      cancelTrip: (tripId) => {
+        set({
+          trips: get().trips.map((t) =>
+            t.id === tripId
+              ? { ...t, status: "cancelled" as const, completedAt: new Date().toISOString() }
+              : t
+          ),
+        });
       },
 
       // --- Items dentro de un trip ---

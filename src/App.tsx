@@ -10,6 +10,7 @@ import Movements from "@/pages/Wallet/Movements";
 import ShoppingHome from "@/pages/Shopping/Home";
 import NewTrip from "@/pages/Shopping/NewTrip";
 import ActiveTrip from "@/pages/Shopping/ActiveTrip";
+import EditTrip from "@/pages/Shopping/EditTrip";
 import ShoppingHistory from "@/pages/Shopping/History";
 import ShoppingReports from "@/pages/Shopping/Reports";
 import ShoppingStores from "@/pages/Shopping/Stores";
@@ -121,6 +122,14 @@ const AnimatedRoutes = () => {
           element={
             <AnyUserRoute>
               <ActiveTrip />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/shopping/edit/:tripId"
+          element={
+            <AnyUserRoute>
+              <EditTrip />
             </AnyUserRoute>
           }
         />

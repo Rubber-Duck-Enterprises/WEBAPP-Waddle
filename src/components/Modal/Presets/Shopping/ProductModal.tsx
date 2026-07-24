@@ -39,8 +39,15 @@ const ProductModal: React.FC<Props> = ({ initialData, onConfirm, onCancel }) => 
   const [unit, setUnit] = useState<ShoppingItemUnit>(initialData?.unit || "unidad");
   const [category, setCategory] = useState(initialData?.category || (categories[0]?.name ?? "Otro"));
   const [price, setPrice] = useState(String(initialData?.price || ""));
+  const [priceMode, setPriceMode] = useState<"unitario" | "total">("unitario");
 
-  const totalAuto = (Number(price) || 0) * (Number(quantity) || 0);
+  const unitPrice = priceMode === "unitario"
+    ? (Number(price) || 0)
+    : (Number(quantity) || 0) > 0 ? (Number(price) || 0) / (Number(quantity) || 1) : 0;
+
+  const totalPrice = priceMode === "unitario"
+    ? (Number(price) || 0) * (Number(quantity) || 0)
+    : (Number(price) || 0);
 
   const handleConfirm = () => {
     if (!name.trim()) {
@@ -51,7 +58,7 @@ const ProductModal: React.FC<Props> = ({ initialData, onConfirm, onCancel }) => 
       showPopUp("DANGER", "La cantidad debe ser mayor a 0.");
       return;
     }
-    if (Number(price) < 0) {
+    if (unitPrice < 0) {
       showPopUp("DANGER", "El precio no puede ser negativo.");
       return;
     }
@@ -61,7 +68,7 @@ const ProductModal: React.FC<Props> = ({ initialData, onConfirm, onCancel }) => 
       quantity: Number(quantity),
       unit,
       category,
-      price: Number(price) || 0,
+      price: unitPrice,
     });
   };
 
@@ -69,7 +76,7 @@ const ProductModal: React.FC<Props> = ({ initialData, onConfirm, onCancel }) => 
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>⭐ Detalles del producto</h3>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem" }}>
         <div style={{ gridColumn: "1 / -1" }}>
           <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Nombre</label>
           <UITextInput
@@ -90,17 +97,12 @@ const ProductModal: React.FC<Props> = ({ initialData, onConfirm, onCancel }) => 
         </div>
 
         <div>
-          <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-            Total (Auto): ${totalAuto.toLocaleString()}
-          </label>
-          <UITextInput
-            type="number"
-            placeholder="Precio unitario"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            min={0}
-            step={0.01}
-          />
+          <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Medida</label>
+          <UISelect value={unit} onChange={(e) => setUnit(e.target.value as ShoppingItemUnit)}>
+            {UNITS.map((u) => (
+              <option key={u.value} value={u.value}>{u.label}</option>
+            ))}
+          </UISelect>
         </div>
 
         <div>
@@ -111,19 +113,63 @@ const ProductModal: React.FC<Props> = ({ initialData, onConfirm, onCancel }) => 
             ))}
           </UISelect>
         </div>
-
-        <div>
-          <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Medida</label>
-          <UISelect value={unit} onChange={(e) => setUnit(e.target.value as ShoppingItemUnit)}>
-            {UNITS.map((u) => (
-              <option key={u.value} value={u.value}>{u.label}</option>
-            ))}
-          </UISelect>
-        </div>
       </div>
 
-      <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", textAlign: "center" }}>
-        Precio real: ${totalAuto.toLocaleString()}
+      {/* Toggle de modo de precio */}
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <button
+          onClick={() => { setPriceMode("unitario"); setPrice(""); }}
+          style={{
+            flex: 1,
+            padding: "0.4rem",
+            borderRadius: "6px",
+            border: "1px solid var(--border-color)",
+            background: priceMode === "unitario" ? "var(--btn-primary-bg)" : "transparent",
+            color: priceMode === "unitario" ? "var(--btn-text-color)" : "var(--text-primary)",
+            fontSize: "0.8rem",
+            cursor: "pointer",
+            fontWeight: priceMode === "unitario" ? "bold" : "normal",
+          }}
+        >
+          Precio unitario
+        </button>
+        <button
+          onClick={() => { setPriceMode("total"); setPrice(""); }}
+          style={{
+            flex: 1,
+            padding: "0.4rem",
+            borderRadius: "6px",
+            border: "1px solid var(--border-color)",
+            background: priceMode === "total" ? "var(--btn-primary-bg)" : "transparent",
+            color: priceMode === "total" ? "var(--btn-text-color)" : "var(--text-primary)",
+            fontSize: "0.8rem",
+            cursor: "pointer",
+            fontWeight: priceMode === "total" ? "bold" : "normal",
+          }}
+        >
+          Precio total
+        </button>
+      </div>
+
+      {/* Input de precio */}
+      <div>
+        <UITextInput
+          type="number"
+          placeholder={priceMode === "unitario" ? "Precio unitario" : "Precio total"}
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          min={0}
+          step={0.01}
+        />
+        {/* Info secundaria abajo a la derecha */}
+        <div style={{ textAlign: "right", marginTop: "0.25rem" }}>
+          <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+            {priceMode === "unitario"
+              ? `Total: $${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : `Unitario: $${unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            }
+          </span>
+        </div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>

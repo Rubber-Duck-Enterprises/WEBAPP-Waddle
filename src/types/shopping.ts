@@ -1,6 +1,6 @@
 // Waddle Shopping — Tipos del módulo de compras
 
-export type ShoppingTripStatus = "planning" | "in_progress" | "completed";
+export type ShoppingTripStatus = "planning" | "in_progress" | "completed" | "cancelled";
 
 export type ShoppingItemUnit = "unidad" | "kg" | "L" | "g" | "ml" | "paquete";
 

@@ -20,6 +20,7 @@ const ActiveTrip: React.FC = () => {
     trips,
     startTrip,
     completeTrip,
+    cancelTrip,
     markItemInCart,
     unmarkItemFromCart,
     removeItemFromTrip,
@@ -100,6 +101,21 @@ const ActiveTrip: React.FC = () => {
     return <TripSummary trip={trip} elapsedMinutes={elapsedMinutes} onClose={() => navigate("/shopping")} />;
   }
 
+  // Si fue cancelada, redirigir
+  if (trip.status === "cancelled") {
+    return (
+      <ShoppingLayout>
+        <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-secondary)" }}>
+          <p style={{ fontSize: "2rem" }}>🚫</p>
+          <p>Esta compra fue cancelada.</p>
+          <UIButton variant="primary" onClick={() => navigate("/shopping")} style={{ marginTop: "1rem" }}>
+            Volver al inicio
+          </UIButton>
+        </div>
+      </ShoppingLayout>
+    );
+  }
+
   // Modal para agregar al carrito (confirmar precio real)
   const handleAddToCart = (item: ShoppingItem) => {
     showModal(
@@ -133,6 +149,32 @@ const ActiveTrip: React.FC = () => {
             }}
           >
             Eliminar
+          </UIButton>
+        </div>
+      </div>
+    );
+  };
+
+  const handleCancelTrip = () => {
+    showModal(
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", textAlign: "center" }}>
+        <div style={{ fontSize: "2rem" }}>🚫</div>
+        <h3 style={{ color: "var(--text-primary)" }}>Cancelar compra</h3>
+        <p style={{ color: "var(--text-secondary)" }}>
+          ¿Estás seguro de que quieres cancelar esta compra? Los productos agregados al carrito no se guardarán.
+        </p>
+        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+          <UIButton variant="default" onClick={hideModal}>Volver</UIButton>
+          <UIButton
+            variant="danger"
+            onClick={() => {
+              cancelTrip(trip.id);
+              hideModal();
+              showPopUp("INFO", "Compra cancelada.");
+              navigate("/shopping");
+            }}
+          >
+            Cancelar compra
           </UIButton>
         </div>
       </div>
@@ -251,20 +293,35 @@ const ActiveTrip: React.FC = () => {
             alignItems: "center",
           }}
         >
-          <span style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
-            Presupuesto restante
-          </span>
-          <span
+          <div>
+            <span style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+              Presupuesto restante
+            </span>
+            <div
+              style={{
+                fontWeight: "bold",
+                fontSize: "1.3rem",
+                color: trip.budget === 0
+                  ? "var(--text-primary)"
+                  : remainingBudget < 0 ? "#f44336" : "#4caf50",
+              }}
+            >
+              {trip.budget > 0 ? `$${remainingBudget.toLocaleString()}` : "$—"}
+            </div>
+          </div>
+          <button
+            onClick={handleCancelTrip}
             style={{
-              fontWeight: "bold",
-              fontSize: "1.3rem",
-              color: trip.budget === 0
-                ? "var(--text-primary)"
-                : remainingBudget < 0 ? "#f44336" : "#4caf50",
+              background: "none",
+              border: "none",
+              color: "#f44336",
+              fontSize: "0.85rem",
+              cursor: "pointer",
+              padding: "0.3rem 0",
             }}
           >
-            {trip.budget > 0 ? `$${remainingBudget.toLocaleString()}` : "$—"}
-          </span>
+            Cancelar
+          </button>
         </div>
 
         {/* Filtros */}
@@ -424,16 +481,25 @@ const AddToCartModal: React.FC<{
   onCancel: () => void;
   onConfirm: (actualPrice: number) => void;
 }> = ({ item, onCancel, onConfirm }) => {
+  const [priceMode, setPriceMode] = useState<"unitario" | "total">("unitario");
   const [price, setPrice] = useState(String(item.estimatedPrice));
   const { showPopUp } = usePopUp();
 
-  const total = (Number(price) || 0) * item.quantity;
+  // Modo unitario: el usuario ingresa precio unitario, se calcula el total
+  // Modo total: el usuario ingresa el total, se calcula el precio unitario
+  const unitPrice = priceMode === "unitario"
+    ? (Number(price) || 0)
+    : item.quantity > 0 ? (Number(price) || 0) / item.quantity : 0;
+
+  const totalPrice = priceMode === "unitario"
+    ? (Number(price) || 0) * item.quantity
+    : (Number(price) || 0);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
       <h3 style={{ color: "var(--text-primary)" }}>⭐ Detalles del producto</h3>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0.5rem" }}>
         <div style={{ gridColumn: "1 / -1" }}>
           <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Nombre</label>
           <div style={{
@@ -461,9 +527,7 @@ const AddToCartModal: React.FC<{
         </div>
 
         <div>
-          <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-            Total (Auto): ${total.toLocaleString()}
-          </label>
+          <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Medida</label>
           <div style={{
             padding: "0.5rem",
             borderRadius: "8px",
@@ -471,7 +535,7 @@ const AddToCartModal: React.FC<{
             background: "var(--input-bg)",
             color: "var(--text-primary)",
           }}>
-            ${total.toLocaleString()}
+            {item.unit}
           </div>
         </div>
 
@@ -487,25 +551,48 @@ const AddToCartModal: React.FC<{
             {item.category}
           </div>
         </div>
+      </div>
 
-        <div>
-          <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Medida</label>
-          <div style={{
-            padding: "0.5rem",
-            borderRadius: "8px",
+      {/* Toggle de modo de precio */}
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <button
+          onClick={() => { setPriceMode("unitario"); setPrice(String(item.estimatedPrice)); }}
+          style={{
+            flex: 1,
+            padding: "0.4rem",
+            borderRadius: "6px",
             border: "1px solid var(--border-color)",
-            background: "var(--input-bg)",
-            color: "var(--text-primary)",
-          }}>
-            {item.unit}
-          </div>
-        </div>
+            background: priceMode === "unitario" ? "var(--btn-primary-bg)" : "transparent",
+            color: priceMode === "unitario" ? "var(--btn-text-color)" : "var(--text-primary)",
+            fontSize: "0.8rem",
+            cursor: "pointer",
+            fontWeight: priceMode === "unitario" ? "bold" : "normal",
+          }}
+        >
+          Precio unitario
+        </button>
+        <button
+          onClick={() => { setPriceMode("total"); setPrice(String(item.estimatedPrice * item.quantity)); }}
+          style={{
+            flex: 1,
+            padding: "0.4rem",
+            borderRadius: "6px",
+            border: "1px solid var(--border-color)",
+            background: priceMode === "total" ? "var(--btn-primary-bg)" : "transparent",
+            color: priceMode === "total" ? "var(--btn-text-color)" : "var(--text-primary)",
+            fontSize: "0.8rem",
+            cursor: "pointer",
+            fontWeight: priceMode === "total" ? "bold" : "normal",
+          }}
+        >
+          Precio total
+        </button>
       </div>
 
       {/* Precio real - editable */}
       <div>
         <label style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: "bold" }}>
-          Precio real
+          {priceMode === "unitario" ? "Precio unitario real" : "Precio total real"}
         </label>
         <UITextInput
           type="number"
@@ -513,9 +600,18 @@ const AddToCartModal: React.FC<{
           onChange={(e) => setPrice(e.target.value)}
           min={0}
           step={0.01}
-          placeholder={`$${item.estimatedPrice}`}
+          placeholder={priceMode === "unitario" ? `$${item.estimatedPrice}` : `$${item.estimatedPrice * item.quantity}`}
           style={{ fontSize: "1.1rem", padding: "0.7rem", marginTop: "0.3rem" }}
         />
+        {/* Info secundaria abajo a la derecha */}
+        <div style={{ textAlign: "right", marginTop: "0.25rem" }}>
+          <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+            {priceMode === "unitario"
+              ? `Total: $${totalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : `Unitario: $${unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            }
+          </span>
+        </div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>
@@ -523,7 +619,7 @@ const AddToCartModal: React.FC<{
         <UIButton
           variant="primary"
           onClick={() => {
-            const p = Number(price);
+            const p = unitPrice;
             if (isNaN(p) || p < 0) {
               showPopUp("DANGER", "Ingresa un precio válido.");
               return;
@@ -889,6 +985,7 @@ const TripSummary: React.FC<{
   elapsedMinutes: number;
   onClose: () => void;
 }> = ({ trip, elapsedMinutes, onClose }) => {
+  const navigate = useNavigate();
   const { showModal, hideModal } = useModal();
   const { showPopUp } = usePopUp();
   const { addExpense } = useWalletStore();
@@ -896,7 +993,7 @@ const TripSummary: React.FC<{
 
   const purchasedItems = trip.items.filter((i) => i.inCart && !i.removed);
   const removedItems = trip.items.filter((i) => i.removed);
-  const skippedItems = trip.items.filter((i) => !i.inCart && !i.removed);
+  const notPurchasedItems = trip.items.filter((i) => !i.inCart && !i.removed);
 
   const totalEstimated = purchasedItems.reduce((acc, i) => acc + i.estimatedPrice * i.quantity, 0);
   const totalActual = purchasedItems.reduce((acc, i) => acc + (i.actualPrice ?? i.estimatedPrice) * i.quantity, 0);
@@ -1065,7 +1162,7 @@ const TripSummary: React.FC<{
         )}
 
         {/* Productos no encontrados / eliminados */}
-        {(removedItems.length > 0 || skippedItems.length > 0) && (
+        {(removedItems.length > 0 || notPurchasedItems.length > 0) && (
           <div
             style={{
               background: "var(--card-bg)",
@@ -1088,13 +1185,13 @@ const TripSummary: React.FC<{
                 </div>
               </>
             )}
-            {skippedItems.length > 0 && (
+            {notPurchasedItems.length > 0 && (
               <>
                 <h3 style={{ fontSize: "0.85rem", color: "#ff9800", marginBottom: "0.4rem" }}>
-                  ⏭️ No comprados ({skippedItems.length})
+                  🕐 No comprados ({notPurchasedItems.length})
                 </h3>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
-                  {skippedItems.map((item) => (
+                  {notPurchasedItems.map((item) => (
                     <span key={item.id} style={{ fontSize: "0.75rem", color: "var(--text-secondary)", padding: "0.2rem 0.4rem", borderRadius: "4px", border: "1px solid #ff980044" }}>
                       {item.name}
                     </span>
@@ -1119,9 +1216,18 @@ const TripSummary: React.FC<{
         )}
 
         {/* Botón cerrar */}
-        <UIButton variant="primary" fullWidth onClick={onClose}>
-          Volver al inicio
-        </UIButton>
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <UIButton
+            variant="default"
+            fullWidth
+            onClick={() => navigate(`/shopping/edit/${trip.id}`)}
+          >
+            ✏️ Editar
+          </UIButton>
+          <UIButton variant="primary" fullWidth onClick={onClose}>
+            Volver al inicio
+          </UIButton>
+        </div>
       </div>
     </ShoppingLayout>
   );

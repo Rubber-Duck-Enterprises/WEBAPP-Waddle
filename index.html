@@ -96,7 +96,242 @@
     </script>
   </head>
   <body>
+    <!-- Splash loader — se remueve solo después de la animación -->
+    <div id="waddle-splash">
+      <div class="splash-bg"></div>
+      <!-- Nubes (tema claro) -->
+      <div class="splash-clouds">
+        <div class="splash-cloud cloud-1">☁️</div>
+        <div class="splash-cloud cloud-2">☁️</div>
+        <div class="splash-cloud cloud-3">⛅</div>
+        <div class="splash-cloud cloud-4">☁️</div>
+      </div>
+      <!-- Estrellas (tema oscuro) -->
+      <div class="splash-stars">
+        <div class="splash-star star-1">✦</div>
+        <div class="splash-star star-2">✧</div>
+        <div class="splash-star star-3">✦</div>
+        <div class="splash-star star-4">✧</div>
+        <div class="splash-star star-5">✦</div>
+        <div class="splash-star star-6">⭐</div>
+        <div class="splash-star star-7">✧</div>
+        <div class="splash-star star-8">✦</div>
+      </div>
+      <div class="splash-emoji splash-sun">☀️</div>
+      <div class="splash-emoji splash-moon">🌙</div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <style>
+      #waddle-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        overflow: hidden;
+      }
+
+      /* 
+        El fondo es 3x la altura de la pantalla para tener zonas sólidas
+        arriba (claro) y abajo (oscuro) con una franja de transición en medio.
+        Se desplaza verticalmente para revelar solo un color al final.
+      */
+      #waddle-splash .splash-bg {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 300%;
+        top: -100%; /* empieza centrado: zona de transición visible */
+        /*
+          0%–40% = blanco sólido
+          60%–100% = oscuro sólido
+          40%–60% = transición entre ambos
+        */
+        background: linear-gradient(
+          to bottom,
+          #121212 0%,
+          #121212 40%,
+          #ffffff 60%,
+          #ffffff 100%
+        );
+        animation: splash-slide-light 1.6s ease-in-out forwards;
+      }
+
+      [data-theme="dark"] #waddle-splash .splash-bg {
+        animation: splash-slide-dark 1.6s ease-in-out forwards;
+      }
+
+      /* Emojis */
+      #waddle-splash .splash-emoji {
+        position: absolute;
+        font-size: 3rem;
+        z-index: 1;
+        transition: none;
+      }
+
+      /* Sol — arriba derecha inicialmente */
+      #waddle-splash .splash-sun {
+        top: 15%;
+        right: 15%;
+        animation: splash-sun-light 1.6s ease-in-out forwards;
+      }
+
+      /* Luna — abajo izquierda inicialmente */
+      #waddle-splash .splash-moon {
+        top: 75%;
+        left: 15%;
+        animation: splash-moon-light 1.6s ease-in-out forwards;
+      }
+
+      /* === TEMA CLARO === */
+      /* Desplaza el degradado hacia arriba hasta que solo se vea la zona blanca */
+      @keyframes splash-slide-light {
+        0% { top: -100%; }
+        100% { top: -200%; }
+      }
+
+      /* Sol se mueve arriba centrado */
+      @keyframes splash-sun-light {
+        0% { top: 15%; right: 15%; transform: translate(0, 0) scale(1); }
+        100% { top: 10%; right: 50%; transform: translate(50%, 0) scale(1.4); }
+      }
+
+      /* Luna se desvanece en tema claro */
+      @keyframes splash-moon-light {
+        0% { opacity: 1; top: 75%; left: 15%; transform: translate(0, 0) scale(1); }
+        50% { opacity: 0.2; }
+        100% { opacity: 0; top: 75%; left: 15%; transform: translate(0, 0) scale(0.8); }
+      }
+
+      /* === TEMA OSCURO === */
+      [data-theme="dark"] #waddle-splash .splash-sun {
+        animation: splash-sun-dark 1.6s ease-in-out forwards;
+      }
+
+      [data-theme="dark"] #waddle-splash .splash-moon {
+        animation: splash-moon-dark 1.6s ease-in-out forwards;
+      }
+
+      /* Desplaza el degradado hacia abajo hasta que solo se vea la zona oscura */
+      @keyframes splash-slide-dark {
+        0% { top: -100%; }
+        100% { top: 0%; }
+      }
+
+      /* Sol se desvanece en tema oscuro */
+      @keyframes splash-sun-dark {
+        0% { opacity: 1; top: 15%; right: 15%; transform: translate(0, 0) scale(1); }
+        50% { opacity: 0.2; }
+        100% { opacity: 0; top: 15%; right: 15%; transform: translate(0, 0) scale(0.8); }
+      }
+
+      /* Luna se mueve arriba centrado */
+      @keyframes splash-moon-dark {
+        0% { top: 75%; left: 15%; transform: translate(0, 0) scale(1); }
+        100% { top: 10%; left: 50%; transform: translate(-50%, 0) scale(1.4); }
+      }
+
+      /* Fade out del splash — empieza DESPUÉS de que la animación del gradiente termine */
+      #waddle-splash {
+        animation: splash-fadeout 0.5s ease-out 1.8s forwards;
+      }
+
+      @keyframes splash-fadeout {
+        0% { opacity: 1; }
+        100% { opacity: 0; pointer-events: none; }
+      }
+
+      /* === NUBES (tema claro) === */
+      #waddle-splash .splash-clouds {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        opacity: 0;
+        animation: clouds-fadein 1s ease-out 0.6s forwards;
+      }
+
+      /* Ocultar nubes en tema oscuro */
+      [data-theme="dark"] #waddle-splash .splash-clouds {
+        display: none;
+      }
+
+      #waddle-splash .splash-cloud {
+        position: absolute;
+        font-size: 2.5rem;
+        opacity: 0.85;
+        animation: cloud-float 3s ease-in-out infinite alternate;
+      }
+
+      .cloud-1 { top: 20%; left: 10%; font-size: 2rem; animation-delay: 0s; }
+      .cloud-2 { top: 30%; right: 8%; font-size: 3rem; animation-delay: 0.5s; }
+      .cloud-3 { top: 45%; left: 25%; font-size: 2.2rem; animation-delay: 1s; }
+      .cloud-4 { top: 15%; right: 30%; font-size: 1.8rem; animation-delay: 0.3s; }
+
+      @keyframes clouds-fadein {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes cloud-float {
+        0% { transform: translateX(0) translateY(0); }
+        100% { transform: translateX(8px) translateY(-4px); }
+      }
+
+      /* === ESTRELLAS (tema oscuro) === */
+      #waddle-splash .splash-stars {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: none;
+      }
+
+      [data-theme="dark"] #waddle-splash .splash-stars {
+        display: block;
+        opacity: 0;
+        animation: stars-fadein 1s ease-out 0.6s forwards;
+      }
+
+      #waddle-splash .splash-star {
+        position: absolute;
+        color: #ffffff;
+        opacity: 0;
+        animation: star-twinkle 1.5s ease-in-out infinite alternate;
+      }
+
+      .star-1 { top: 12%; left: 20%; font-size: 1rem; animation-delay: 0.2s; }
+      .star-2 { top: 25%; right: 25%; font-size: 1.4rem; animation-delay: 0.6s; }
+      .star-3 { top: 18%; left: 55%; font-size: 0.8rem; animation-delay: 0.9s; }
+      .star-4 { top: 35%; left: 12%; font-size: 1.2rem; animation-delay: 0.4s; }
+      .star-5 { top: 40%; right: 15%; font-size: 0.9rem; animation-delay: 1.1s; }
+      .star-6 { top: 8%; left: 40%; font-size: 1.3rem; animation-delay: 0.7s; }
+      .star-7 { top: 50%; left: 65%; font-size: 1.1rem; animation-delay: 0.3s; }
+      .star-8 { top: 28%; right: 45%; font-size: 0.7rem; animation-delay: 1.3s; }
+
+      @keyframes stars-fadein {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+
+      @keyframes star-twinkle {
+        0% { opacity: 0.3; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1.2); }
+      }
+    </style>
+    <script>
+      // Remueve el splash del DOM una vez completada la animación
+      (function() {
+        var splash = document.getElementById('waddle-splash');
+        if (splash) {
+          splash.addEventListener('animationend', function(e) {
+            if (e.animationName === 'splash-fadeout') {
+              splash.remove();
+            }
+          });
+          // Safety: remover después de 4s por si algo falla
+          setTimeout(function() {
+            if (splash.parentNode) splash.remove();
+          }, 4000);
+        }
+      })();
+    </script>
   </body>
 </html>

@@ -1,17 +1,21 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useShoppingStore } from "@/stores/shoppingStore";
+import { useModal } from "@/context/ModalContext";
+import { usePopUp } from "@/context/PopUpContext";
 import ShoppingLayout from "@/layouts/ShoppingLayout";
 import UIButton from "@/components/UI/UIButton";
 import UITextInput from "@/components/UI/UITextInput";
-import type { ShoppingTrip } from "@/types/shopping";
+import TripCard from "@/components/Shopping/TripCard";
 
 const ITEMS_PER_PAGE = 5;
 type RangeType = "todo" | "semana" | "mes";
 
 const ShoppingHome: React.FC = () => {
   const navigate = useNavigate();
-  const { trips, monthlyBudget, setMonthlyBudget } = useShoppingStore();
+  const { showModal, hideModal } = useModal();
+  const { showPopUp } = usePopUp();
+  const { trips, monthlyBudget, setMonthlyBudget, cancelTrip } = useShoppingStore();
   const [page, setPage] = useState(0);
   const [rangeType, setRangeType] = useState<RangeType>("mes");
   const [editingBudget, setEditingBudget] = useState(false);
@@ -63,6 +67,7 @@ const ShoppingHome: React.FC = () => {
       in_progress: 0,
       planning: 1,
       completed: 2,
+      cancelled: 3,
     };
     return [...trips].sort((a, b) => {
       const orderDiff = statusOrder[a.status] - statusOrder[b.status];
@@ -79,6 +84,31 @@ const ShoppingHome: React.FC = () => {
     const value = Number(budgetInput) || 0;
     setMonthlyBudget(value);
     setEditingBudget(false);
+  };
+
+  const handleCancelTrip = (tripId: string, storeName: string) => {
+    showModal(
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", textAlign: "center" }}>
+        <div style={{ fontSize: "2rem" }}>🚫</div>
+        <h3 style={{ color: "var(--text-primary)" }}>Cancelar compra</h3>
+        <p style={{ color: "var(--text-secondary)" }}>
+          ¿Estás seguro de que quieres cancelar la compra en {storeName}?
+        </p>
+        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+          <UIButton variant="default" onClick={hideModal}>Volver</UIButton>
+          <UIButton
+            variant="danger"
+            onClick={() => {
+              cancelTrip(tripId);
+              hideModal();
+              showPopUp("INFO", "Compra cancelada.");
+            }}
+          >
+            Cancelar compra
+          </UIButton>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -242,6 +272,9 @@ const ShoppingHome: React.FC = () => {
                 key={trip.id}
                 trip={trip}
                 onAction={() => navigate(`/shopping/trip/${trip.id}`)}
+                onEdit={() => navigate(`/shopping/edit/${trip.id}`)}
+                onViewDetails={() => navigate(`/shopping/trip/${trip.id}`)}
+                onCancel={() => handleCancelTrip(trip.id, trip.store)}
               />
             ))}
             {hasMore && (
@@ -332,120 +365,6 @@ const BudgetBar: React.FC<{ spent: number; budget: number; exceed: number }> = (
             <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#ff9800", display: "inline-block" }} />
             Excedente
           </span>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// --- Tarjeta de compra ---
-const TripCard: React.FC<{
-  trip: ShoppingTrip;
-  onAction: () => void;
-}> = ({ trip, onAction }) => {
-  // Balance = presupuesto de la lista - lo gastado en esa lista
-  const balance = trip.status === "completed"
-    ? trip.budget - trip.actualTotal
-    : trip.budget > 0
-      ? trip.budget - trip.estimatedTotal
-      : 0;
-  const isPositive = balance >= 0;
-
-  const statusConfig: Record<string, { text: string; color: string; borderColor: string; dot: string }> = {
-    planning: { text: "Pendiente", color: "var(--text-secondary)", borderColor: "var(--border-color)", dot: "⚫" },
-    in_progress: { text: "En proceso", color: "#ff9800", borderColor: "#ff9800", dot: "🟡" },
-    completed: {
-      text: isPositive ? "En el presupuesto" : "Excedente",
-      color: isPositive ? "#4caf50" : "#f44336",
-      borderColor: isPositive ? "#4caf50" : "#f44336",
-      dot: "🟢",
-    },
-  };
-
-  const config = statusConfig[trip.status];
-
-  const formatDate = (iso: string) => {
-    const date = new Date(iso);
-    return date.toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric" });
-  };
-
-  return (
-    <div
-      style={{
-        background: "var(--card-bg)",
-        borderRadius: "12px",
-        padding: "1rem",
-        border: `2px solid ${config.borderColor}`,
-        cursor: trip.status !== "completed" ? "pointer" : undefined,
-      }}
-      onClick={trip.status !== "completed" ? onAction : undefined}
-    >
-      {/* Fila superior: tienda + balance */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "1rem" }}>⚙️</span>
-            <span style={{ fontWeight: "bold", fontSize: "1.05rem", color: "var(--text-primary)" }}>
-              {trip.store}
-            </span>
-          </div>
-          <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.15rem" }}>
-            {trip.status === "planning"
-              ? "● Pendiente"
-              : formatDate(trip.completedAt || trip.createdAt)}
-          </div>
-        </div>
-
-        <div style={{ textAlign: "right" }}>
-          <div
-            style={{
-              fontWeight: "bold",
-              fontSize: "1.4rem",
-              color: trip.status === "completed"
-                ? (isPositive ? "#4caf50" : "#f44336")
-                : trip.budget > 0
-                  ? (isPositive ? "#4caf50" : "#f44336")
-                  : "var(--text-primary)",
-            }}
-          >
-            {trip.status === "completed"
-              ? `${isPositive ? "+" : "-"}$${Math.abs(balance).toLocaleString()}`
-              : trip.budget > 0
-                ? `${isPositive ? "+" : "-"}$${Math.abs(balance).toLocaleString()}`
-                : `$${trip.estimatedTotal.toLocaleString()}`}
-          </div>
-          <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
-            {trip.budget > 0 ? "Presupuesto" : "Estimado"}
-          </div>
-        </div>
-      </div>
-
-      {/* Detalle de estimado/gastado/presupuesto */}
-      <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
-        <span>Estimado: ${trip.estimatedTotal.toLocaleString()}</span>
-        {trip.status === "completed" && (
-          <span>Gastado: ${trip.actualTotal.toLocaleString()}</span>
-        )}
-        {trip.budget > 0 && (
-          <span>Presupuesto: ${trip.budget.toLocaleString()}</span>
-        )}
-      </div>
-
-      {/* Pie: estado + acción */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem" }}>
-        <span style={{ fontSize: "0.75rem", color: config.color, fontWeight: "bold" }}>
-          {config.text}
-        </span>
-        {trip.status === "completed" && (
-          <span style={{ fontSize: "0.75rem", color: "#4caf50" }}>● Comprada</span>
-        )}
-        {trip.status !== "completed" && (
-          <UIButton
-            variant="primary"
-            style={{ fontSize: "0.75rem", padding: "0.3rem 0.7rem" }}
-          >
-            {trip.status === "planning" ? "Comprar" : "Continuar"}
-          </UIButton>
         )}
       </div>
     </div>
