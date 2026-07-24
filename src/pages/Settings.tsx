@@ -142,12 +142,18 @@ const Settings: React.FC = () => {
             value={startPath}
             onChange={(e) => {
               setSetting("startPath", e.target.value);
-              const label = e.target.value === "/wallet" ? "Waddle Wallet" : "Waddle List";
+              const labels: Record<string, string> = {
+                "/wallet": "Waddle Wallet",
+                "/list": "Waddle List",
+                "/shopping": "Waddle Shopping",
+              };
+              const label = labels[e.target.value] || e.target.value;
               showPopUp("SUCCESS", `Inicio cambiado a ${label}`);
             }}
           >
             <option value="/wallet">Waddle Wallet</option>
             <option value="/list">Waddle List</option>
+            <option value="/shopping">Waddle Shopping</option>
           </UISelect>
         </UISettingsCard>
 

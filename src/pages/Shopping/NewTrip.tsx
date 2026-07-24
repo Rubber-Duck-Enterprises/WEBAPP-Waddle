@@ -175,7 +175,14 @@ const NewTrip: React.FC = () => {
   };
 
   // Si no hay lista seleccionada, mostrar todos los productos conocidos
-  const displayItems = selectedListId ? items : (items.length > 0 ? items : allKnownProducts);
+  // Siempre usar allKnownProducts como base cuando no hay lista, para no ocultar productos al seleccionar
+  // También incluir productos agregados manualmente que no estén en allKnownProducts
+  const displayItems = useMemo(() => {
+    if (selectedListId) return items;
+    const knownIds = new Set(allKnownProducts.map((p) => p.id));
+    const manuallyAdded = items.filter((i) => !knownIds.has(i.id));
+    return [...manuallyAdded, ...allKnownProducts];
+  }, [selectedListId, items, allKnownProducts]);
 
   const handleListChange = (value: string) => {
     setSelectedListId(value);

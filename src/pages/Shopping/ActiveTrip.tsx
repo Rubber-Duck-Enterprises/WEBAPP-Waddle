@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useShoppingStore } from "@/stores/shoppingStore";
+import { useWalletStore } from "@/stores/walletStore";
 import { useModal } from "@/context/ModalContext";
 import { usePopUp } from "@/context/PopUpContext";
 import ShoppingLayout from "@/layouts/ShoppingLayout";
@@ -28,7 +29,11 @@ const ActiveTrip: React.FC = () => {
   const trip = trips.find((t) => t.id === tripId);
   const [filter, setFilter] = useState<FilterTab>("todos");
   const [searchTerm, setSearchTerm] = useState("");
-  const [startTime] = useState(() => Date.now());
+  const [startTime] = useState(() => {
+    // Usar startedAt persistido para que el timer sobreviva navegación
+    if (trip?.startedAt) return new Date(trip.startedAt).getTime();
+    return Date.now();
+  });
   const [showSummary, setShowSummary] = useState(false);
   const [elapsedMinutes, setElapsedMinutes] = useState(0);
 
@@ -759,12 +764,136 @@ const AddMoreModal: React.FC<{
   );
 };
 
+// --- Modal para registrar compra en wallet ---
+const RegisterInWalletModal: React.FC<{
+  totalActual: number;
+  storeName: string;
+  tripDate: string;
+  onCancel: () => void;
+  onConfirm: (sectionId: string) => void;
+}> = ({ totalActual, storeName, tripDate, onCancel, onConfirm }) => {
+  const { sections } = useWalletStore();
+  const [selectedSection, setSelectedSection] = useState<string>("");
+
+  // Filtrar solo secciones que pueden tener gastos (standard, card, passive)
+  const availableSections = sections.filter((s) => s.type !== "savings");
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: "2rem" }}>💳</div>
+        <h3 style={{ color: "var(--text-primary)", margin: "0.3rem 0" }}>Registrar en Wallet</h3>
+        <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem" }}>
+          ¿Con qué apartado pagaste esta compra?
+        </p>
+      </div>
+
+      {/* Resumen del gasto */}
+      <div
+        style={{
+          background: "var(--card-bg)",
+          borderRadius: "10px",
+          padding: "0.75rem",
+          border: "1px solid var(--border-color)",
+          textAlign: "center",
+        }}
+      >
+        <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>Total a registrar</div>
+        <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#f44336" }}>
+          -${totalActual.toLocaleString()}
+        </div>
+        <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
+          🏬 {storeName} · {new Date(tripDate).toLocaleDateString("es-MX")}
+        </div>
+      </div>
+
+      {/* Selector de apartado */}
+      {availableSections.length === 0 ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "1rem",
+            color: "var(--text-secondary)",
+            fontSize: "0.85rem",
+          }}
+        >
+          No tienes apartados creados. Crea uno en Wallet → Apartados.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <label style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: "bold" }}>
+            Selecciona un apartado:
+          </label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", maxHeight: "200px", overflowY: "auto" }}>
+            {availableSections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => setSelectedSection(section.id)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.6rem",
+                  padding: "0.7rem 0.8rem",
+                  borderRadius: "10px",
+                  border: selectedSection === section.id
+                    ? "2px solid var(--btn-primary-bg)"
+                    : "1px solid var(--border-color)",
+                  background: selectedSection === section.id
+                    ? "var(--btn-primary-bg)22"
+                    : "var(--card-bg)",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <span style={{ fontSize: "1.3rem" }}>{section.icon || "📁"}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: "0.9rem", fontWeight: "600", color: "var(--text-primary)" }}>
+                    {section.name}
+                  </div>
+                  <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
+                    {section.type === "card" ? "💳 Tarjeta" : section.type === "passive" ? "🏦 Pasivo" : "📂 Estándar"}
+                  </div>
+                </div>
+                {selectedSection === section.id && (
+                  <span style={{ color: "var(--btn-primary-bg)", fontWeight: "bold" }}>✓</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Botones */}
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <UIButton variant="default" fullWidth onClick={onCancel}>
+          Omitir
+        </UIButton>
+        <UIButton
+          variant="primary"
+          fullWidth
+          disabled={!selectedSection}
+          onClick={() => onConfirm(selectedSection)}
+          style={{ opacity: selectedSection ? 1 : 0.5 }}
+        >
+          Registrar gasto
+        </UIButton>
+      </div>
+    </div>
+  );
+};
+
 // --- Pantalla de resumen de compra ---
 const TripSummary: React.FC<{
   trip: import("@/types/shopping").ShoppingTrip;
   elapsedMinutes: number;
   onClose: () => void;
 }> = ({ trip, elapsedMinutes, onClose }) => {
+  const { showModal, hideModal } = useModal();
+  const { showPopUp } = usePopUp();
+  const { addExpense } = useWalletStore();
+  const [registeredInWallet, setRegisteredInWallet] = useState(false);
+
   const purchasedItems = trip.items.filter((i) => i.inCart && !i.removed);
   const removedItems = trip.items.filter((i) => i.removed);
   const skippedItems = trip.items.filter((i) => !i.inCart && !i.removed);
@@ -786,6 +915,32 @@ const TripSummary: React.FC<{
   );
 
   const budgetDiff = trip.budget > 0 ? trip.budget - totalActual : null;
+
+  // Handler para mostrar el modal de registrar en wallet
+  const handleRegisterInWallet = () => {
+    showModal(
+      <RegisterInWalletModal
+        totalActual={totalActual}
+        storeName={trip.store}
+        tripDate={trip.completedAt || trip.createdAt}
+        onCancel={hideModal}
+        onConfirm={(sectionId) => {
+          addExpense({
+            description: `Compra en ${trip.store}`,
+            amount: -totalActual,
+            category: "Supermercado",
+            source: sectionId,
+            date: trip.completedAt || new Date().toISOString(),
+            kind: "expense",
+            notes: `${purchasedItems.length} productos · Lista: ${trip.listName}`,
+          });
+          hideModal();
+          setRegisteredInWallet(true);
+          showPopUp("SUCCESS", "Gasto registrado en Wallet ✅");
+        }}
+      />
+    );
+  };
 
   return (
     <ShoppingLayout>
@@ -948,6 +1103,19 @@ const TripSummary: React.FC<{
               </>
             )}
           </div>
+        )}
+
+        {/* Botón registrar en wallet */}
+        {totalActual > 0 && (
+          <UIButton
+            variant={registeredInWallet ? "default" : "secondary"}
+            fullWidth
+            onClick={handleRegisterInWallet}
+            disabled={registeredInWallet}
+            style={{ opacity: registeredInWallet ? 0.6 : 1 }}
+          >
+            {registeredInWallet ? "✅ Registrado en Wallet" : "💳 Registrar gasto en Wallet"}
+          </UIButton>
         )}
 
         {/* Botón cerrar */}
