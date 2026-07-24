@@ -2,33 +2,32 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronDown } from "react-icons/fi";
 import { Expense, Section } from "@/types";
+import styles from "./TransactionList.module.css";
 
 interface Props {
   latest: Expense[];
   sections: Section[];
+  defaultOpen?: boolean;
 }
 
-const TransactionList: React.FC<Props> = ({ latest, sections }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const TransactionList: React.FC<Props> = ({ latest, sections, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <>
       <div
-        style={{
-          alignItems: "center",
-          cursor: "pointer",
-          display: "flex",
-          justifyContent: "space-between",
-        }}
+        className={styles.header}
         onClick={() => setIsOpen(!isOpen)}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isOpen}
+        aria-label="Mostrar últimos movimientos"
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setIsOpen(!isOpen); }}
       >
-        <h4 style={{ marginBottom: "0.5rem" }}>Últimos movimientos</h4>
+        <h4>Últimos movimientos</h4>
         <FiChevronDown
           size={24}
-          style={{
-            transition: "transform 0.2s ease",
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-          }}
+          className={`${styles.chevron} ${isOpen ? styles.chevronOpen : ""}`}
         />
       </div>
 
@@ -41,46 +40,32 @@ const TransactionList: React.FC<Props> = ({ latest, sections }) => {
             transition={{ duration: 0.3, ease: "easeInOut" }}
             style={{ overflow: "hidden" }}
           >
-            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            <ul className={styles.list}>
               {latest.map((tx) => {
                 const section = sections.find((s) => s.id === tx.category);
                 const source = tx.source ? sections.find((s) => s.id === tx.source) : null;
 
                 return (
-                  <motion.div
-                    key={tx.id}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "0.5rem 0",
-                      borderBottom: "1px solid var(--border-color)",
-                      flexDirection: "column",
-                      color: "var(--text-primary)",
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <motion.li key={tx.id} className={styles.item}>
+                    <div className={styles.itemRow}>
                       <span>{tx.description}</span>
-                      <span
-                        style={{
-                          color: tx.amount < 0 ? "var(--danger-color)" : "var(--success-color)",
-                        }}
-                      >
+                      <span className={tx.amount < 0 ? styles.amountNegative : styles.amountPositive}>
                         {tx.amount < 0 ? "-" : "+"}${Math.abs(tx.amount).toLocaleString()}
                       </span>
                     </div>
 
                     {section && (
-                      <small style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>
+                      <small className={styles.sectionLabel}>
                         {section.icon || "📁"} {section.name}
                       </small>
                     )}
 
                     {source && source.id !== tx.category && (
-                      <small style={{ color: "var(--text-secondary)", fontSize: "0.75rem" }}>
+                      <small className={styles.sourceLabel}>
                         💳 Pagado desde {source.icon || "🏦"} {source.name}
                       </small>
                     )}
-                  </motion.div>
+                  </motion.li>
                 );
               })}
             </ul>

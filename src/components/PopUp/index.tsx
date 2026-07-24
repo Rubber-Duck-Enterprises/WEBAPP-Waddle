@@ -30,9 +30,10 @@ type ToastProps = {
   content: string;
   onClose: (id: string) => void;
   autoCloseMs?: number;
+  action?: { label: string; onClick: () => void };
 };
 
-function Toast({ id, variant, content, onClose, autoCloseMs = 4500 }: ToastProps) {
+function Toast({ id, variant, content, onClose, autoCloseMs = 4500, action }: ToastProps) {
   const s = stylesByVariant[variant];
 
   useEffect(() => {
@@ -118,6 +119,29 @@ function Toast({ id, variant, content, onClose, autoCloseMs = 4500 }: ToastProps
           {content}
         </div>
 
+        {action && (
+          <button
+            onClick={() => {
+              action.onClick();
+              onClose(id);
+            }}
+            style={{
+              padding: "0.25rem 0.5rem",
+              border: `1px solid ${s.border}`,
+              borderRadius: 6,
+              background: "transparent",
+              color: s.border,
+              cursor: "pointer",
+              fontSize: 12,
+              fontWeight: "bold",
+              whiteSpace: "nowrap",
+              flex: "0 0 auto",
+            }}
+          >
+            {action.label}
+          </button>
+        )}
+
         <button
           onClick={() => onClose(id)}
           aria-label="Cerrar notificación"
@@ -175,6 +199,7 @@ export default function PopUp() {
             content={t.content}
             onClose={hidePopUp}
             autoCloseMs={4500}
+            action={t.action}
           />
         ))}
       </AnimatePresence>

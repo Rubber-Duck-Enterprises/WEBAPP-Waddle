@@ -7,10 +7,15 @@ export type PopUpItem = {
   variant: PopUpVariant;
   content: string;
   createdAt: number;
+  /** Acción opcional que se muestra como botón en el toast */
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 };
 
 interface PopUpContextProps {
-  showPopUp: (variant: PopUpVariant, content: string) => string; // devuelve id
+  showPopUp: (variant: PopUpVariant, content: string, action?: PopUpItem["action"]) => string;
   hidePopUp: (id: string) => void;
   clearAll: () => void;
   items: PopUpItem[];
@@ -25,9 +30,9 @@ const uid = () => {
 export const PopUpProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<PopUpItem[]>([]);
 
-  const showPopUp = (variant: PopUpVariant, content: string) => {
+  const showPopUp = (variant: PopUpVariant, content: string, action?: PopUpItem["action"]) => {
     const id = uid();
-    const toast: PopUpItem = { id, variant, content, createdAt: Date.now() };
+    const toast: PopUpItem = { id, variant, content, createdAt: Date.now(), action };
     setItems((prev) => [toast, ...prev]);
     return id;
   };

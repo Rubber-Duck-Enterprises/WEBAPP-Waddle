@@ -10,16 +10,19 @@ import {
 import { createScopedStorage } from "@/lib/scopedStorage";
 
 type ListId = string | "all";
+type TaskFilter = "all" | "done" | "pending";
  
 interface TaskListStore {
   taskLists: TaskList[];
   tagsByList: Record<string, Tag[]>;
   activeListId: ListId;
+  activeFilter: TaskFilter;
 
   addTaskList: (list: Omit<TaskList, "id">) => void;
   updateTaskList: (id: string, updated: Partial<TaskList>) => void;
   deleteTaskList: (id: string) => void;
   setActiveListId: (id: ListId) => void;
+  setActiveFilter: (filter: TaskFilter) => void;
   addTagToList: (listId: string, tag: Tag) => void;
   getTagsForList: (listId: string) => Tag[];
 
@@ -29,6 +32,9 @@ interface TaskListStore {
   updateTask: (id: string, updated: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleTaskDone: (id: string) => void;
+  addSubtask: (taskId: string, title: string) => void;
+  toggleSubtask: (taskId: string, subtaskId: string) => void;
+  deleteSubtask: (taskId: string, subtaskId: string) => void;
 }
 
 function getNextDueDate(current: string, repeat: Task["repeat"]): string {
@@ -45,6 +51,7 @@ export const useListStore = create<TaskListStore>()(
       taskLists: [],
       tagsByList: {},
       activeListId: "all",
+      activeFilter: "pending",
 
       addTaskList: (list) => {
         const newList: TaskList = { id: nanoid(), ...list };
@@ -62,14 +69,17 @@ export const useListStore = create<TaskListStore>()(
         delete tagsByList[id];
 
         const remaining = get().taskLists.filter((l) => l.id !== id);
+        const remainingTasks = get().tasks.filter((t) => t.listId !== id);
 
         set((state) => ({
           taskLists: remaining,
+          tasks: remainingTasks,
           tagsByList,
           activeListId: state.activeListId === id ? "all" : state.activeListId,
         }));
       },
       setActiveListId: (id) => set({ activeListId: id }),
+      setActiveFilter: (filter) => set({ activeFilter: filter }),
       addTagToList: (listId, tag) => {
         const existing = get().tagsByList[listId] || [];
         const alreadyExists = existing.some((t) => t.name === tag.name);
@@ -108,12 +118,18 @@ export const useListStore = create<TaskListStore>()(
         const task = currentTasks.find((t) => t.id === id);
         if (!task) return;
 
-        const updated = { ...task, isDone: !task.isDone };
+        const nowIsDone = !task.isDone;
+        const updated = {
+          ...task,
+          isDone: nowIsDone,
+          completedAt: nowIsDone ? new Date().toISOString() : undefined,
+        };
         const updatedTasks = currentTasks.map((t) =>
           t.id === id ? updated : t
         );
 
-        if (!task.isDone && task.repeat) {
+        // Si se marca como completada y es recurrente, crear la siguiente ocurrencia
+        if (nowIsDone && task.repeat) {
           const newTask: Task = {
             ...task,
             id: nanoid(),
@@ -127,6 +143,44 @@ export const useListStore = create<TaskListStore>()(
 
         set({ tasks: updatedTasks });
       },
+      addSubtask: (taskId, title) => {
+        const subtask: Task = {
+          id: nanoid(),
+          title,
+          isDone: false,
+          createdAt: new Date().toISOString(),
+        };
+        set({
+          tasks: get().tasks.map((t) =>
+            t.id === taskId
+              ? { ...t, subtasks: [...(t.subtasks || []), subtask] }
+              : t
+          ),
+        });
+      },
+      toggleSubtask: (taskId, subtaskId) => {
+        set({
+          tasks: get().tasks.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  subtasks: (t.subtasks || []).map((s) =>
+                    s.id === subtaskId ? { ...s, isDone: !s.isDone } : s
+                  ),
+                }
+              : t
+          ),
+        });
+      },
+      deleteSubtask: (taskId, subtaskId) => {
+        set({
+          tasks: get().tasks.map((t) =>
+            t.id === taskId
+              ? { ...t, subtasks: (t.subtasks || []).filter((s) => s.id !== subtaskId) }
+              : t
+          ),
+        });
+      },
     }),
     {
       name: "waddle-list",
@@ -136,6 +190,7 @@ export const useListStore = create<TaskListStore>()(
         tasks: state.tasks,
         tagsByList: state.tagsByList,
         activeListId: state.activeListId,
+        activeFilter: state.activeFilter,
       }),
     }
   )

@@ -48,12 +48,16 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onAction, onEdit, onViewDetai
   return (
     <div
       style={{
-        background: "var(--card-bg)",
+        background: `${config.borderColor}1A`,
         borderRadius: "12px",
         padding: "1rem",
-        border: `2px solid ${config.borderColor}`,
+        border: `1px solid ${config.borderColor}`,
+        boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
         cursor: trip.status === "cancelled" ? "default" : "pointer",
         opacity: trip.status === "cancelled" ? 0.6 : 1,
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.5rem",
       }}
       onClick={handleCardClick}
     >
@@ -98,7 +102,7 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onAction, onEdit, onViewDetai
       </div>
 
       {/* Detalle de estimado/gastado/presupuesto */}
-      <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
+      <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
         <span>Estimado: ${trip.estimatedTotal.toLocaleString()}</span>
         {trip.status === "completed" && (
           <span>Gastado: ${trip.actualTotal.toLocaleString()}</span>
@@ -109,7 +113,7 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onAction, onEdit, onViewDetai
       </div>
 
       {/* Pie: estado + acción */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: "0.75rem", color: config.color, fontWeight: "bold" }}>
           {config.text}
         </span>

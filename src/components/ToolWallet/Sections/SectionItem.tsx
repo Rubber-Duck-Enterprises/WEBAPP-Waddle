@@ -1,6 +1,7 @@
 import React from "react";
 import UIButton from "@/components/UI/UIButton";
 import { Section } from "@/types";
+import styles from "./Sections.module.css";
 
 interface Props {
   section: Section;
@@ -8,36 +9,27 @@ interface Props {
   onDelete: () => void;
 }
 
-const SectionItem: React.FC<Props> = ({ section, onEdit, onDelete }) => (
+const SectionItem: React.FC<Props> = React.memo(({ section, onEdit, onDelete }) => (
   <div
+    className={styles.sectionItem}
     style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "1rem",
-      borderRadius: "12px",
-      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
       background: `${section.color || "var(--surface)"}1A`,
       border: `1px solid ${section.color || "#ccc"}`,
       borderLeft: `16px solid ${section.color || "#ccc"}`,
-      gap: "1rem",
     }}
   >
-    <div style={{ display: "flex", alignItems: "center", gap: "1rem", flex: 1 }}>
-      <div style={{ fontSize: "2rem" }}>{section.icon || "📁"}</div>
+    <div className={styles.sectionItemContent}>
+      <div className={styles.sectionItemIcon}>{section.icon || "📁"}</div>
       <div>
-        <h4 style={{ margin: 0, color: "var(--text-primary)" }}>{section.name}</h4>
-        
-        {
-          section.goal && section.goal > 0 && (
-            <small style={{ color: "var(--text-secondary)" }}>
-              {section.goal ? `🎯 Meta: $${section.goal.toLocaleString()}` : "Sin meta"}
-            </small>
-          )
-        }
+        <h4 className={styles.sectionItemName}>{section.name}</h4>
+        {section.goal && section.goal > 0 && (
+          <small className={styles.sectionItemGoal}>
+            🎯 Meta: ${section.goal.toLocaleString()}
+          </small>
+        )}
       </div>
     </div>
-    <div style={{ display: "flex", gap: "0.5rem" }}>
+    <div className={styles.sectionItemActions}>
       <UIButton variant="secondary" onClick={onEdit}>
         Editar
       </UIButton>
@@ -46,6 +38,8 @@ const SectionItem: React.FC<Props> = ({ section, onEdit, onDelete }) => (
       </UIButton>
     </div>
   </div>
-);
+));
+
+SectionItem.displayName = "SectionItem";
 
 export default SectionItem;

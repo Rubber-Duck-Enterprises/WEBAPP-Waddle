@@ -165,6 +165,47 @@ const ShoppingReports: React.FC = () => {
   const totalImpulseItems = impulseByStore.reduce((acc, s) => acc + s.totalItems, 0);
   const totalImpulseSpent = impulseByStore.reduce((acc, s) => acc + s.totalSpent, 0);
 
+  // --- Precisión del presupuesto (qué tan cerca estamos del gasto real) ---
+  const budgetAnalysis = useMemo(() => {
+    const tripsWithBudget = completedTrips.filter((t) => t.budget > 0);
+    if (tripsWithBudget.length === 0) return null;
+
+    const diffs = tripsWithBudget.map((t) => {
+      const diff = t.budget - t.actualTotal;
+      const percentDiff = (diff / t.budget) * 100;
+      return { diff, percentDiff, overBudget: diff < 0 };
+    });
+
+    const avgPercentDiff = diffs.reduce((acc, d) => acc + d.percentDiff, 0) / diffs.length;
+    const overBudgetCount = diffs.filter((d) => d.overBudget).length;
+    const underBudgetCount = diffs.filter((d) => !d.overBudget).length;
+    const avgAbsPercent = diffs.reduce((acc, d) => acc + Math.abs(d.percentDiff), 0) / diffs.length;
+
+    // Determinar diagnóstico
+    let diagnosis: "ideal" | "excedente_frecuente" | "presupuesto_alto" = "ideal";
+    if (avgAbsPercent <= 15) {
+      diagnosis = "ideal";
+    } else if (avgPercentDiff < -5) {
+      diagnosis = "excedente_frecuente"; // Se pasa del presupuesto
+    } else if (avgPercentDiff > 15) {
+      diagnosis = "presupuesto_alto"; // Presupuesta de más
+    }
+
+    return {
+      avgPercentDiff,
+      avgAbsPercent,
+      overBudgetCount,
+      underBudgetCount,
+      total: tripsWithBudget.length,
+      diagnosis,
+    };
+  }, [completedTrips]);
+
+  // --- Top tiendas donde tardas más ---
+  const slowestStores = useMemo(() => {
+    return [...avgDurationByStore].sort((a, b) => b.avg - a.avg);
+  }, [avgDurationByStore]);
+
   if (completedTrips.length === 0) {
     return (
       <ShoppingLayout>
@@ -187,10 +228,11 @@ const ShoppingReports: React.FC = () => {
         {/* Resumen general */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--success-bg)",
             borderRadius: "12px",
             padding: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid var(--success-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -210,13 +252,76 @@ const ShoppingReports: React.FC = () => {
           </div>
         </div>
 
+        {/* Precisión del presupuesto */}
+        {budgetAnalysis && (
+          <div
+            style={{
+              background: budgetAnalysis.diagnosis === "ideal" ? "#4caf501A"
+                : budgetAnalysis.diagnosis === "excedente_frecuente" ? "#f443361A"
+                : "#ff98001A",
+              borderRadius: "12px",
+              padding: "1rem",
+              border: `1px solid ${
+                budgetAnalysis.diagnosis === "ideal" ? "#4caf50"
+                  : budgetAnalysis.diagnosis === "excedente_frecuente" ? "#f44336"
+                  : "#ff9800"
+              }`,
+            }}
+          >
+            <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
+              🎯 Precisión de presupuesto
+            </h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
+              <MetricCard
+                label="Desviación promedio"
+                value={`${Math.round(budgetAnalysis.avgAbsPercent)}%`}
+                color={budgetAnalysis.avgAbsPercent <= 15 ? "#4caf50" : budgetAnalysis.avgAbsPercent <= 30 ? "#ff9800" : "#f44336"}
+              />
+              <MetricCard
+                label="Tendencia"
+                value={budgetAnalysis.avgPercentDiff > 0 ? `+${Math.round(budgetAnalysis.avgPercentDiff)}% sobra` : `${Math.round(budgetAnalysis.avgPercentDiff)}% falta`}
+                color={budgetAnalysis.avgPercentDiff > 0 ? "#ff9800" : "#f44336"}
+              />
+              <MetricCard
+                label="Veces sobre presupuesto"
+                value={`${budgetAnalysis.overBudgetCount}/${budgetAnalysis.total}`}
+                color="#f44336"
+              />
+              <MetricCard
+                label="Veces bajo presupuesto"
+                value={`${budgetAnalysis.underBudgetCount}/${budgetAnalysis.total}`}
+                color="#4caf50"
+              />
+            </div>
+            <div
+              style={{
+                fontSize: "0.8rem",
+                color: "var(--text-secondary)",
+                padding: "0.5rem 0.75rem",
+                borderRadius: "8px",
+                background: "rgba(0,0,0,0.05)",
+              }}
+            >
+              {budgetAnalysis.diagnosis === "ideal" && (
+                <span>✅ Tus presupuestos son bastante precisos. Sigue así.</span>
+              )}
+              {budgetAnalysis.diagnosis === "excedente_frecuente" && (
+                <span>⚠️ Sueles gastar más de lo presupuestado. Esto puede significar que los precios subieron o que presupuestas muy ajustado. Intenta agregar un 10-15% de margen.</span>
+              )}
+              {budgetAnalysis.diagnosis === "presupuesto_alto" && (
+                <span>💡 Tus presupuestos suelen sobrar bastante. Podrías ajustarlos a la baja para tener un control más real de tus finanzas.</span>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Gasto por tienda */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "#2196f31A",
             borderRadius: "12px",
             padding: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid #2196f3",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -242,10 +347,10 @@ const ShoppingReports: React.FC = () => {
         {/* Gasto por categoría */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "#9c27b01A",
             borderRadius: "12px",
             padding: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid #9c27b0",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -272,10 +377,10 @@ const ShoppingReports: React.FC = () => {
         {monthlyTrend.length > 1 && (
           <div
             style={{
-              background: "var(--card-bg)",
+              background: "#ff98001A",
               borderRadius: "12px",
               padding: "1rem",
-              border: "1px solid var(--border-color)",
+              border: "1px solid #ff9800",
             }}
           >
             <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -306,10 +411,10 @@ const ShoppingReports: React.FC = () => {
         {/* Productos más comprados */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "#4caf501A",
             borderRadius: "12px",
             padding: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid #4caf50",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -353,10 +458,10 @@ const ShoppingReports: React.FC = () => {
         {tripsWithDuration.length > 0 && (
           <div
             style={{
-              background: "var(--card-bg)",
+              background: "#6070801A",
               borderRadius: "12px",
               padding: "1rem",
-              border: "1px solid var(--border-color)",
+              border: "1px solid #607080",
             }}
           >
             <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -377,10 +482,10 @@ const ShoppingReports: React.FC = () => {
             {avgDurationByStore.length > 0 && (
               <div>
                 <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
-                  Tiempo promedio por tienda:
+                  🐢 Donde más tardas comprando:
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-                  {avgDurationByStore.map(({ store, avg }) => (
+                  {slowestStores.map(({ store, avg }, idx) => (
                     <div
                       key={store}
                       style={{
@@ -390,12 +495,13 @@ const ShoppingReports: React.FC = () => {
                         padding: "0.4rem 0.5rem",
                         borderRadius: "6px",
                         border: "1px solid var(--border-color)",
+                        background: idx === 0 ? "rgba(244, 67, 54, 0.08)" : "transparent",
                       }}
                     >
                       <span style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>
-                        🏬 {store}
+                        {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "🏬"} {store}
                       </span>
-                      <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: "var(--text-primary)" }}>
+                      <span style={{ fontSize: "0.85rem", fontWeight: "bold", color: idx === 0 ? "#f44336" : "var(--text-primary)" }}>
                         {Math.round(avg)} min
                       </span>
                     </div>
@@ -410,10 +516,10 @@ const ShoppingReports: React.FC = () => {
         {avgProductsByStore.length > 0 && (
           <div
             style={{
-              background: "var(--card-bg)",
+              background: "#2196f31A",
               borderRadius: "12px",
               padding: "1rem",
-              border: "1px solid var(--border-color)",
+              border: "1px solid #2196f3",
             }}
           >
             <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -451,10 +557,10 @@ const ShoppingReports: React.FC = () => {
         {impulseByStore.length > 0 && (
           <div
             style={{
-              background: "var(--card-bg)",
+              background: "#ff98001A",
               borderRadius: "12px",
               padding: "1rem",
-              border: "1px solid var(--border-color)",
+              border: "1px solid #ff9800",
             }}
           >
             <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>

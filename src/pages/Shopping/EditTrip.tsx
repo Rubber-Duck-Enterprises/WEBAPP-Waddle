@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useShoppingStore } from "@/stores/shoppingStore";
 import { useModal } from "@/context/ModalContext";
@@ -106,11 +106,12 @@ const EditTrip: React.FC = () => {
         {/* Info del trip */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--information-bg)",
             borderRadius: "12px",
             padding: "0.75rem 1rem",
             marginBottom: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid var(--information-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -196,7 +197,8 @@ const EditableItemCard: React.FC<{
   variant?: "default" | "pending";
 }> = ({ item, onEdit, variant = "default" }) => {
   const borderColor = variant === "pending" ? "var(--border-color)" : "#4caf50";
-  const opacity = variant === "pending" ? 0.6 : 1;
+  const bgColor = variant === "pending" ? "var(--surface)" : "#4caf501A";
+  const opacity = variant === "pending" ? 0.7 : 1;
 
   const displayPrice = item.inCart ? (item.actualPrice ?? item.estimatedPrice) : item.estimatedPrice;
   const total = displayPrice * item.quantity;
@@ -205,7 +207,7 @@ const EditableItemCard: React.FC<{
     <div
       onClick={onEdit}
       style={{
-        background: "var(--card-bg)",
+        background: bgColor,
         borderRadius: "10px",
         padding: "0.7rem 0.75rem",
         border: `1px solid ${borderColor}`,

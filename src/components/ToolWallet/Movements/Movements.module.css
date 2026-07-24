@@ -1,0 +1,160 @@
+.container {
+  padding: 1rem;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}
+
+.emptyTitle {
+  font-weight: 600;
+}
+
+.emptySubtitle {
+  font-size: 0.85rem;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.loadMore {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+/* Contenedor para la lista virtualizada */
+.virtualContainer {
+  height: calc(100vh - 280px);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Filtros de búsqueda */
+.searchBar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.searchInput {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--input-border-color);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: var(--text-secondary);
+}
+
+.filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Agrupación por fecha */
+.dateGroup {
+  margin-bottom: 1rem;
+}
+
+.dateGroupHeader {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Items de movimiento */
+.movementItem {
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.movementItemExpense {
+  border: 1px solid var(--danger-color);
+  background-color: var(--danger-bg);
+}
+
+.movementItemIncome {
+  border: 1px solid var(--success-color);
+  background-color: var(--success-bg);
+}
+
+.movementDescription {
+  font-weight: 600;
+}
+
+.movementAmount {
+  font-weight: 500;
+}
+
+.movementMeta {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.movementActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Transfer item */
+.transferItem {
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--information-color);
+  border-radius: 8px;
+  background-color: var(--information-bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: var(--text-primary);
+}
+
+.transferTitle {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.transferDetails {
+  font-size: 0.9rem;
+}
+
+.transferAmount {
+  font-size: 0.9rem;
+  color: var(--success-color);
+}
+
+.transferMeta {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}

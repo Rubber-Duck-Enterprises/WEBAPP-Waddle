@@ -137,13 +137,11 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
       </div>
 
-      {isOpen && (
-        <div
-          className={styles.drawerOverlay}
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`${styles.drawerOverlay} ${isOpen ? styles.drawerOverlayVisible : ""}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
     </>
   );
 };

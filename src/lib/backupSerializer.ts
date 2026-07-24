@@ -14,6 +14,7 @@ export interface ListStoreState {
   tasks: import("@/types").Task[];
   tagsByList: Record<string, import("@/types").Tag[]>;
   activeListId: string;
+  activeFilter?: string;
 }
 
 // ─── serializeBackup ──────────────────────────────────────────────────────────

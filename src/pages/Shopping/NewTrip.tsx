@@ -379,11 +379,12 @@ const NewTrip: React.FC = () => {
         {/* Header: Presupuesto restante (se actualiza con selección) */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--success-bg)",
             borderRadius: "12px",
             padding: "0.75rem 1rem",
             marginBottom: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid var(--success-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -502,11 +503,11 @@ const NewTrip: React.FC = () => {
             <div
               key={item.id}
               style={{
-                background: "var(--card-bg)",
+                background: item.selected ? "#4caf501A" : "var(--surface)",
                 borderRadius: "10px",
                 padding: "0.7rem 0.75rem",
                 border: item.selected
-                  ? "2px solid #4caf50"
+                  ? "1px solid #4caf50"
                   : "1px solid var(--border-color)",
                 display: "flex",
                 justifyContent: "space-between",
@@ -559,7 +560,7 @@ const NewTrip: React.FC = () => {
                     height: "24px",
                     borderRadius: "4px",
                     border: "1px solid var(--border-color)",
-                    background: "var(--card-bg)",
+                    background: "var(--surface)",
                     color: "var(--text-primary)",
                     cursor: "pointer",
                     fontSize: "0.9rem",
@@ -580,7 +581,7 @@ const NewTrip: React.FC = () => {
                     height: "24px",
                     borderRadius: "4px",
                     border: "1px solid var(--border-color)",
-                    background: "var(--card-bg)",
+                    background: "var(--surface)",
                     color: "var(--text-primary)",
                     cursor: "pointer",
                     fontSize: "0.9rem",

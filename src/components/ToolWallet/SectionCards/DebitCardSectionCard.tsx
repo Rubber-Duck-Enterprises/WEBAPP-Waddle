@@ -13,6 +13,7 @@ import { createTransferExpenses, createAdjustBalanceHandler } from "@/utils/wall
 import { useModal } from "@/context/ModalContext";
 import { useWalletStore } from "@/stores/walletStore";
 import SectionCardContainer from "./SectionCardContainer";
+import styles from "./SectionCards.module.css";
 
 interface Props {
   section: Section;
@@ -49,9 +50,9 @@ const DebitCardSectionCard: React.FC<Props> = ({
 
       {goal && goal > 0 && (
         <>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
-            <span style={{ fontSize: "0.85rem" }}>Progreso</span>
-            <span style={{ fontSize: "0.85rem", fontWeight: "bold" }}>
+          <div className={styles.goalRow}>
+            <span className={styles.goalLabel}>Progreso</span>
+            <span className={styles.goalValue}>
               ${balance.toLocaleString()} / ${goal.toLocaleString()}
             </span>
           </div>
@@ -63,14 +64,8 @@ const DebitCardSectionCard: React.FC<Props> = ({
       <UIIncomeExpenseSummary income={income} totalExpenses={totalExpenses} />
       <TransactionList latest={latest} sections={[]} />
 
-      <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            width: "100%",
-          }}
-        > 
+      <div className={styles.actions}>
+        <div className={styles.actionsRow}>
           <UIButton variant="primary" fullWidth onClick={() => onAdd("income", section.id)}>
             + Ingreso
           </UIButton>

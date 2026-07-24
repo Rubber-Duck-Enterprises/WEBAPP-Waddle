@@ -1,11 +1,16 @@
 import React from "react";
-import { Section } from "../../../types";
+import { Section } from "@/types";
+import styles from "./SectionCards.module.css";
 
 interface SectionCardContainerProps {
   section: Section;
   children: React.ReactNode;
 }
 
+/**
+ * Genera estilos dinámicos basados en el color de la sección.
+ * Exportado para uso en tests de propiedades.
+ */
 export function getSectionCardStyle(section: Section): React.CSSProperties {
   const color = section.color;
   return {
@@ -25,7 +30,16 @@ const SectionCardContainer: React.FC<SectionCardContainerProps> = ({
   section,
   children,
 }) => {
-  return <div style={getSectionCardStyle(section)}>{children}</div>;
+  const dynamicStyle: React.CSSProperties = {
+    background: `${section.color || "var(--surface)"}1A`,
+    border: `1px solid ${section.color || "var(--border-color)"}`,
+  };
+
+  return (
+    <div className={styles.container} style={dynamicStyle}>
+      {children}
+    </div>
+  );
 };
 
 export default SectionCardContainer;

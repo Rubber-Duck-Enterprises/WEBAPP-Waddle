@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useShoppingStore } from "@/stores/shoppingStore";
 import { useWalletStore } from "@/stores/walletStore";
@@ -30,13 +30,32 @@ const ActiveTrip: React.FC = () => {
   const trip = trips.find((t) => t.id === tripId);
   const [filter, setFilter] = useState<FilterTab>("todos");
   const [searchTerm, setSearchTerm] = useState("");
-  const [startTime] = useState(() => {
-    // Usar startedAt persistido para que el timer sobreviva navegación
-    if (trip?.startedAt) return new Date(trip.startedAt).getTime();
-    return Date.now();
-  });
   const [showSummary, setShowSummary] = useState(false);
   const [elapsedMinutes, setElapsedMinutes] = useState(0);
+  const [displaySeconds, setDisplaySeconds] = useState(0);
+  const enterTimeRef = useRef(Date.now());
+  const addActiveMinutes = useShoppingStore((s) => s.addActiveMinutes);
+
+  // Timer que muestra el tiempo acumulado + el actual en pantalla
+  useEffect(() => {
+    if (!trip || trip.status === "completed" || trip.status === "cancelled") return;
+    enterTimeRef.current = Date.now();
+
+    const interval = setInterval(() => {
+      const secondsOnScreen = Math.floor((Date.now() - enterTimeRef.current) / 1000);
+      const previousSeconds = (trip.activeMinutes || 0) * 60;
+      setDisplaySeconds(previousSeconds + secondsOnScreen);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      // Al salir de pantalla, guardar los minutos acumulados
+      const minutesOnScreen = (Date.now() - enterTimeRef.current) / 60000;
+      if (minutesOnScreen > 0.1 && trip) {
+        addActiveMinutes(trip.id, minutesOnScreen);
+      }
+    };
+  }, [trip?.id, trip?.status]);
 
   // Auto-start
   useEffect(() => {
@@ -242,7 +261,13 @@ const ActiveTrip: React.FC = () => {
 
   const handleFinishTrip = () => {
     const hasPending = pendingItems.length > 0;
-    const elapsed = Math.round((Date.now() - startTime) / 60000);
+    // Guardar minutos acumulados antes de completar
+    const minutesOnScreen = (Date.now() - enterTimeRef.current) / 60000;
+    if (minutesOnScreen > 0.1) {
+      addActiveMinutes(trip.id, minutesOnScreen);
+      enterTimeRef.current = Date.now(); // Reset para no duplicar
+    }
+    const elapsed = Math.round(displaySeconds / 60);
 
     showModal(
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", textAlign: "center" }}>
@@ -283,11 +308,12 @@ const ActiveTrip: React.FC = () => {
         {/* Header: Presupuesto restante */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--success-bg)",
             borderRadius: "12px",
             padding: "0.75rem 1rem",
             marginBottom: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid var(--success-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -322,6 +348,13 @@ const ActiveTrip: React.FC = () => {
           >
             Cancelar
           </button>
+        </div>
+
+        {/* Timer pequeño */}
+        <div style={{ textAlign: "right", marginBottom: "0.5rem" }}>
+          <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
+            ⏱️ {Math.floor(displaySeconds / 60)}:{String(displaySeconds % 60).padStart(2, "0")}
+          </span>
         </div>
 
         {/* Filtros */}
@@ -382,11 +415,11 @@ const ActiveTrip: React.FC = () => {
                     <div
                       key={item.id}
                       style={{
-                        background: "var(--card-bg)",
+                        background: item.inCart ? "#4caf501A" : "var(--surface)",
                         borderRadius: "10px",
                         padding: "0.7rem 0.75rem",
                         border: item.inCart
-                          ? "2px solid #4caf50"
+                          ? "1px solid #4caf50"
                           : "1px solid var(--border-color)",
                         opacity: item.inCart ? 0.7 : 1,
                         display: "flex",
@@ -887,10 +920,10 @@ const RegisterInWalletModal: React.FC<{
       {/* Resumen del gasto */}
       <div
         style={{
-          background: "var(--card-bg)",
+          background: "#f443361A",
           borderRadius: "10px",
           padding: "0.75rem",
-          border: "1px solid var(--border-color)",
+          border: "1px solid #f44336",
           textAlign: "center",
         }}
       >
@@ -936,7 +969,7 @@ const RegisterInWalletModal: React.FC<{
                     : "1px solid var(--border-color)",
                   background: selectedSection === section.id
                     ? "var(--btn-primary-bg)22"
-                    : "var(--card-bg)",
+                    : "var(--surface)",
                   cursor: "pointer",
                   textAlign: "left",
                   transition: "all 0.15s ease",
@@ -1054,10 +1087,11 @@ const TripSummary: React.FC<{
         {/* Métricas principales */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--information-bg)",
             borderRadius: "12px",
             padding: "1rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid var(--information-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gap: "0.75rem",
@@ -1113,10 +1147,10 @@ const TripSummary: React.FC<{
         {moreExpensive.length > 0 && (
           <div
             style={{
-              background: "var(--card-bg)",
+              background: "#f443361A",
               borderRadius: "12px",
               padding: "1rem",
-              border: "1px solid #f4433644",
+              border: "1px solid #f44336",
             }}
           >
             <h3 style={{ fontSize: "0.85rem", color: "#f44336", marginBottom: "0.5rem" }}>
@@ -1139,10 +1173,10 @@ const TripSummary: React.FC<{
         {cheaper.length > 0 && (
           <div
             style={{
-              background: "var(--card-bg)",
+              background: "#4caf501A",
               borderRadius: "12px",
               padding: "1rem",
-              border: "1px solid #4caf5044",
+              border: "1px solid #4caf50",
             }}
           >
             <h3 style={{ fontSize: "0.85rem", color: "#4caf50", marginBottom: "0.5rem" }}>
@@ -1165,10 +1199,10 @@ const TripSummary: React.FC<{
         {(removedItems.length > 0 || notPurchasedItems.length > 0) && (
           <div
             style={{
-              background: "var(--card-bg)",
+              background: "#ff98001A",
               borderRadius: "12px",
               padding: "1rem",
-              border: "1px solid var(--border-color)",
+              border: "1px solid #ff9800",
             }}
           >
             {removedItems.length > 0 && (

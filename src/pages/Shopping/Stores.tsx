@@ -215,7 +215,7 @@ const ShoppingStores: React.FC = () => {
                     padding: "0.3rem",
                     border: icon === emoji ? "2px solid var(--btn-primary-bg)" : "2px solid transparent",
                     borderRadius: "8px",
-                    background: "var(--card-bg)",
+                    background: "var(--surface)",
                     cursor: "pointer",
                   }}
                 >
@@ -265,10 +265,11 @@ const ShoppingStores: React.FC = () => {
         {/* Agregar tienda */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--surface)",
             borderRadius: "12px",
             padding: "1rem",
             border: "1px solid var(--border-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -297,7 +298,7 @@ const ShoppingStores: React.FC = () => {
                     padding: "0.2rem",
                     border: newIcon === emoji ? "2px solid var(--btn-primary-bg)" : "2px solid transparent",
                     borderRadius: "6px",
-                    background: "var(--card-bg)",
+                    background: "var(--surface)",
                     cursor: "pointer",
                   }}
                 >
@@ -318,10 +319,11 @@ const ShoppingStores: React.FC = () => {
         {/* Lista de tiendas */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--surface)",
             borderRadius: "12px",
             padding: "1rem",
             border: "1px solid var(--border-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -395,10 +397,11 @@ const ShoppingStores: React.FC = () => {
         {/* Comparador de precios / Sugerencias */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--surface)",
             borderRadius: "12px",
             padding: "1rem",
             border: "1px solid var(--border-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>
@@ -429,7 +432,7 @@ const ShoppingStores: React.FC = () => {
                     padding: "0.15rem",
                     border: newCatIcon === emoji ? "2px solid var(--btn-primary-bg)" : "2px solid transparent",
                     borderRadius: "6px",
-                    background: "var(--card-bg)",
+                    background: "var(--surface)",
                     cursor: "pointer",
                   }}
                 >
@@ -486,10 +489,11 @@ const ShoppingStores: React.FC = () => {
         {/* Comparador de precios / Sugerencias */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--surface)",
             borderRadius: "12px",
             padding: "1rem",
             border: "1px solid var(--border-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
           }}
         >
           <h3 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.75rem" }}>

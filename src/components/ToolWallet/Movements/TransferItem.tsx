@@ -1,4 +1,6 @@
 import React from "react";
+import UIButton from "@/components/UI/UIButton";
+import styles from "./Movements.module.css";
 
 interface Props {
   amount: number;
@@ -6,27 +8,15 @@ interface Props {
   toLabel: string;
   date: string;
   notes?: string;
+  onDelete?: () => void;
 }
 
-const TransferItem: React.FC<Props> = ({ amount, fromLabel, toLabel, date, notes }) => {
+const TransferItem: React.FC<Props> = React.memo(({ amount, fromLabel, toLabel, date, notes, onDelete }) => {
   return (
-    <li
-      style={{
-        marginBottom: "1rem",
-        padding: "1rem",
-        border: "1px solid var(--information-color)",
-        borderRadius: "8px",
-        backgroundColor: "var(--information-bg)",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "0.5rem",
-        color: "var(--text-primary)",
-      }}
-    >
-      <strong style={{ fontSize: "1rem" }}>↔ Transferencia</strong>
+    <li className={styles.transferItem}>
+      <strong className={styles.transferTitle}>↔ Transferencia</strong>
 
-      <div style={{ fontSize: "0.9rem" }}>
+      <div className={styles.transferDetails}>
         <div>
           <strong>De:</strong> {fromLabel}
         </div>
@@ -35,16 +25,26 @@ const TransferItem: React.FC<Props> = ({ amount, fromLabel, toLabel, date, notes
         </div>
       </div>
 
-      <div style={{ fontSize: "0.9rem", color: "var(--success-color)" }}>
+      <div className={styles.transferAmount}>
         Monto: ${amount.toLocaleString()}
       </div>
 
-      <small style={{ color: "var(--text-secondary)" }}>
+      <small className={styles.transferMeta}>
         {new Date(date).toLocaleDateString()}
         {notes ? ` · ${notes}` : ""}
       </small>
+
+      {onDelete && (
+        <div className={styles.movementActions}>
+          <UIButton variant="danger" onClick={onDelete}>
+            Eliminar
+          </UIButton>
+        </div>
+      )}
     </li>
   );
-};
+});
+
+TransferItem.displayName = "TransferItem";
 
 export default TransferItem;

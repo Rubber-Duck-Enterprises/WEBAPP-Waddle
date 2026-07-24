@@ -122,14 +122,13 @@ const ShoppingHome: React.FC = () => {
               onClick={() => setRangeType(type)}
               style={{
                 padding: "0.4rem 0.8rem",
-                borderRadius: "8px",
-                border: "1px solid var(--border-color)",
-                background: rangeType === type ? "var(--btn-primary-bg)" : "transparent",
-                color: rangeType === type ? "var(--btn-text-color)" : "var(--text-primary)",
+                borderRadius: "999px",
+                border: `1px solid ${rangeType === type ? "var(--btn-primary-bg)" : "var(--border-color)"}`,
+                background: rangeType === type ? "var(--success-bg)" : "var(--bullet-bg)",
+                color: rangeType === type ? "var(--text-primary)" : "var(--text-primary)",
                 fontSize: "0.85rem",
-                fontWeight: rangeType === type ? "bold" : "normal",
+                fontWeight: "bold",
                 cursor: "pointer",
-                textTransform: "capitalize",
               }}
             >
               {type === "todo" ? "Todo" : type === "semana" ? "Semana" : "Mes"}
@@ -140,19 +139,23 @@ const ShoppingHome: React.FC = () => {
         {/* Tarjeta de resumen */}
         <div
           style={{
-            background: "var(--card-bg)",
+            background: "var(--success-bg)",
             borderRadius: "12px",
-            padding: "1.2rem",
+            padding: "1rem",
             marginBottom: "1.5rem",
-            border: "1px solid var(--border-color)",
+            border: "1px solid var(--success-color)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.75rem",
           }}
         >
-          <h2 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
+          <h2 style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>
             Resumen
           </h2>
 
           {/* Monto principal: Total presupuesto - usado */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", marginBottom: "0.3rem" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "1rem" }}>
             <span
               style={{
                 fontSize: "2.2rem",

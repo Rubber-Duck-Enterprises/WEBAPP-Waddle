@@ -11,9 +11,14 @@ export interface UseSectionFinancialsParams {
 
 export interface UseSectionFinancialsResult {
   filteredExpenses: Expense[];
+  /** Ingresos del período seleccionado */
   income: number;
+  /** Gastos del período seleccionado */
   totalExpenses: number;
+  /** Balance acumulado total (todas las fechas) — representa el saldo real */
   balance: number;
+  /** Balance solo del período filtrado */
+  periodBalance: number;
   goal: number | null;
   progress: number;
   latest: Expense[];
@@ -24,14 +29,18 @@ export function computeSectionFinancials(
 ): UseSectionFinancialsResult {
   const { section, expenses, startDate, endDate } = params;
 
-  const filteredExpenses = expenses.filter((e) => {
+  // Todos los gastos de esta sección (sin filtro de fecha) para el balance real
+  const allSectionExpenses = expenses.filter(
+    (e) => e.category === section.id || e.source === section.id
+  );
+
+  // Gastos filtrados por período (para income/expenses del período y últimos movimientos)
+  const filteredExpenses = allSectionExpenses.filter((e) => {
     const date = parseISO(e.date);
-    return (
-      isWithinInterval(date, { start: startDate, end: endDate }) &&
-      (e.category === section.id || e.source === section.id)
-    );
+    return isWithinInterval(date, { start: startDate, end: endDate });
   });
 
+  // Income/expenses del período seleccionado
   const income =
     section.type === "passive"
       ? 0
@@ -43,7 +52,22 @@ export function computeSectionFinancials(
     .filter((e) => e.amount < 0)
     .reduce((acc, e) => acc + e.amount, 0);
 
-  const balance = income + totalExpenses;
+  const periodBalance = income + totalExpenses;
+
+  // Balance acumulado real (sin filtro de fecha)
+  const allIncome =
+    section.type === "passive"
+      ? 0
+      : allSectionExpenses
+          .filter((e) => e.amount > 0 && e.category === section.id)
+          .reduce((acc, e) => acc + e.amount, 0);
+
+  const allExpenses = allSectionExpenses
+    .filter((e) => e.amount < 0)
+    .reduce((acc, e) => acc + e.amount, 0);
+
+  const balance = allIncome + allExpenses;
+
   const goal = section.goal || null;
   const progress = goal && goal > 0 ? Math.min((balance / goal) * 100, 100) : 0;
 
@@ -51,7 +75,7 @@ export function computeSectionFinancials(
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3);
 
-  return { filteredExpenses, income, totalExpenses, balance, goal, progress, latest };
+  return { filteredExpenses, income, totalExpenses, balance, periodBalance, goal, progress, latest };
 }
 
 export function useSectionFinancials(

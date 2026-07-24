@@ -9,12 +9,14 @@ import { getEditSectionModal } from "@/components/Modal/Presets/Wallet/EditSecti
 import NewSectionCard from "@/components/ToolWallet/Sections/NewSectionCard";
 import SectionItem from "@/components/ToolWallet/Sections/SectionItem";
 import UIButton from "@/components/UI/UIButton";
+import UISelect from "@/components/UI/UISelect";
 
 import WalletLayout from "../../layouts/WalletLayout";
+import sectionStyles from "@/components/ToolWallet/Sections/Sections.module.css";
 
 const Sections: React.FC = () => {
   const navigate = useNavigate();
-  const { sections, addSection, deleteSection, updateSection } = useWalletStore();
+  const { sections, expenses, addSection, deleteSection, updateSection, deleteSectionWithMigration } = useWalletStore();
   const { showModal, hideModal } = useModal();
   const [name, setName] = useState("");
 
@@ -52,11 +54,62 @@ const Sections: React.FC = () => {
     );
   };
 
+  const handleDeleteWithMigration = (sectionId: string, sectionName: string) => {
+    // Contar gastos asociados a esta sección
+    const associatedExpenses = expenses.filter(
+      (e) => e.category === sectionId || e.source === sectionId
+    );
+    const otherSections = sections.filter((s) => s.id !== sectionId);
+
+    if (associatedExpenses.length > 0 && otherSections.length > 0) {
+      // Mostrar modal con opción de migrar
+      showModal(
+        <MigrateOrDeleteModal
+          sectionName={sectionName}
+          expenseCount={associatedExpenses.length}
+          otherSections={otherSections}
+          onMigrate={(targetId) => {
+            // Usar la acción atómica del store
+            deleteSectionWithMigration(sectionId, targetId);
+            hideModal();
+          }}
+          onDeleteAnyway={() => {
+            hideModal();
+            // Mostrar confirmación estándar
+            showModal(
+              getDeleteSectionModal({
+                sectionName,
+                onCancel: hideModal,
+                onConfirm: () => {
+                  deleteSection(sectionId);
+                  hideModal();
+                },
+              })
+            );
+          }}
+          onCancel={hideModal}
+        />
+      );
+    } else {
+      // Sin gastos asociados, eliminar directamente con confirmación
+      showModal(
+        getDeleteSectionModal({
+          sectionName,
+          onCancel: hideModal,
+          onConfirm: () => {
+            deleteSection(sectionId);
+            hideModal();
+          },
+        })
+      );
+    }
+  };
+
   return (
     <WalletLayout>
-      <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <div className={sectionStyles.container}>
         <NewSectionCard name={name} onChange={setName} onCreate={handleAdd} />
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div className={sectionStyles.sectionList}>
           {sections.map((section) => (
             <SectionItem
               key={section.id}
@@ -79,23 +132,72 @@ const Sections: React.FC = () => {
                   })
                 );
               }}
-              onDelete={() =>
-                showModal(
-                  getDeleteSectionModal({
-                    sectionName: section.name,
-                    onCancel: hideModal,
-                    onConfirm: () => {
-                      deleteSection(section.id);
-                      hideModal();
-                    },
-                  })
-                )
-              }
+              onDelete={() => handleDeleteWithMigration(section.id, section.name)}
             />
           ))}
         </div>
       </div>
     </WalletLayout>
+  );
+};
+
+// Modal interno para migrar gastos o eliminar de todas formas
+interface MigrateOrDeleteModalProps {
+  sectionName: string;
+  expenseCount: number;
+  otherSections: { id: string; name: string; icon?: string }[];
+  onMigrate: (targetId: string) => void;
+  onDeleteAnyway: () => void;
+  onCancel: () => void;
+}
+
+const MigrateOrDeleteModal: React.FC<MigrateOrDeleteModalProps> = ({
+  sectionName,
+  expenseCount,
+  otherSections,
+  onMigrate,
+  onDeleteAnyway,
+  onCancel,
+}) => {
+  const [targetId, setTargetId] = useState(otherSections[0]?.id || "");
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      <h3 style={{ color: "var(--text-primary)" }}>
+        ⚠️ "{sectionName}" tiene {expenseCount} movimiento{expenseCount > 1 ? "s" : ""}
+      </h3>
+      <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+        ¿Qué quieres hacer con los movimientos asociados?
+      </p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <label style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>
+          Mover a otro apartado:
+        </label>
+        <UISelect
+          value={targetId}
+          onChange={(e) => setTargetId(e.target.value)}
+        >
+          {otherSections.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.icon || "📁"} {s.name}
+            </option>
+          ))}
+        </UISelect>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <UIButton variant="primary" onClick={() => onMigrate(targetId)}>
+          Mover y eliminar apartado
+        </UIButton>
+        <UIButton variant="danger" onClick={onDeleteAnyway}>
+          Eliminar sin mover
+        </UIButton>
+        <UIButton variant="default" onClick={onCancel}>
+          Cancelar
+        </UIButton>
+      </div>
+    </div>
   );
 };
 

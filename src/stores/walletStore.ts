@@ -17,6 +17,8 @@ interface WalletStore {
   addSection: (section: Omit<Section, "id" | "createdAt">) => void;
   updateSection: (id: string, updated: Partial<Omit<Section, "id" | "createdAt">>) => void;
   deleteSection: (id: string) => void;
+  /** Elimina sección y migra sus gastos a otra sección */
+  deleteSectionWithMigration: (sectionId: string, targetSectionId: string) => void;
 
   expenses: Expense[];
 
@@ -24,6 +26,14 @@ interface WalletStore {
   updateExpense: (id: string, updatedExpense: Omit<Expense, "id">) => void;
   deleteExpense: (id: string) => void;
   clearExpenses: () => void;
+
+  /** Crea una transferencia atómica entre dos secciones (dos expenses con transferId compartido) */
+  createTransfer: (params: {
+    fromSectionId: string;
+    toSectionId: string;
+    amount: number;
+    notes?: string;
+  }) => void;
 }
 
 export const useWalletStore = create<WalletStore>()(
@@ -54,6 +64,19 @@ export const useWalletStore = create<WalletStore>()(
       deleteSection: (id) => {
         set({ sections: get().sections.filter((s) => s.id !== id) });
       },
+      deleteSectionWithMigration: (sectionId, targetSectionId) => {
+        const { expenses, sections } = get();
+        const updatedExpenses = expenses.map((e) => {
+          const updates: Partial<Expense> = {};
+          if (e.category === sectionId) updates.category = targetSectionId;
+          if (e.source === sectionId) updates.source = targetSectionId;
+          return Object.keys(updates).length > 0 ? { ...e, ...updates } : e;
+        });
+        set({
+          sections: sections.filter((s) => s.id !== sectionId),
+          expenses: updatedExpenses,
+        });
+      },
 
       expenses: [],
       
@@ -82,6 +105,40 @@ export const useWalletStore = create<WalletStore>()(
       },
       clearExpenses: () => {
         set({ expenses: [] });
+      },
+      createTransfer: ({ fromSectionId, toSectionId, amount, notes }) => {
+        if (amount <= 0) return;
+        const { sections, expenses } = get();
+        const fromSection = sections.find((s) => s.id === fromSectionId);
+        const toSection = sections.find((s) => s.id === toSectionId);
+        if (!fromSection || !toSection) return;
+
+        const now = new Date().toISOString();
+        const transferId = nanoid();
+
+        const fromExpense: Expense = {
+          id: nanoid(),
+          description: `Transferencia a ${toSection.icon || "📁"} ${toSection.name}`,
+          amount: -Math.abs(amount),
+          category: fromSectionId,
+          notes: notes || "",
+          date: now,
+          transferId,
+          kind: "expense",
+        };
+
+        const toExpense: Expense = {
+          id: nanoid(),
+          description: `Transferencia desde ${fromSection.icon || "📁"} ${fromSection.name}`,
+          amount: Math.abs(amount),
+          category: toSectionId,
+          notes: notes || "",
+          date: now,
+          transferId,
+          kind: "income",
+        };
+
+        set({ expenses: [...expenses, fromExpense, toExpense] });
       },
     }), 
     {

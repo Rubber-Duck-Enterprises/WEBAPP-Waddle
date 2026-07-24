@@ -66,6 +66,8 @@ interface ShoppingState {
   removeItemFromTrip: (tripId: string, itemId: string) => void;
   addItemToTrip: (tripId: string, item: Omit<ShoppingItem, "id" | "inCart" | "removed">) => void;
   updateTripItem: (tripId: string, itemId: string, updated: Partial<Omit<ShoppingItem, "id">>) => void;
+  /** Acumular minutos activos en pantalla de compra */
+  addActiveMinutes: (tripId: string, minutes: number) => void;
 }
 
 export const useShoppingStore = create<ShoppingState>()(
@@ -228,8 +230,11 @@ export const useShoppingStore = create<ShoppingState>()(
               .filter((i) => i.inCart && !i.removed)
               .reduce((acc, i) => acc + (i.actualPrice ?? i.estimatedPrice) * i.quantity, 0);
             const now = new Date();
-            const startedAt = t.startedAt ? new Date(t.startedAt) : now;
-            const durationMinutes = Math.round((now.getTime() - startedAt.getTime()) / 60000);
+            // Usar activeMinutes acumulados (tiempo real en pantalla) si existe
+            const durationMinutes = t.activeMinutes ?? (() => {
+              const startedAt = t.startedAt ? new Date(t.startedAt) : now;
+              return Math.round((now.getTime() - startedAt.getTime()) / 60000);
+            })();
             return {
               ...t,
               status: "completed" as const,
@@ -320,6 +325,15 @@ export const useShoppingStore = create<ShoppingState>()(
                     i.id === itemId ? { ...i, ...updated } : i
                   ),
                 }
+              : t
+          ),
+        });
+      },
+      addActiveMinutes: (tripId, minutes) => {
+        set({
+          trips: get().trips.map((t) =>
+            t.id === tripId
+              ? { ...t, activeMinutes: (t.activeMinutes || 0) + minutes }
               : t
           ),
         });

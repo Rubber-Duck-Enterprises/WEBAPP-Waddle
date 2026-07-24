@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import { isWithinInterval, parseISO } from "date-fns";
 
 import { useWalletStore } from "@/stores/walletStore";
 import { useDateRange } from "@/hooks/useDateRange";
+import { useWalletSummary } from "@/hooks/useWalletSummary";
+import { useExpensesBySection } from "@/hooks/useExpensesBySection";
 import { useModal } from "@/context/ModalContext";
 import { getAddIncomeModal } from "@/components/Modal/Presets/Wallet/AddIncomeModal";
 import { getAddExpenseModal } from "@/components/Modal/Presets/Wallet/AddExpenseModal";
 
 import DateFilterBar from "@/components/ToolWallet/Home/DateFilterBar";
 import BalanceCard from "@/components/ToolWallet/Home/BalanceCard";
+import WalletChart from "@/components/ToolWallet/Home/WalletChart";
 import SectionSelector from "@/components/ToolWallet/Home/SectionSelector";
 import SectionBalanceCard from "@/components/ToolWallet/SectionCards/SectionBalanceCard";
 
@@ -40,6 +42,12 @@ const WalletHome: React.FC = () => {
     endDate,
   } = useDateRange();
 
+  // Usar el hook extraído para el cálculo del resumen
+  const { income, totalExpenses, balance, latest } = useWalletSummary(expenses, startDate, endDate);
+
+  // Pre-indexar expenses por sección para evitar O(n) lookups por cada card
+  const expensesBySection = useExpensesBySection(expenses);
+
   const selectedSection = sections.find(
     (s) => s.id === selectedSectionId && s.type !== "card"
   );
@@ -48,46 +56,11 @@ const WalletHome: React.FC = () => {
   );
 
   const sectionExpenses = selectedSection
-    ? expenses.filter(
-        (e) => e.category === selectedSection.id || e.source === selectedSection.id
-      )
+    ? expensesBySection.get(selectedSection.id) || []
     : [];
   const cardExpenses = selectedCard
-    ? expenses.filter(
-        (e) => e.category === selectedCard.id || e.source === selectedCard.id
-      )
+    ? expensesBySection.get(selectedCard.id) || []
     : [];
-
-  const allExpensesInRange = expenses.filter((e) => {
-    const date = parseISO(e.date);
-    return isWithinInterval(date, { start: startDate, end: endDate });
-  });
-
-  const income = allExpensesInRange
-    .filter((e) => {
-      if (e.amount <= 0) return false;
-      // Exclude transfer receipts from income — they're internal movements
-      if (e.transferId) return false;
-      if (e.description.startsWith("Transferencia desde ")) return false;
-      return true;
-    })
-    .reduce((acc, e) => acc + e.amount, 0);
-
-  const realExpenses = allExpensesInRange.filter((e) => {
-    if (e.amount >= 0) return false;
-    // Exclude transfers: they move money between sections, not actual spending
-    if (e.transferId) return false;
-    // Legacy fallback for old transfers without transferId
-    if (e.description.startsWith("Transferencia a ")) return false;
-    return true;
-  });
-
-  const totalExpenses = realExpenses.reduce((acc, e) => acc + e.amount, 0);
-  const balance = income + totalExpenses;
-
-  const latest = [...allExpensesInRange]
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, 3);
 
   const openSectionModal = (type: "income" | "expense", sectionId: string) => {
     const section = sections.find((s) => s.id === sectionId);
@@ -122,13 +95,26 @@ const WalletHome: React.FC = () => {
     }
   };
 
+  // Auto-selección de sección/tarjeta cuando cambian las secciones
   useEffect(() => {
     const defaultSection = sections.find((s) => s.type !== "card");
     const defaultCard = sections.find((s) => s.type === "card");
-    if (!selectedSectionId && defaultSection) setSelectedSectionId(defaultSection.id);
-    if (!selectedCardId && defaultCard) setSelectedCardId(defaultCard.id);
-  }, [sections]);
 
+    // Verificar si la sección seleccionada aún existe
+    if (selectedSectionId && !sections.find((s) => s.id === selectedSectionId)) {
+      setSelectedSectionId(defaultSection?.id ?? null);
+    } else if (!selectedSectionId && defaultSection) {
+      setSelectedSectionId(defaultSection.id);
+    }
+
+    if (selectedCardId && !sections.find((s) => s.id === selectedCardId)) {
+      setSelectedCardId(defaultCard?.id ?? null);
+    } else if (!selectedCardId && defaultCard) {
+      setSelectedCardId(defaultCard.id);
+    }
+  }, [sections, selectedSectionId, selectedCardId]);
+
+  // Auto-crear "Efectivo" en primera visita
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
@@ -146,6 +132,9 @@ const WalletHome: React.FC = () => {
     setFirstWalletWasCreated();
   }, []);
 
+  const nonCardSections = sections.filter((s) => s.type !== "card");
+  const cardSections = sections.filter((s) => s.type === "card");
+
   return (
     <WalletLayout>
       <DateFilterBar
@@ -157,7 +146,7 @@ const WalletHome: React.FC = () => {
         setCustomEnd={setCustomEnd}
       />
 
-      <div style={{ padding: "1rem" }}>
+      <div style={{ padding: "1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         <BalanceCard
           income={income}
           totalExpenses={totalExpenses}
@@ -165,15 +154,17 @@ const WalletHome: React.FC = () => {
           latest={latest}
           sections={sections}
         />
+
+        <WalletChart expenses={expenses} />
       </div>
 
       {/* Apartados */}
-      {selectedSection && (
+      {nonCardSections.length > 0 && selectedSection && (
         <div style={{ padding: "0 1rem", paddingBottom: "2rem" }}>
           <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Apartados</h2>
 
           <SectionSelector
-            sections={sections.filter((s) => s.type !== "card")}
+            sections={nonCardSections}
             selectedId={selectedSectionId}
             onSelect={setSelectedSectionId}
           />
@@ -188,13 +179,28 @@ const WalletHome: React.FC = () => {
         </div>
       )}
 
+      {/* Empty state para apartados */}
+      {nonCardSections.length === 0 && (
+        <div style={{
+          padding: "2rem 1rem",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}>
+          <span style={{ fontSize: "2rem" }}>📁</span>
+          <p style={{ marginTop: "0.5rem", fontWeight: 600 }}>Sin apartados</p>
+          <p style={{ fontSize: "0.85rem" }}>
+            Crea tu primer apartado desde la sección de Apartados.
+          </p>
+        </div>
+      )}
+
       {/* Tarjetas */}
-      {selectedCard && (
+      {cardSections.length > 0 && selectedCard && (
         <div style={{ padding: "0 1rem", paddingBottom: "2rem" }}>
           <h2 style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "1rem" }}>Tarjetas</h2>
 
           <SectionSelector
-            sections={sections.filter((s) => s.type === "card")}
+            sections={cardSections}
             selectedId={selectedCardId}
             onSelect={setSelectedCardId}
           />

@@ -31,6 +31,8 @@ export interface ShoppingTrip {
   startedAt?: string;
   completedAt?: string;
   durationMinutes?: number;
+  /** Minutos acumulados en pantalla de compra activa */
+  activeMinutes?: number;
   items: ShoppingItem[];
 }
 

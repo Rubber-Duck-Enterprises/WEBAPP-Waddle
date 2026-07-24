@@ -79,8 +79,8 @@ describe("useSectionFinancials — Property 1: calcula correctamente los financi
         (section, expenses, { startDate, endDate }) => {
           const result = computeSectionFinancials({ section, expenses, startDate, endDate });
 
-          // balance must equal income + totalExpenses
-          expect(result.balance).toBeCloseTo(result.income + result.totalExpenses, 10);
+          // periodBalance must equal income + totalExpenses (período filtrado)
+          expect(result.periodBalance).toBeCloseTo(result.income + result.totalExpenses, 10);
 
           // income is always non-negative
           expect(result.income).toBeGreaterThanOrEqual(0);

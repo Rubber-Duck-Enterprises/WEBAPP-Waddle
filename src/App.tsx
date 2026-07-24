@@ -21,6 +21,7 @@ import About from "@/pages/About";
 import Login from "@/pages/Auth/Login";
 
 import { useScheduledTaskCleanup } from "./hooks/useScheduledTaskCleanup";
+import { useTaskDueReminders } from "./hooks/useTaskDueReminders";
 
 import { AuthProvider } from "@/context/AuthContext";
 import { PublicRoute, AnyUserRoute, AuthOnlyRoute } from "@/routes/guards";
@@ -169,6 +170,7 @@ const AnimatedRoutes = () => {
 
 const App: React.FC = () => {
   useScheduledTaskCleanup();
+  useTaskDueReminders();
 
   return (
     <AuthProvider>

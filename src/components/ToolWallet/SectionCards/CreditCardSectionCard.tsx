@@ -11,6 +11,7 @@ import { useWalletStore } from "@/stores/walletStore";
 import { getPayCreditCardModal } from "@/components/Modal/Presets/Wallet/PayCreditCardModal";
 import { getAddCreditCardExpenseModal } from "@/components/Modal/Presets/Wallet/AddCreditCardExpenseModal";
 import SectionCardContainer from "./SectionCardContainer";
+import styles from "./SectionCards.module.css";
 
 interface Props {
   section: Section;
@@ -129,14 +130,8 @@ const CreditCardSectionCard: React.FC<Props> = ({
         sections={sections}
       />
 
-      <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            width: "100%",
-          }}
-        >
+      <div className={styles.actions}>
+        <div className={styles.actionsRow}>
           <UIButton variant="danger" fullWidth onClick={handleAddExpense}>
             - Gasto
           </UIButton>

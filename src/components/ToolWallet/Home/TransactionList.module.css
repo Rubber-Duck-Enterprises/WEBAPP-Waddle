@@ -1,0 +1,56 @@
+.header {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.header h4 {
+  margin-bottom: 0.5rem;
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+  flex-direction: column;
+  color: var(--text-primary);
+}
+
+.itemRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.amountPositive {
+  color: var(--success-color);
+}
+
+.amountNegative {
+  color: var(--danger-color);
+}
+
+.sectionLabel {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.sourceLabel {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}

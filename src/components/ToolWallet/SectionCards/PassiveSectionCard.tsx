@@ -6,6 +6,7 @@ import UIBalanceAmount from "@/components/UI/UIBalanceAmount";
 import TransactionList from "@/components/ToolWallet/Home/TransactionList";
 import UIButton from "@/components/UI/UIButton";
 import SectionCardContainer from "./SectionCardContainer";
+import styles from "./SectionCards.module.css";
 
 interface Props {
   section: Section;
@@ -34,7 +35,7 @@ const PassiveSectionCard: React.FC<Props> = ({
       <UIBalanceAmount amount={balance} />
       <TransactionList latest={latest} sections={[]} />
 
-      <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
+      <div className={styles.actions}>
         <UIButton variant="danger" fullWidth onClick={() => onAdd("expense", section.id)}>
           - Gasto
         </UIButton>

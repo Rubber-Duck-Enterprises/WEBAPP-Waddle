@@ -1,6 +1,7 @@
 import React from "react";
 import UIButton from "@/components/UI/UIButton";
 import UITextInput from "@/components/UI/UITextInput";
+import styles from "./Sections.module.css";
 
 interface Props {
   name: string;
@@ -9,21 +10,15 @@ interface Props {
 }
 
 const NewSectionCard: React.FC<Props> = ({ name, onChange, onCreate }) => (
-  <div
-    style={{
-      background: "var(--surface)",
-      padding: "1rem",
-      borderRadius: "12px",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-    }}
-  >
-    <h3 style={{ marginBottom: "0.5rem", color: "var(--text-primary)" }}>⭐ Nuevo apartado</h3>
-    <div style={{ display: "flex", gap: "0.5rem" }}>
-      <div style={{ flex: 1 }}>
+  <div className={styles.newSectionCard}>
+    <h3 className={styles.newSectionTitle}>⭐ Nuevo apartado</h3>
+    <div className={styles.newSectionForm}>
+      <div className={styles.newSectionInputWrap}>
         <UITextInput
           value={name}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Nombre del apartado"
+          aria-label="Nombre del nuevo apartado"
         />
       </div>
       <UIButton onClick={onCreate} variant="secondary">

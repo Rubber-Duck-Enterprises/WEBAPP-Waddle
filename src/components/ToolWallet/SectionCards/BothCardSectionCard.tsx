@@ -15,6 +15,7 @@ import { getPayCreditCardModal } from "@/components/Modal/Presets/Wallet/PayCred
 import { useModal } from "@/context/ModalContext";
 import { useWalletStore } from "@/stores/walletStore";
 import SectionCardContainer from "./SectionCardContainer";
+import styles from "./SectionCards.module.css";
 
 interface Props {
   section: Section;
@@ -197,16 +198,10 @@ const BothCardSectionCard: React.FC<Props> = ({
         sections={sections}
       />
 
-      <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+      <div className={styles.actions}>
         {activeMode === "debit" && (
           <>
-            <div
-              style={{
-                display: "flex",
-                gap: "1rem",
-                width: "100%",
-              }}
-            >
+            <div className={styles.actionsRow}>
               <UIButton variant="primary" fullWidth onClick={() => onAdd("income", section.id, "debit")}>
                 + Ingreso
               </UIButton>
@@ -238,13 +233,7 @@ const BothCardSectionCard: React.FC<Props> = ({
         )}
 
         {activeMode === "credit" && (
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              width: "100%",
-            }}
-          >
+          <div className={styles.actionsRow}>
             <UIButton variant="danger" fullWidth onClick={handleAddCreditExpense}>
               - Gasto
             </UIButton>

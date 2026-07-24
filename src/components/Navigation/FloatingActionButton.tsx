@@ -33,7 +33,7 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
           getCreateTaskModal({
             activeListId,
             onCancel: hideModal,
-            onConfirm: ({ title, dueDate, notes, listId, priority, repeat, tags }) => {
+            onConfirm: ({ title, dueDate, notes, listId, priority, repeat, tags, subtasks }) => {
               if (title) {
                 addTask({
                   title,
@@ -43,6 +43,7 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
                   priority,
                   repeat,
                   tags,
+                  subtasks,
                 });
               }
             },
