@@ -1,6 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 
+export const CELEBRATION_EVENT = "waddle:celebration";
+
+/** Dispatch this event from anywhere to trigger confetti */
+export function triggerCelebration() {
+  window.dispatchEvent(new CustomEvent(CELEBRATION_EVENT));
+}
+
 const UIMotionEffectLayer: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -12,7 +19,7 @@ const UIMotionEffectLayer: React.FC = () => {
       useWorker: true,
     });
 
-    (window as any).triggerCelebration = () => {
+    const handleCelebration = () => {
       myConfetti({
         particleCount: 200,
         startVelocity: 60,
@@ -20,6 +27,9 @@ const UIMotionEffectLayer: React.FC = () => {
         origin: { y: 1 },
       });
     };
+
+    window.addEventListener(CELEBRATION_EVENT, handleCelebration);
+    return () => window.removeEventListener(CELEBRATION_EVENT, handleCelebration);
   }, []);
 
   return (

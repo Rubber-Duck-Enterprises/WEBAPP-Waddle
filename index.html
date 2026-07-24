@@ -17,6 +17,83 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
 
     <title>Waddle</title>
+    <style>
+      /* Deshabilita transiciones de color durante la carga para evitar flash/animación */
+      html.theme-loading,
+      html.theme-loading * {
+        transition: none !important;
+      }
+    </style>
+    <script>
+      // Aplica el tema guardado lo antes posible para evitar flash blanco → oscuro.
+      // Estrategia: deshabilitar transiciones, aplicar tema, re-habilitar transiciones.
+      (function() {
+        var html = document.documentElement;
+        html.classList.add('theme-loading');
+
+        function applyTheme(theme) {
+          if (theme === 'dark') {
+            html.setAttribute('data-theme', 'dark');
+          }
+          // Deja un frame para que el navegador pinte con el tema correcto
+          // y luego re-habilita las transiciones
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              html.classList.remove('theme-loading');
+            });
+          });
+        }
+
+        // Intento síncrono desde localStorage mirror
+        try {
+          var cached = localStorage.getItem('waddle-theme');
+          if (cached) {
+            applyTheme(cached);
+            return;
+          }
+        } catch (e) {}
+
+        // Fallback: leer de IndexedDB (localforage) directamente
+        try {
+          var req = indexedDB.open('localforage');
+          req.onsuccess = function(e) {
+            try {
+              var db = e.target.result;
+              var tx = db.transaction('keyvaluepairs', 'readonly');
+              var store = tx.objectStore('keyvaluepairs');
+
+              var cursorReq = store.openCursor();
+              cursorReq.onsuccess = function(ev) {
+                var cursor = ev.target.result;
+                if (cursor) {
+                  if (cursor.key && cursor.key.toString().indexOf('waddle-settings') === 0) {
+                    try {
+                      var data = JSON.parse(cursor.value);
+                      var state = data.state || data;
+                      if (state.theme) {
+                        try { localStorage.setItem('waddle-theme', state.theme); } catch(x) {}
+                        applyTheme(state.theme);
+                        return;
+                      }
+                    } catch(x) {}
+                  }
+                  cursor.continue();
+                } else {
+                  applyTheme('light');
+                }
+              };
+              cursorReq.onerror = function() { applyTheme('light'); };
+            } catch(x) { applyTheme('light'); }
+          };
+          req.onerror = function() { applyTheme('light'); };
+        } catch(e) {
+          applyTheme('light');
+        }
+
+        // Safety: si después de 200ms no se resolvió, revelar de todos modos
+        setTimeout(function() { html.classList.remove('theme-loading'); }, 200);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

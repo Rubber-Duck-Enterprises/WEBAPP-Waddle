@@ -1,18 +1,18 @@
-// layouts/WalletLayout.tsx
 import React, { useState } from "react";
 import Drawer from "@/components/Navigation/Drawer";
 import BottomNav from "@/components/Navigation/BottomNav";
 import Header from "@/components/Navigation/Header";
 import { motion } from "framer-motion";
+import styles from "./Layout.module.css";
 
 const WalletLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw" }}>
+    <div className={styles.shell}>
       <Header onOpenMenu={() => setDrawerOpen(true)} />
 
-      <main style={{ flex: 1, overflowY: "auto", paddingBottom: "56px" }}>
+      <main className={styles.mainWithBottomNav}>
         <motion.div
           key="page-content"
           initial={{ opacity: 0 }}

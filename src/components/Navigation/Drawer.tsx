@@ -5,6 +5,7 @@ import UIToggle from "@/components/UI/UIToggle";
 import DrawerLink from "./DrawerLink";
 import { useTheme } from "@/hooks/useTheme";
 import { useAuth } from "@/context/AuthContext";
+import styles from "./Navigation.module.css";
 
 type Props = {
   isOpen: boolean;
@@ -29,6 +30,15 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -50,16 +60,13 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
   const handleAuthAction = async () => {
     if (loading) return;
 
-    // Si es anon -> manda a login
     if (!user) {
       handleNavigate("/login");
       return;
     }
 
-    // Si hay user -> logout a anon
     try {
       await logoutToAnon();
-      // opcional: manda a wallet o donde quieras
       navigate("/wallet", { replace: true });
     } finally {
       onClose();
@@ -69,54 +76,32 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
   return (
     <>
       <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: isOpen ? 0 : "-250px",
-          width: "250px",
-          height: "100%",
-          backgroundColor: "var(--background)",
-          boxShadow: "2px 0 8px rgba(0, 0, 0, 0.1)",
-          transition: "left 0.3s ease-in-out, background-color 0.3s ease-in-out",
-          zIndex: 1000,
-          padding: "1rem",
-          paddingTop: "calc(1rem + var(--safe-area-top))",
-          paddingBottom: "calc(1rem + var(--safe-area-bottom))",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
+        className={`${styles.drawer} ${isOpen ? styles.drawerOpen : styles.drawerClosed}`}
+        role="navigation"
+        aria-label="Menú principal"
+        aria-hidden={!isOpen}
       >
         <div>
-          <h2 style={{ color: "var(--text-primary)" }}>Menú</h2>
-          <div
-            style={{
-              backgroundColor: "var(--border-color)",
-              margin: "1rem 0",
-              height: "1px",
-              width: "100%",
-            }}
-          />
+          <h2 className={styles.drawerTitle}>Menú</h2>
+          <div className={styles.drawerDivider} />
 
-          <ul style={{ listStyle: "none", padding: 0, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <ul className={styles.drawerList}>
             <DrawerLink path="/wallet" label="💰 Waddle Wallet" onClick={handleNavigate} />
+            <DrawerLink path="/shopping" label="🛒 Waddle Shopping" onClick={handleNavigate} />
             <DrawerLink path="/list" label="📝 Waddle List" onClick={handleNavigate} />
-            {/* <DrawerLink path="/backups" label="☁️ Respaldos" onClick={handleNavigate} /> */}
             <DrawerLink path="/settings" label="⚙️ Configuración" onClick={handleNavigate} />
             <DrawerLink path="/about" label="ℹ️ Sobre Waddle" onClick={handleNavigate} />
           </ul>
         </div>
 
         <div>
-          {/* Auth action */}
-          <div style={{ marginTop: "1rem" }}>
-            {/* Info opcional */}
+          <div className={styles.drawerFooter}>
             {!loading && user && (
-              <div style={{ marginBottom: "0.5rem", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
-                <div style={{ fontWeight: 700, color: "var(--text-primary)" }}>
+              <div className={styles.drawerUserInfo}>
+                <div className={styles.drawerUserName}>
                   {user.displayName || "Usuario"}
                 </div>
-                <div style={{ opacity: 0.85 }}>{user.email}</div>
+                <div className={styles.drawerUserEmail}>{user.email}</div>
               </div>
             )}
 
@@ -138,7 +123,7 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          <div style={{ display: "flex", justifyContent: "center", margin: "1rem 0" }}>
+          <div className={styles.drawerThemeToggle}>
             <UIToggle
               label={theme === "light" ? "🌞 Claro" : "🌚 Oscuro"}
               checked={theme === "dark"}
@@ -146,7 +131,7 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", textAlign: "center" }}>
+          <div className={styles.drawerVersion}>
             v{__APP_VERSION__}
           </div>
         </div>
@@ -154,16 +139,9 @@ const Drawer: React.FC<Props> = ({ isOpen, onClose }) => {
 
       {isOpen && (
         <div
+          className={styles.drawerOverlay}
           onClick={onClose}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.3)",
-            zIndex: 999,
-          }}
+          aria-hidden="true"
         />
       )}
     </>

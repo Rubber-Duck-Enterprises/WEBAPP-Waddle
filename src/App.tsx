@@ -7,6 +7,12 @@ import StartRedirect from "@/pages/StartRedirect";
 import WalletHome from "@/pages/Wallet/Home";
 import Sections from "@/pages/Wallet/Sections";
 import Movements from "@/pages/Wallet/Movements";
+import ShoppingHome from "@/pages/Shopping/Home";
+import NewTrip from "@/pages/Shopping/NewTrip";
+import ActiveTrip from "@/pages/Shopping/ActiveTrip";
+import ShoppingHistory from "@/pages/Shopping/History";
+import ShoppingReports from "@/pages/Shopping/Reports";
+import ShoppingStores from "@/pages/Shopping/Stores";
 import ListHome from "@/pages/List/Home";
 import Backups from "@/pages/Backups";
 import Settings from "@/pages/Settings";
@@ -67,6 +73,54 @@ const AnimatedRoutes = () => {
           element={
             <AnyUserRoute>
               <Movements />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/shopping"
+          element={
+            <AnyUserRoute>
+              <ShoppingHome />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/shopping/history"
+          element={
+            <AnyUserRoute>
+              <ShoppingHistory />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/shopping/reports"
+          element={
+            <AnyUserRoute>
+              <ShoppingReports />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/shopping/stores"
+          element={
+            <AnyUserRoute>
+              <ShoppingStores />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/shopping/new"
+          element={
+            <AnyUserRoute>
+              <NewTrip />
+            </AnyUserRoute>
+          }
+        />
+        <Route
+          path="/shopping/trip/:tripId"
+          element={
+            <AnyUserRoute>
+              <ActiveTrip />
             </AnyUserRoute>
           }
         />

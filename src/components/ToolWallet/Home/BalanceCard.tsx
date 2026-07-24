@@ -42,7 +42,13 @@ const BalanceCard: React.FC<Props> = ({
 
       <UIIncomeExpenseSummary income={income} totalExpenses={totalExpenses} />
 
-      <TransactionList latest={latest} sections={sections} />
+      {latest.length === 0 ? (
+        <p style={{ color: "var(--text-secondary)", fontSize: "0.85rem", textAlign: "center", margin: "0.5rem 0" }}>
+          No hay movimientos en este período.
+        </p>
+      ) : (
+        <TransactionList latest={latest} sections={sections} />
+      )}
     </div>
   );
 };

@@ -1,9 +1,19 @@
 import { createPortal } from "react-dom";
+import { useEffect } from "react";
 import { useModal } from "@/context/ModalContext";
 import { AnimatePresence, motion } from "framer-motion";
 
 const Modal = () => {
   const { isOpen, content, hideModal } = useModal();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") hideModal();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, hideModal]);
 
   return createPortal(
     <AnimatePresence>
@@ -32,6 +42,9 @@ const Modal = () => {
 
           {/* Contenedor centrado con contenido animado */}
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Ventana de diálogo"
             style={{
               position: "fixed",
               top: 0,

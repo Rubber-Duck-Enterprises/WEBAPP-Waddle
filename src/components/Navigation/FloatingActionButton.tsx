@@ -27,6 +27,7 @@ const FloatingActionButton: React.FC<Props> = ({ activeListId }) => {
   return (
     <button
       ref={ref}
+      aria-label="Crear nueva tarea"
       onClick={() => {
         showModal(
           getCreateTaskModal({

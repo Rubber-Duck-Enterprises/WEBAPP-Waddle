@@ -1,10 +1,12 @@
 import React from "react";
+import { nanoid } from "nanoid";
 import { Section, Expense } from "@/types";
 import AdjustBalanceModal from "@/components/Modal/Presets/Wallet/AdjustBalanceModal";
 
 /**
  * Creates two expense entries for a transfer between sections:
  * one negative from `fromSection` and one positive to `toSection`.
+ * Both share the same `transferId` for reliable pairing.
  * If `amount <= 0`, no expenses are created.
  */
 export function createTransferExpenses(
@@ -17,6 +19,7 @@ export function createTransferExpenses(
   if (amount <= 0) return;
 
   const now = new Date().toISOString();
+  const transferId = nanoid();
 
   addExpense({
     description: `Transferencia a ${toSection.icon || "📁"} ${toSection.name}`,
@@ -24,6 +27,7 @@ export function createTransferExpenses(
     category: fromSection.id,
     notes,
     date: now,
+    transferId,
   });
 
   addExpense({
@@ -32,6 +36,7 @@ export function createTransferExpenses(
     category: toSection.id,
     notes,
     date: now,
+    transferId,
   });
 }
 

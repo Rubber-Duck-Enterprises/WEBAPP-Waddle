@@ -113,9 +113,9 @@ const Login: React.FC = () => {
         showPopUp("SUCCESS", `Conectado como ${u.displayName || "Usuario"}`);
         goApp();
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Login - Google error:", e);
-      showPopUp("DANGER", e?.message || "No se pudo iniciar sesión con Google.");
+      showPopUp("DANGER", e instanceof Error ? e.message : "No se pudo iniciar sesión con Google.");
     } finally {
       setBusy(false);
     }
@@ -146,9 +146,9 @@ const Login: React.FC = () => {
         showPopUp("SUCCESS", "Sesión iniciada.");
         goApp();
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Login - Email error:", e);
-      showPopUp("DANGER", e?.message || "No se pudo iniciar sesión. Revisa tu correo y contraseña.");
+      showPopUp("DANGER", e instanceof Error ? e.message : "No se pudo iniciar sesión. Revisa tu correo y contraseña.");
     } finally {
       setBusy(false);
     }
@@ -175,9 +175,9 @@ const Login: React.FC = () => {
         showPopUp("SUCCESS", "Cuenta creada.");
         goApp();
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Login - Signup error:", e);
-      showPopUp("DANGER", e?.message || "No se pudo crear la cuenta.");
+      showPopUp("DANGER", e instanceof Error ? e.message : "No se pudo crear la cuenta.");
     } finally {
       setBusy(false);
     }
@@ -195,9 +195,9 @@ const Login: React.FC = () => {
       await resetPassword(email.trim());
 
       showPopUp("SUCCESS", "Te enviamos un correo para recuperar tu contraseña.");
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Login - resetPassword error:", e);
-      showPopUp("DANGER", e?.message || "No se pudo enviar el correo de recuperación.");
+      showPopUp("DANGER", e instanceof Error ? e.message : "No se pudo enviar el correo de recuperación.");
     } finally {
       setBusy(false);
     }

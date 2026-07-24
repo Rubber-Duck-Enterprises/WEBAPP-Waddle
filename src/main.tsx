@@ -5,6 +5,7 @@ import { registerSW } from 'virtual:pwa-register';
 import App from '@/App.tsx';
 import Modal from '@/components/Modal';
 import PopUp from './components/PopUp';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { ModalProvider } from '@/context/ModalContext';
 import { PopUpProvider } from './context/PopUpContext';
 import { setScopeGetter } from '@/lib/userScope';
@@ -46,12 +47,14 @@ registerSW({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ModalProvider>
-    <PopUpProvider>
-      <App />
-      <Modal />
-      <PopUp />
-    </PopUpProvider>
-    </ModalProvider>
+    <ErrorBoundary>
+      <ModalProvider>
+      <PopUpProvider>
+        <App />
+        <Modal />
+        <PopUp />
+      </PopUpProvider>
+      </ModalProvider>
+    </ErrorBoundary>
   </StrictMode>
 );

@@ -26,7 +26,6 @@ const WalletHome: React.FC = () => {
   } = useWalletStore();
   const initializedRef = useRef(false);
 
-  const [onlyGeneral] = useState<boolean>(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
@@ -61,18 +60,26 @@ const WalletHome: React.FC = () => {
 
   const allExpensesInRange = expenses.filter((e) => {
     const date = parseISO(e.date);
-    const isInRange = isWithinInterval(date, { start: startDate, end: endDate });
-    const isGeneral = e.category === "general";
-    return isInRange && (!onlyGeneral ? true : isGeneral);
+    return isWithinInterval(date, { start: startDate, end: endDate });
   });
 
   const income = allExpensesInRange
-    .filter((e) => e.amount > 0)
+    .filter((e) => {
+      if (e.amount <= 0) return false;
+      // Exclude transfer receipts from income — they're internal movements
+      if (e.transferId) return false;
+      if (e.description.startsWith("Transferencia desde ")) return false;
+      return true;
+    })
     .reduce((acc, e) => acc + e.amount, 0);
 
   const realExpenses = allExpensesInRange.filter((e) => {
     if (e.amount >= 0) return false;
-    return !e.source || e.source !== e.category;
+    // Exclude transfers: they move money between sections, not actual spending
+    if (e.transferId) return false;
+    // Legacy fallback for old transfers without transferId
+    if (e.description.startsWith("Transferencia a ")) return false;
+    return true;
   });
 
   const totalExpenses = realExpenses.reduce((acc, e) => acc + e.amount, 0);

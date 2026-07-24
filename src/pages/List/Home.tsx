@@ -10,6 +10,7 @@ import { useModal } from "@/context/ModalContext";
 import { getEditTaskModal } from "@/components/Modal/Presets/List/EditTaskModal";
 import { getCreateTaskListModal } from "@/components/Modal/Presets/List/CreateTaskListModal";
 import { getDeleteTaskListModal } from "@/components/Modal/Presets/List/DeleteTaskListModal";
+import { triggerCelebration } from "@/components/UI/UIFullScreenEffectLayer";
 
 const ListHome: React.FC = () => {
   const {
@@ -140,7 +141,7 @@ const ListHome: React.FC = () => {
           onToggleDone={(id) => {
             toggleTaskDone(id);
             const task = tasks.find((t) => t.id === id);
-            if (task && !task.isDone) (window as any).triggerCelebration?.();
+            if (task && !task.isDone) triggerCelebration();
           }}
           onEdit={(task) => {
             showModal(

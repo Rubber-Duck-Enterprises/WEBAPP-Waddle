@@ -30,6 +30,8 @@ export type Expense = {
   recurring?: boolean;
   notes?: string;
   adjustment?: boolean;
+  /** Shared ID between the two expenses of a transfer pair */
+  transferId?: string;
 };
 
 export type ExpenseCategory = {

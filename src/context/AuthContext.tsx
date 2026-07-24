@@ -64,11 +64,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
             // ✅ Cambiar scope ANTES de rehydrate
             setUser(u, false);
 
-            // 🚧 MIGRACIÓN TEMPORALMENTE DESHABILITADA PARA DEBUG
-            const isAnonToUser = false;
+            const isAnonToUser = prevScope === "anon" && !!u;
 
             if (isAnonToUser) {
-              // ✅ y SOLO si ese uid aún no fue manejado (no volver a preguntar)
               try {
                 const alreadyHandled = await wasMigrationHandled(u.uid);
 
@@ -76,19 +74,24 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                   const anonHasData = await hasAnonData();
 
                   if (anonHasData) {
-                    // mostramos modal y salimos (el modal se encarga del reset/rehydrate)
+                    // Mostramos modal — el modal se encarga del flujo completo.
+                    // La persistencia permanece PAUSADA hasta que el modal termine.
                     showModal(
                       getMigrateAnonDataModal({
                         onConfirm: async () => {
                           try {
+                            // 1. Migrar datos anon al scope del usuario en localforage
                             await migrateAnonToUserAllStores(u.uid);
                             await markMigrationHandled(u.uid);
                           } catch (err) {
                             console.error("❌ Migration failed:", err);
+                            // Aún así intentamos marcar como handled para no repetir
+                            try { await markMigrationHandled(u.uid); } catch {}
                           } finally {
                             hideModal();
+                            // 2. Rehydratar SIN resetear — los datos merged ya están en localforage.
+                            //    Primero resumimos persistence para que el rehydrate pueda leer.
                             resumeAllStores();
-                            resetUserStoresToEmpty();
                             await rehydrateAllStores();
                             lastHandledScopeRef.current = nextScope;
                             setLoading(false);
@@ -101,15 +104,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                             await markMigrationHandled(u.uid);
                           } catch (err) {
                             console.error("❌ Clear anonymous data failed:", err);
-                            try {
-                              await markMigrationHandled(u.uid);
-                            } catch (markErr) {
-                              console.error("❌ Failed to mark migration as handled:", markErr);
-                            }
+                            try { await markMigrationHandled(u.uid); } catch {}
                           } finally {
                             hideModal();
+                            // Rehydratar datos del usuario (sin datos anon mezclados)
                             resumeAllStores();
-                            resetUserStoresToEmpty();
                             await rehydrateAllStores();
                             lastHandledScopeRef.current = nextScope;
                             setLoading(false);
@@ -119,10 +118,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                       })
                     );
 
-                    return; // 👈 IMPORTANTÍSIMO: no continúes con el flujo normal
+                    return; // 👈 No continuar con el flujo normal
                   }
 
-                  // No hay data anon, igual marcamos handled para no volver a checar
+                  // No hay data anon — marcar como handled para no volver a checar
                   await markMigrationHandled(u.uid);
                 }
               } catch (err) {

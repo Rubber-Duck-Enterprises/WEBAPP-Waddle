@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import styles from "./Navigation.module.css";
 
 const BottomNav: React.FC = () => {
   const location = useLocation();
@@ -12,38 +13,19 @@ const BottomNav: React.FC = () => {
   ];
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-around",
-        alignItems: "center",
-        padding: "0.5rem 0",
-        borderTop: "1px solid var(--border-color)",
-        background: "var(--background)",
-        position: "fixed",
-        bottom: "var(--safe-area-bottom)",
-        width: "100%",
-        height: "56px",
-      }}
-    >
+    <nav className={styles.bottomNav} aria-label="Navegación principal">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
-            style={{
-              background: "none",
-              border: "none",
-              color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
-              fontWeight: isActive ? "bold" : "normal",
-              fontSize: "1rem",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
+            className={styles.navButton}
+            data-active={isActive}
+            aria-label={item.label}
+            aria-current={isActive ? "page" : undefined}
           >
-            <span style={{ fontSize: "1.4rem" }}>{item.emoji}</span>
+            <span className={styles.navButtonIcon}>{item.emoji}</span>
             <span>{item.label}</span>
           </button>
         );

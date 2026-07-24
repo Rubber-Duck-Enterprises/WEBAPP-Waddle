@@ -1,5 +1,6 @@
 import React from "react";
 import MenuButton from "./MenuButton";
+import styles from "./Navigation.module.css";
 
 type Props = {
   onOpenMenu: () => void;
@@ -7,21 +8,10 @@ type Props = {
 
 const Header: React.FC<Props> = ({ onOpenMenu }) => {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "1rem",
-        paddingTop: "calc(1rem + var(--safe-area-top))",
-        borderBottom: "1px solid var(--border-color)",
-        background: "var(--background)",
-        color: "var(--text-primary)",
-      }}
-    >
+    <div className={styles.header}>
       <MenuButton onClick={onOpenMenu} />
-      <span style={{ fontWeight: "bold", fontSize: "1.5rem" }}>Waddle 🐤</span>
-      <div style={{ width: "1.5rem" }} />
+      <span className={styles.headerTitle}>Waddle 🐤</span>
+      <div className={styles.headerSpacer} />
     </div>
   );
 };

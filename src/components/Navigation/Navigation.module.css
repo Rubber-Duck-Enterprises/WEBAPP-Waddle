@@ -1,0 +1,140 @@
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  padding-top: calc(1rem + var(--safe-area-top));
+  border-bottom: 1px solid var(--border-color);
+  background: var(--background);
+  color: var(--text-primary);
+}
+
+.headerTitle {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.headerSpacer {
+  width: 1.5rem;
+}
+
+/* BottomNav */
+.bottomNav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border-color);
+  background: var(--background);
+  position: fixed;
+  bottom: var(--safe-area-bottom);
+  width: 100%;
+  height: 56px;
+}
+
+.navButton {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.navButton[data-active="true"] {
+  color: var(--text-primary);
+  font-weight: bold;
+}
+
+.navButtonIcon {
+  font-size: 1.4rem;
+}
+
+/* Drawer */
+.drawer {
+  position: fixed;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  background-color: var(--background);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: left 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  z-index: 1000;
+  padding: 1rem;
+  padding-top: calc(1rem + var(--safe-area-top));
+  padding-bottom: calc(1rem + var(--safe-area-bottom));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.drawerOpen {
+  left: 0;
+}
+
+.drawerClosed {
+  left: -250px;
+}
+
+.drawerTitle {
+  color: var(--text-primary);
+}
+
+.drawerDivider {
+  background-color: var(--border-color);
+  margin: 1rem 0;
+  height: 1px;
+  width: 100%;
+}
+
+.drawerList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.drawerFooter {
+  margin-top: 1rem;
+}
+
+.drawerUserInfo {
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.drawerUserName {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.drawerUserEmail {
+  opacity: 0.85;
+}
+
+.drawerThemeToggle {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.drawerVersion {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.drawerOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+}

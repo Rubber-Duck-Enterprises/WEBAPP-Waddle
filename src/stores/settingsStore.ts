@@ -47,10 +47,19 @@ export const useSettingsStore = create<SettingsStore>()(
       onRehydrateStorage: () => (state, error) => {
         if (!error && state?.hydrated !== undefined) {
           useSettingsStore.setState({ hydrated: true });
-          document.documentElement.setAttribute(
-            "data-theme",
-            state.theme ?? "light"
-          );
+          const theme = state.theme ?? "light";
+          // Deshabilitar transiciones para evitar animación durante rehydratación
+          const html = document.documentElement;
+          html.classList.add("theme-loading");
+          html.setAttribute("data-theme", theme);
+          // Espejo síncrono para que index.html pueda leerlo antes de React
+          try { localStorage.setItem("waddle-theme", theme); } catch {}
+          // Re-habilitar transiciones después del repaint
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              html.classList.remove("theme-loading");
+            });
+          });
         }
       },
     }

@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import Drawer from "@/components/Navigation/Drawer";
 import Header from "@/components/Navigation/Header";
 import { motion } from "framer-motion";
+import styles from "./Layout.module.css";
 
 const DefaultLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw" }}>
+    <div className={styles.shell}>
       <Header onOpenMenu={() => setDrawerOpen(true)} />
 
-      <main style={{ flex: 1, overflowY: "auto" }}>
+      <main className={styles.main}>
         <motion.div
           key="page-content"
           initial={{ opacity: 0 }}

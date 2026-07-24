@@ -152,6 +152,9 @@ export default function PopUp() {
 
   return createPortal(
     <div
+      aria-live="polite"
+      aria-atomic="false"
+      role="status"
       style={{
         position: "fixed",
         top: "calc(16px + var(--safe-area-top, 0px))",

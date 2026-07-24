@@ -3,6 +3,7 @@ import Drawer from "@/components/Navigation/Drawer";
 import Header from "@/components/Navigation/Header";
 import { motion } from "framer-motion";
 import UIMotionEffectLayer from "@/components/UI/UIFullScreenEffectLayer";
+import styles from "./Layout.module.css";
 
 const ListLayout: React.FC<{
   children: React.ReactNode;
@@ -11,10 +12,10 @@ const ListLayout: React.FC<{
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100vw" }}>
+    <div className={styles.shell}>
       <Header onOpenMenu={() => setDrawerOpen(true)} />
 
-      <main style={{ flex: 1, overflowY: "auto", position: "relative" }}>
+      <main className={styles.mainRelative}>
         <motion.div
           key="page-content"
           initial={{ opacity: 0 }}

@@ -8,6 +8,7 @@ const MenuButton: React.FC<Props> = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
+      aria-label="Abrir menú"
       style={{
         background: "none",
         border: "none",

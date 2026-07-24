@@ -1,178 +1,272 @@
 import localforage from "localforage";
 
-const BASES = [
-  "waddle-expenses",
-  "waddle-sections",
-  "waddle-settings",
-  "waddle-list",
-  "waddle-tasks",
-] as const;
+/**
+ * Real persistence keys used by Zustand stores (before scope suffix).
+ * These MUST match the `name` field in each store's persist config.
+ */
+const STORE_KEYS = ["waddle-wallet", "waddle-list", "waddle-settings"] as const;
 
-type Base = (typeof BASES)[number];
+type StoreKey = (typeof STORE_KEYS)[number];
 
-function safeParse(v: unknown) {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function safeParse(v: unknown): Record<string, unknown> | null {
   try {
     if (!v) return null;
-    return typeof v === "string" ? JSON.parse(v) : v;
+    if (typeof v === "string") return JSON.parse(v);
+    if (typeof v === "object") return v as Record<string, unknown>;
+    return null;
   } catch {
     return null;
   }
 }
 
-function isNonEmptyArray(v: unknown) {
+function isNonEmptyArray(v: unknown): v is unknown[] {
   return Array.isArray(v) && v.length > 0;
 }
 
-function hasMeaningfulData(base: Base, raw: unknown) {
-  const obj = safeParse(raw);
-  if (!obj) return false;
-
-  const state = obj?.state ?? obj;
-
-  if (base === "waddle-expenses") return isNonEmptyArray(state?.expenses);
-  if (base === "waddle-sections") return isNonEmptyArray(state?.sections);
-  if (base === "waddle-tasks") return isNonEmptyArray(state?.tasks);
-  if (base === "waddle-list") return isNonEmptyArray(state?.taskLists) || !!state?.tagsByList;
-  if (base === "waddle-settings") return !!state;
-  return false;
-}
-
-function uniqById<T extends { id: string }>(arr: T[]) {
+/**
+ * Deduplicate by `id` field, preferring the LAST occurrence (user data wins
+ * over anon data when both arrays are spread user-first).
+ */
+function uniqById<T extends { id: string }>(arr: T[]): T[] {
   const map = new Map<string, T>();
   for (const item of arr) map.set(item.id, item);
   return Array.from(map.values());
 }
 
-function mergePersisted(base: Base, anonRaw: unknown, userRaw: unknown) {
-  const anonObj = safeParse(anonRaw);
-  const userObj = safeParse(userRaw);
-
-  if (!anonObj) return userRaw ?? null;
-
-  if (!userObj) return JSON.stringify(anonObj);
-
-  const anonState = anonObj.state ?? anonObj;
-  let userState = userObj.state ?? userObj;
-
-  if (base === "waddle-expenses") {
-    const merged = uniqById([...(anonState.expenses || []), ...(userState.expenses || [])]);
-    userState.expenses = merged;
+/**
+ * Deduplicate items that share the same `name` field (case-insensitive).
+ * Keeps the FIRST occurrence (user data should come first so it takes priority).
+ */
+function uniqByName<T extends { id: string; name: string }>(arr: T[]): T[] {
+  const seen = new Map<string, T>();
+  for (const item of arr) {
+    const key = item.name.trim().toLowerCase();
+    if (!seen.has(key)) {
+      seen.set(key, item);
+    }
   }
-
-  if (base === "waddle-sections") {
-    const merged = uniqById([...(anonState.sections || []), ...(userState.sections || [])]);
-    userState.sections = merged;
-
-    userState.hasFirstWallet = !!(userState.hasFirstWallet || anonState.hasFirstWallet);
-  }
-
-  if (base === "waddle-tasks") {
-    const merged = uniqById([...(anonState.tasks || []), ...(userState.tasks || [])]);
-    userState.tasks = merged;
-  }
-
-  if (base === "waddle-list") {
-    const mergedLists = uniqById([...(anonState.taskLists || []), ...(userState.taskLists || [])]);
-    userState.taskLists = mergedLists;
-
-    userState.tagsByList = { ...(anonState.tagsByList || {}), ...(userState.tagsByList || {}) };
-
-    userState.activeListId = userState.activeListId ?? anonState.activeListId ?? "all";
-  }
-
-  if (base === "waddle-settings") {
-    userState = { ...(anonState || {}), ...(userState || {}) };
-    userState.hydrated = false;
-
-    if (userObj.state) userObj.state = userState;
-    else Object.assign(userObj, userState);
-
-    return JSON.stringify(userObj);
-  }
-
-  if (userObj.state) {
-    userObj.state = userState;
-    return JSON.stringify(userObj);
-  }
-
-  return JSON.stringify(userState);
+  return Array.from(seen.values());
 }
 
+/**
+ * Deduplicate expenses by content signature (description + amount + date + category).
+ * This catches cases where the same expense was persisted with different IDs
+ * (e.g., due to re-serialization or store write race conditions).
+ * Keeps the FIRST occurrence (user data should come first).
+ */
+function uniqBySignature<T extends { id: string; description: string; amount: number; date: string; category: string }>(arr: T[]): T[] {
+  const seen = new Set<string>();
+  const result: T[] = [];
+  for (const item of arr) {
+    const sig = `${item.description}|${item.amount}|${item.date}|${item.category}`;
+    if (!seen.has(sig)) {
+      seen.add(sig);
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+/**
+ * Deduplicate tasks by content signature (title + listId + createdAt).
+ * Catches tasks that were re-persisted with new IDs during auth transitions.
+ * Keeps the FIRST occurrence (user data priority).
+ */
+function uniqTasksBySignature<T extends { id: string; title: string; listId?: string; createdAt: string }>(arr: T[]): T[] {
+  const seen = new Set<string>();
+  const result: T[] = [];
+  for (const item of arr) {
+    const sig = `${item.title}|${item.listId ?? "none"}|${item.createdAt}`;
+    if (!seen.has(sig)) {
+      seen.add(sig);
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+// ─── Data detection ───────────────────────────────────────────────────────────
+
+function hasMeaningfulData(storeKey: StoreKey, raw: unknown): boolean {
+  const obj = safeParse(raw);
+  if (!obj) return false;
+
+  // Zustand persist wraps state in { state: {...}, version: N }
+  const state = (obj.state as Record<string, unknown>) ?? obj;
+
+  switch (storeKey) {
+    case "waddle-wallet":
+      return isNonEmptyArray(state.sections) || isNonEmptyArray(state.expenses);
+    case "waddle-list":
+      return isNonEmptyArray(state.taskLists) || isNonEmptyArray(state.tasks);
+    case "waddle-settings":
+      return state !== null && Object.keys(state).length > 0;
+    default:
+      return false;
+  }
+}
+
+// ─── Merge logic per store ────────────────────────────────────────────────────
+
+function mergePersisted(storeKey: StoreKey, anonRaw: unknown, userRaw: unknown): string | null {
+  const anonObj = safeParse(anonRaw);
+  if (!anonObj) return null;
+
+  const userObj = safeParse(userRaw);
+
+  // If user has no existing data, just use anon data as-is
+  if (!userObj) return JSON.stringify(anonObj);
+
+  // Extract state from Zustand persist wrapper
+  const anonState = (anonObj.state as Record<string, unknown>) ?? anonObj;
+  const userState = (userObj.state as Record<string, unknown>) ?? userObj;
+
+  switch (storeKey) {
+    case "waddle-wallet": {
+      // Merge sections: dedup by id first, then by name (user wins)
+      const anonSections = (anonState.sections as Array<{ id: string; name: string }>) || [];
+      const userSections = (userState.sections as Array<{ id: string; name: string }>) || [];
+      const mergedById = uniqById([...userSections, ...anonSections]);
+      userState.sections = uniqByName(mergedById);
+
+      // Merge expenses: dedup by id, then by content signature to catch
+      // re-serialized duplicates that got new IDs somehow
+      const anonExpenses = (anonState.expenses as Array<{ id: string; description: string; amount: number; date: string; category: string }>) || [];
+      const userExpenses = (userState.expenses as Array<{ id: string; description: string; amount: number; date: string; category: string }>) || [];
+      const mergedExpenses = uniqById([...userExpenses, ...anonExpenses]);
+      userState.expenses = uniqBySignature(mergedExpenses);
+
+      // Keep hasFirstWallet if either had it
+      userState.hasFirstWallet = !!(userState.hasFirstWallet || anonState.hasFirstWallet);
+      break;
+    }
+
+    case "waddle-list": {
+      // Merge task lists: dedup by id, then by name (user wins)
+      const anonLists = (anonState.taskLists as Array<{ id: string; name: string }>) || [];
+      const userLists = (userState.taskLists as Array<{ id: string; name: string }>) || [];
+      const mergedById = uniqById([...userLists, ...anonLists]);
+      userState.taskLists = uniqByName(mergedById);
+
+      // Merge tasks: dedup by id, then by content signature (title + listId + createdAt)
+      const anonTasks = (anonState.tasks as Array<{ id: string; title: string; listId?: string; createdAt: string }>) || [];
+      const userTasks = (userState.tasks as Array<{ id: string; title: string; listId?: string; createdAt: string }>) || [];
+      const mergedTasks = uniqById([...userTasks, ...anonTasks]);
+      userState.tasks = uniqTasksBySignature(mergedTasks);
+
+      // Merge tags by list (user tags win on conflicts)
+      const anonTags = (anonState.tagsByList as Record<string, unknown>) || {};
+      const userTags = (userState.tagsByList as Record<string, unknown>) || {};
+      userState.tagsByList = { ...anonTags, ...userTags };
+
+      // Keep user's activeListId if set, otherwise fallback to anon's
+      userState.activeListId = userState.activeListId ?? anonState.activeListId ?? "all";
+      break;
+    }
+
+    case "waddle-settings": {
+      // Settings: anon as base, user overrides (user preferences take priority)
+      const merged = { ...anonState, ...userState, hydrated: false };
+
+      if (userObj.state) {
+        userObj.state = merged;
+      } else {
+        Object.assign(userObj, merged);
+      }
+      return JSON.stringify(userObj);
+    }
+  }
+
+  // Write merged state back into wrapper
+  if (userObj.state) {
+    userObj.state = userState;
+  } else {
+    Object.assign(userObj, userState);
+  }
+
+  return JSON.stringify(userObj);
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+/**
+ * Returns true if there is meaningful data stored under anon scope.
+ */
 export async function hasAnonData(): Promise<boolean> {
   try {
-    for (const base of BASES) {
-      const anonKey = `${base}-anon`;
+    for (const storeKey of STORE_KEYS) {
+      const anonKey = `${storeKey}-anon`;
       try {
-        const anonVal = await localforage.getItem(anonKey);
-        if (hasMeaningfulData(base, anonVal)) return true;
+        const val = await localforage.getItem(anonKey);
+        if (hasMeaningfulData(storeKey, val)) return true;
       } catch (err) {
-        console.error(`❌ Failed to check anonymous data for ${base}:`, err);
-        // Continue checking other stores
+        console.error(`❌ Failed to check anon data for ${storeKey}:`, err);
       }
     }
     return false;
-  } catch (err) {
-    console.error("❌ hasAnonData failed:", err);
-    return false; // Fail gracefully - assume no data
+  } catch {
+    return false;
   }
 }
 
+/**
+ * Removes all anonymous scoped data from localforage.
+ */
 export async function clearAnonData(): Promise<void> {
-  try {
-    const results = await Promise.allSettled(
-      BASES.map((base) => localforage.removeItem(`${base}-anon`))
-    );
-    
-    // Log any failures but don't throw
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        console.error(`❌ Failed to clear anonymous data for ${BASES[index]}:`, result.reason);
-      }
-    });
-  } catch (err) {
-    console.error("❌ clearAnonData failed:", err);
-    // Don't throw - allow auth flow to continue
-  }
+  const results = await Promise.allSettled(
+    STORE_KEYS.map((key) => localforage.removeItem(`${key}-anon`))
+  );
+
+  results.forEach((result, i) => {
+    if (result.status === "rejected") {
+      console.error(`❌ Failed to clear anon data for ${STORE_KEYS[i]}:`, result.reason);
+    }
+  });
 }
 
+/**
+ * Merges anonymous data into the authenticated user's scoped storage.
+ *
+ * Deduplication rules:
+ *  - Sections and TaskLists: dedup by id AND by name (user data wins on name conflicts)
+ *  - Expenses and Tasks: dedup by id only
+ *  - Settings: user preferences override anon preferences
+ *  - Tags: user tags override anon tags per list
+ *
+ * After successful merge, clears all anonymous data.
+ * Throws if any store migration fails (prevents marking as handled).
+ */
 export async function migrateAnonToUserAllStores(uid: string): Promise<void> {
-  const errors: Array<{ base: Base; error: any }> = [];
+  const errors: Array<{ storeKey: StoreKey; error: unknown }> = [];
 
-  try {
-    for (const base of BASES) {
-      try {
-        const anonKey = `${base}-anon`;
-        const userKey = `${base}-${uid}`;
-
-        const anonVal = await localforage.getItem(anonKey);
-        if (!hasMeaningfulData(base, anonVal)) continue;
-
-        const userVal = await localforage.getItem(userKey);
-
-        const merged = mergePersisted(base, anonVal, userVal);
-        if (merged) {
-          await localforage.setItem(userKey, merged);
-        }
-      } catch (err: unknown) {
-        console.error(`❌ Failed to migrate ${base}:`, err);
-        errors.push({ base, error: err });
-        // Continue with other stores
-      }
-    }
-
-    // Always attempt to clear anonymous data, even if some migrations failed
+  for (const storeKey of STORE_KEYS) {
     try {
-      await clearAnonData();
-    } catch (err) {
-      console.error("❌ Failed to clear anonymous data after migration:", err);
-    }
+      const anonKey = `${storeKey}-anon`;
+      const userKey = `${storeKey}-${uid}`;
 
-    // If any migrations failed, throw to prevent marking as handled
-    if (errors.length > 0) {
-      throw new Error(`Migration failed for ${errors.length} store(s): ${errors.map(e => e.base).join(", ")}`);
+      const anonVal = await localforage.getItem(anonKey);
+      if (!hasMeaningfulData(storeKey, anonVal)) continue;
+
+      const userVal = await localforage.getItem(userKey);
+      const merged = mergePersisted(storeKey, anonVal, userVal);
+
+      if (merged) {
+        await localforage.setItem(userKey, merged);
+      }
+    } catch (err) {
+      console.error(`❌ Failed to migrate ${storeKey}:`, err);
+      errors.push({ storeKey, error: err });
     }
-  } catch (err) {
-    console.error("❌ migrateAnonToUserAllStores failed:", err);
-    throw err; // Re-throw to prevent marking as handled
+  }
+
+  // Always attempt to clear anon data even if some merges failed
+  await clearAnonData();
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Migración falló para: ${errors.map((e) => e.storeKey).join(", ")}`
+    );
   }
 }

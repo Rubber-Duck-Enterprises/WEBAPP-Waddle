@@ -1,0 +1,455 @@
+import React, { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useShoppingStore } from "@/stores/shoppingStore";
+import ShoppingLayout from "@/layouts/ShoppingLayout";
+import UIButton from "@/components/UI/UIButton";
+import UITextInput from "@/components/UI/UITextInput";
+import type { ShoppingTrip } from "@/types/shopping";
+
+const ITEMS_PER_PAGE = 5;
+type RangeType = "todo" | "semana" | "mes";
+
+const ShoppingHome: React.FC = () => {
+  const navigate = useNavigate();
+  const { trips, monthlyBudget, setMonthlyBudget } = useShoppingStore();
+  const [page, setPage] = useState(0);
+  const [rangeType, setRangeType] = useState<RangeType>("mes");
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState(String(monthlyBudget || ""));
+
+  // Calcular fechas del filtro
+  const { startDate, endDate } = useMemo(() => {
+    const now = new Date();
+    let start: Date;
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+    switch (rangeType) {
+      case "semana": {
+        const day = now.getDay();
+        start = new Date(now);
+        start.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+        start.setHours(0, 0, 0, 0);
+        break;
+      }
+      case "mes":
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case "todo":
+      default:
+        start = new Date(0);
+        break;
+    }
+    return { startDate: start, endDate: end };
+  }, [rangeType]);
+
+  // Filtrar trips completados en rango
+  const tripsInRange = useMemo(() => {
+    return trips.filter((t) => {
+      if (t.status !== "completed") return false;
+      const date = new Date(t.completedAt || t.createdAt);
+      return date >= startDate && date <= endDate;
+    });
+  }, [trips, startDate, endDate]);
+
+  // Cálculos del resumen
+  const usedBudget = tripsInRange.reduce((acc, t) => acc + t.actualTotal, 0);
+  const remainingBudget = monthlyBudget - usedBudget;
+  const isOverBudget = remainingBudget < 0;
+  const exceedAmount = isOverBudget ? Math.abs(remainingBudget) : 0;
+
+  // Ordenar todas las compras: en proceso > planning > completados por fecha
+  const sortedTrips = useMemo(() => {
+    const statusOrder: Record<string, number> = {
+      in_progress: 0,
+      planning: 1,
+      completed: 2,
+    };
+    return [...trips].sort((a, b) => {
+      const orderDiff = statusOrder[a.status] - statusOrder[b.status];
+      if (orderDiff !== 0) return orderDiff;
+      return b.createdAt.localeCompare(a.createdAt);
+    });
+  }, [trips]);
+
+  const paginatedTrips = sortedTrips.slice(0, (page + 1) * ITEMS_PER_PAGE);
+  const hasMore = paginatedTrips.length < sortedTrips.length;
+
+  // Guardar presupuesto
+  const handleSaveBudget = () => {
+    const value = Number(budgetInput) || 0;
+    setMonthlyBudget(value);
+    setEditingBudget(false);
+  };
+
+  return (
+    <ShoppingLayout>
+      <div style={{ padding: "1rem", paddingBottom: "5rem" }}>
+        {/* Filtro de rango */}
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+          {(["todo", "semana", "mes"] as RangeType[]).map((type) => (
+            <button
+              key={type}
+              onClick={() => setRangeType(type)}
+              style={{
+                padding: "0.4rem 0.8rem",
+                borderRadius: "8px",
+                border: "1px solid var(--border-color)",
+                background: rangeType === type ? "var(--btn-primary-bg)" : "transparent",
+                color: rangeType === type ? "var(--btn-text-color)" : "var(--text-primary)",
+                fontSize: "0.85rem",
+                fontWeight: rangeType === type ? "bold" : "normal",
+                cursor: "pointer",
+                textTransform: "capitalize",
+              }}
+            >
+              {type === "todo" ? "Todo" : type === "semana" ? "Semana" : "Mes"}
+            </button>
+          ))}
+        </div>
+
+        {/* Tarjeta de resumen */}
+        <div
+          style={{
+            background: "var(--card-bg)",
+            borderRadius: "12px",
+            padding: "1.2rem",
+            marginBottom: "1.5rem",
+            border: "1px solid var(--border-color)",
+          }}
+        >
+          <h2 style={{ fontSize: "0.9rem", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
+            Resumen
+          </h2>
+
+          {/* Monto principal: Total presupuesto - usado */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", marginBottom: "0.3rem" }}>
+            <span
+              style={{
+                fontSize: "2.2rem",
+                fontWeight: "bold",
+                color: monthlyBudget === 0
+                  ? "var(--text-primary)"
+                  : isOverBudget ? "#f44336" : "#4caf50",
+              }}
+            >
+              {monthlyBudget > 0 ? `$${remainingBudget.toLocaleString()}` : "$—"}
+            </span>
+            {monthlyBudget > 0 && isOverBudget && (
+              <span style={{ fontSize: "1rem", color: "#f44336", fontWeight: "bold" }}>
+                -${exceedAmount.toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          {monthlyBudget > 0 ? (
+            <>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.15rem" }}>
+                + Presupuesto total: ${monthlyBudget.toLocaleString()}
+              </div>
+              <div style={{ fontSize: "0.8rem", color: "#f44336", marginBottom: "0.75rem" }}>
+                - Presupuesto usado: ${usedBudget.toLocaleString()}
+              </div>
+
+              {/* Barra gráfica de 3 segmentos */}
+              <BudgetBar
+                spent={usedBudget}
+                budget={monthlyBudget}
+                exceed={exceedAmount}
+              />
+            </>
+          ) : (
+            <div style={{ marginTop: "0.5rem" }}>
+              {editingBudget ? (
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                  <UITextInput
+                    type="number"
+                    placeholder="Ej: 6000"
+                    value={budgetInput}
+                    onChange={(e) => setBudgetInput(e.target.value)}
+                    min={0}
+                    style={{ flex: 1 }}
+                  />
+                  <UIButton variant="primary" onClick={handleSaveBudget}>
+                    Guardar
+                  </UIButton>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setEditingBudget(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--text-secondary)",
+                    fontSize: "0.8rem",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Configura tu presupuesto mensual para ver el seguimiento.
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Editar presupuesto si ya existe */}
+          {monthlyBudget > 0 && (
+            <button
+              onClick={() => { setEditingBudget(!editingBudget); setBudgetInput(String(monthlyBudget)); }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--text-secondary)",
+                fontSize: "0.7rem",
+                cursor: "pointer",
+                marginTop: "0.5rem",
+                textDecoration: "underline",
+              }}
+            >
+              {editingBudget ? "Cancelar" : "Editar presupuesto"}
+            </button>
+          )}
+          {monthlyBudget > 0 && editingBudget && (
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.5rem" }}>
+              <UITextInput
+                type="number"
+                value={budgetInput}
+                onChange={(e) => setBudgetInput(e.target.value)}
+                min={0}
+                style={{ flex: 1 }}
+              />
+              <UIButton variant="primary" onClick={handleSaveBudget} style={{ fontSize: "0.8rem" }}>
+                Guardar
+              </UIButton>
+            </div>
+          )}
+        </div>
+
+        {/* Compras recientes */}
+        <h2 style={{ fontSize: "1.1rem", fontWeight: "bold", color: "var(--text-primary)", marginBottom: "1rem" }}>
+          🛒 Compras recientes
+        </h2>
+
+        {sortedTrips.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "2rem 1rem", color: "var(--text-secondary)" }}>
+            <p style={{ fontSize: "2.5rem", marginBottom: "0.5rem" }}>🛍️</p>
+            <p>No tienes compras aún.</p>
+            <p style={{ fontSize: "0.85rem" }}>Crea tu primera lista de compras.</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+            {paginatedTrips.map((trip) => (
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                onAction={() => navigate(`/shopping/trip/${trip.id}`)}
+              />
+            ))}
+            {hasMore && (
+              <UIButton
+                variant="default"
+                fullWidth
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Ver más
+              </UIButton>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* FAB: Botón flotante "+ Nueva compra" */}
+      <button
+        onClick={() => navigate("/shopping/new")}
+        style={{
+          position: "fixed",
+          bottom: "calc(70px + var(--safe-area-bottom, 0px))",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "calc(100% - 2rem)",
+          maxWidth: "400px",
+          padding: "0.85rem",
+          borderRadius: "12px",
+          border: "none",
+          background: "var(--btn-primary-bg)",
+          color: "var(--btn-text-color)",
+          fontWeight: "bold",
+          fontSize: "1rem",
+          cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+          zIndex: 100,
+        }}
+      >
+        + Nueva compra
+      </button>
+    </ShoppingLayout>
+  );
+};
+
+// --- Barra gráfica de presupuesto (Rojo=Gastado, Verde=Disponible, Naranja=Excedente) ---
+const BudgetBar: React.FC<{ spent: number; budget: number; exceed: number }> = ({ spent, budget, exceed }) => {
+  const total = Math.max(budget, spent);
+  const spentPercent = Math.min(100, (Math.min(spent, budget) / total) * 100);
+  const availablePercent = spent < budget ? ((budget - spent) / total) * 100 : 0;
+  const exceedPercent = exceed > 0 ? (exceed / total) * 100 : 0;
+
+  return (
+    <div>
+      <div
+        style={{
+          width: "100%",
+          height: "16px",
+          borderRadius: "8px",
+          overflow: "hidden",
+          display: "flex",
+          background: "var(--progress-bg)",
+        }}
+      >
+        {/* Rojo: Gastado */}
+        {spentPercent > 0 && (
+          <div style={{ width: `${spentPercent}%`, background: "#f44336", transition: "width 0.3s" }} />
+        )}
+        {/* Verde: Disponible */}
+        {availablePercent > 0 && (
+          <div style={{ width: `${availablePercent}%`, background: "#4caf50", transition: "width 0.3s" }} />
+        )}
+        {/* Naranja: Excedente */}
+        {exceedPercent > 0 && (
+          <div style={{ width: `${exceedPercent}%`, background: "#ff9800", transition: "width 0.3s" }} />
+        )}
+      </div>
+      {/* Leyenda */}
+      <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.4rem", fontSize: "0.7rem", color: "var(--text-secondary)" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+          <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#f44336", display: "inline-block" }} />
+          Gastado
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+          <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#4caf50", display: "inline-block" }} />
+          Presupuesto
+        </span>
+        {exceed > 0 && (
+          <span style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+            <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#ff9800", display: "inline-block" }} />
+            Excedente
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- Tarjeta de compra ---
+const TripCard: React.FC<{
+  trip: ShoppingTrip;
+  onAction: () => void;
+}> = ({ trip, onAction }) => {
+  // Balance = presupuesto de la lista - lo gastado en esa lista
+  const balance = trip.status === "completed"
+    ? trip.budget - trip.actualTotal
+    : trip.budget > 0
+      ? trip.budget - trip.estimatedTotal
+      : 0;
+  const isPositive = balance >= 0;
+
+  const statusConfig: Record<string, { text: string; color: string; borderColor: string; dot: string }> = {
+    planning: { text: "Pendiente", color: "var(--text-secondary)", borderColor: "var(--border-color)", dot: "⚫" },
+    in_progress: { text: "En proceso", color: "#ff9800", borderColor: "#ff9800", dot: "🟡" },
+    completed: {
+      text: isPositive ? "En el presupuesto" : "Excedente",
+      color: isPositive ? "#4caf50" : "#f44336",
+      borderColor: isPositive ? "#4caf50" : "#f44336",
+      dot: "🟢",
+    },
+  };
+
+  const config = statusConfig[trip.status];
+
+  const formatDate = (iso: string) => {
+    const date = new Date(iso);
+    return date.toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric" });
+  };
+
+  return (
+    <div
+      style={{
+        background: "var(--card-bg)",
+        borderRadius: "12px",
+        padding: "1rem",
+        border: `2px solid ${config.borderColor}`,
+        cursor: trip.status !== "completed" ? "pointer" : undefined,
+      }}
+      onClick={trip.status !== "completed" ? onAction : undefined}
+    >
+      {/* Fila superior: tienda + balance */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <span style={{ fontSize: "1rem" }}>⚙️</span>
+            <span style={{ fontWeight: "bold", fontSize: "1.05rem", color: "var(--text-primary)" }}>
+              {trip.store}
+            </span>
+          </div>
+          <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "0.15rem" }}>
+            {trip.status === "planning"
+              ? "● Pendiente"
+              : formatDate(trip.completedAt || trip.createdAt)}
+          </div>
+        </div>
+
+        <div style={{ textAlign: "right" }}>
+          <div
+            style={{
+              fontWeight: "bold",
+              fontSize: "1.4rem",
+              color: trip.status === "completed"
+                ? (isPositive ? "#4caf50" : "#f44336")
+                : trip.budget > 0
+                  ? (isPositive ? "#4caf50" : "#f44336")
+                  : "var(--text-primary)",
+            }}
+          >
+            {trip.status === "completed"
+              ? `${isPositive ? "+" : "-"}$${Math.abs(balance).toLocaleString()}`
+              : trip.budget > 0
+                ? `${isPositive ? "+" : "-"}$${Math.abs(balance).toLocaleString()}`
+                : `$${trip.estimatedTotal.toLocaleString()}`}
+          </div>
+          <div style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
+            {trip.budget > 0 ? "Presupuesto" : "Estimado"}
+          </div>
+        </div>
+      </div>
+
+      {/* Detalle de estimado/gastado/presupuesto */}
+      <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "0.4rem", display: "flex", flexDirection: "column", gap: "0.1rem" }}>
+        <span>Estimado: ${trip.estimatedTotal.toLocaleString()}</span>
+        {trip.status === "completed" && (
+          <span>Gastado: ${trip.actualTotal.toLocaleString()}</span>
+        )}
+        {trip.budget > 0 && (
+          <span>Presupuesto: ${trip.budget.toLocaleString()}</span>
+        )}
+      </div>
+
+      {/* Pie: estado + acción */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.5rem" }}>
+        <span style={{ fontSize: "0.75rem", color: config.color, fontWeight: "bold" }}>
+          {config.text}
+        </span>
+        {trip.status === "completed" && (
+          <span style={{ fontSize: "0.75rem", color: "#4caf50" }}>● Comprada</span>
+        )}
+        {trip.status !== "completed" && (
+          <UIButton
+            variant="primary"
+            style={{ fontSize: "0.75rem", padding: "0.3rem 0.7rem" }}
+          >
+            {trip.status === "planning" ? "Comprar" : "Continuar"}
+          </UIButton>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ShoppingHome;
