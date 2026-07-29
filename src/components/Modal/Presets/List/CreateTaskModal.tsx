@@ -455,7 +455,7 @@ const CreateTaskModal: React.FC<Props> = ({ activeListId, onConfirm, onCancel })
                 listId: finalListId,
                 tags,
                 priority: priority || undefined,
-                dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
+                dueDate: dueDate ? dueDate + "T12:00:00" : undefined,
                 repeat: repeat || undefined,
                 subtasks: subtaskTitles.length > 0
                   ? subtaskTitles.map((t) => ({

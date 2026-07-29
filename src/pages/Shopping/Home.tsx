@@ -115,7 +115,7 @@ const ShoppingHome: React.FC = () => {
     <ShoppingLayout>
       <div style={{ padding: "1rem", paddingBottom: "5rem" }}>
         {/* Filtro de rango */}
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch" }}>
           {(["todo", "semana", "mes"] as RangeType[]).map((type) => (
             <button
               key={type}
@@ -129,6 +129,8 @@ const ShoppingHome: React.FC = () => {
                 fontSize: "0.85rem",
                 fontWeight: "bold",
                 cursor: "pointer",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
               }}
             >
               {type === "todo" ? "Todo" : type === "semana" ? "Semana" : "Mes"}
@@ -354,17 +356,17 @@ const BudgetBar: React.FC<{ spent: number; budget: number; exceed: number }> = (
         )}
       </div>
       {/* Leyenda */}
-      <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.4rem", fontSize: "0.7rem", color: "var(--text-secondary)" }}>
-        <span style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+      <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.4rem", fontSize: "0.7rem", color: "var(--text-secondary)", overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.2rem", whiteSpace: "nowrap", flexShrink: 0 }}>
           <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#f44336", display: "inline-block" }} />
           Gastado
         </span>
-        <span style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.2rem", whiteSpace: "nowrap", flexShrink: 0 }}>
           <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#4caf50", display: "inline-block" }} />
           Presupuesto
         </span>
         {exceed > 0 && (
-          <span style={{ display: "flex", alignItems: "center", gap: "0.2rem" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.2rem", whiteSpace: "nowrap", flexShrink: 0 }}>
             <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#ff9800", display: "inline-block" }} />
             Excedente
           </span>

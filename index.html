@@ -25,35 +25,57 @@
       }
     </style>
     <script>
-      // Aplica el tema guardado lo antes posible para evitar flash blanco → oscuro.
-      // Estrategia: deshabilitar transiciones, aplicar tema, re-habilitar transiciones.
+      // Aplica el tema guardado lo antes posible y gestiona el inicio de la animación del splash.
       (function() {
         var html = document.documentElement;
         html.classList.add('theme-loading');
+        window.__waddleSplashStarted = false;
 
-        function applyTheme(theme) {
-          if (theme === 'dark') {
+        function startSplash(theme) {
+          if (window.__waddleSplashStarted) return;
+          window.__waddleSplashStarted = true;
+
+          var validTheme = (theme === 'dark') ? 'dark' : 'light';
+
+          if (validTheme === 'dark') {
             html.setAttribute('data-theme', 'dark');
+          } else {
+            html.setAttribute('data-theme', 'light');
           }
-          // Deja un frame para que el navegador pinte con el tema correcto
-          // y luego re-habilita las transiciones
-          requestAnimationFrame(function() {
+
+          try {
+            localStorage.setItem('waddle-theme', validTheme);
+          } catch(e) {}
+
+          var triggerSplash = function() {
+            var splash = document.getElementById('waddle-splash');
+            if (splash) {
+              splash.classList.add('splash-start');
+            }
             requestAnimationFrame(function() {
-              html.classList.remove('theme-loading');
+              requestAnimationFrame(function() {
+                html.classList.remove('theme-loading');
+              });
             });
-          });
+          };
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', triggerSplash);
+          } else {
+            triggerSplash();
+          }
         }
 
-        // Intento síncrono desde localStorage mirror
+        // 1. Intento síncrono desde localStorage mirror
         try {
           var cached = localStorage.getItem('waddle-theme');
-          if (cached) {
-            applyTheme(cached);
+          if (cached === 'light' || cached === 'dark') {
+            startSplash(cached);
             return;
           }
         } catch (e) {}
 
-        // Fallback: leer de IndexedDB (localforage) directamente
+        // 2. Fallback: leer de IndexedDB (localforage) directamente
         try {
           var req = indexedDB.open('localforage');
           req.onsuccess = function(e) {
@@ -70,28 +92,31 @@
                     try {
                       var data = JSON.parse(cursor.value);
                       var state = data.state || data;
-                      if (state.theme) {
-                        try { localStorage.setItem('waddle-theme', state.theme); } catch(x) {}
-                        applyTheme(state.theme);
+                      if (state.theme === 'light' || state.theme === 'dark') {
+                        startSplash(state.theme);
                         return;
                       }
                     } catch(x) {}
                   }
                   cursor.continue();
                 } else {
-                  applyTheme('light');
+                  startSplash('light');
                 }
               };
-              cursorReq.onerror = function() { applyTheme('light'); };
-            } catch(x) { applyTheme('light'); }
+              cursorReq.onerror = function() { startSplash('light'); };
+            } catch(x) { startSplash('light'); }
           };
-          req.onerror = function() { applyTheme('light'); };
+          req.onerror = function() { startSplash('light'); };
         } catch(e) {
-          applyTheme('light');
+          startSplash('light');
         }
 
-        // Safety: si después de 200ms no se resolvió, revelar de todos modos
-        setTimeout(function() { html.classList.remove('theme-loading'); }, 200);
+        // Safety: si después de 150ms no se resolvió IndexedDB, iniciar con tema por defecto ('light')
+        setTimeout(function() {
+          if (!window.__waddleSplashStarted) {
+            startSplash('light');
+          }
+        }, 150);
       })();
     </script>
   </head>
@@ -140,12 +165,7 @@
         left: 0;
         right: 0;
         height: 300%;
-        top: -100%; /* empieza centrado: zona de transición visible */
-        /*
-          0%–40% = blanco sólido
-          60%–100% = oscuro sólido
-          40%–60% = transición entre ambos
-        */
+        top: -100%; /* empieza centrado */
         background: linear-gradient(
           to bottom,
           #121212 0%,
@@ -153,10 +173,14 @@
           #ffffff 60%,
           #ffffff 100%
         );
+      }
+
+      /* La animación solo arranca cuando el tema ha sido resuelto (.splash-start) */
+      #waddle-splash.splash-start .splash-bg {
         animation: splash-slide-light 1.6s ease-in-out forwards;
       }
 
-      [data-theme="dark"] #waddle-splash .splash-bg {
+      [data-theme="dark"] #waddle-splash.splash-start .splash-bg {
         animation: splash-slide-dark 1.6s ease-in-out forwards;
       }
 
@@ -172,6 +196,9 @@
       #waddle-splash .splash-sun {
         top: 15%;
         right: 15%;
+      }
+
+      #waddle-splash.splash-start .splash-sun {
         animation: splash-sun-light 1.6s ease-in-out forwards;
       }
 
@@ -179,23 +206,23 @@
       #waddle-splash .splash-moon {
         top: 75%;
         left: 15%;
+      }
+
+      #waddle-splash.splash-start .splash-moon {
         animation: splash-moon-light 1.6s ease-in-out forwards;
       }
 
       /* === TEMA CLARO === */
-      /* Desplaza el degradado hacia arriba hasta que solo se vea la zona blanca */
       @keyframes splash-slide-light {
         0% { top: -100%; }
         100% { top: -200%; }
       }
 
-      /* Sol se mueve arriba centrado */
       @keyframes splash-sun-light {
         0% { top: 15%; right: 15%; transform: translate(0, 0) scale(1); }
         100% { top: 10%; right: 50%; transform: translate(50%, 0) scale(1.4); }
       }
 
-      /* Luna se desvanece en tema claro */
       @keyframes splash-moon-light {
         0% { opacity: 1; top: 75%; left: 15%; transform: translate(0, 0) scale(1); }
         50% { opacity: 0.2; }
@@ -203,35 +230,32 @@
       }
 
       /* === TEMA OSCURO === */
-      [data-theme="dark"] #waddle-splash .splash-sun {
+      [data-theme="dark"] #waddle-splash.splash-start .splash-sun {
         animation: splash-sun-dark 1.6s ease-in-out forwards;
       }
 
-      [data-theme="dark"] #waddle-splash .splash-moon {
+      [data-theme="dark"] #waddle-splash.splash-start .splash-moon {
         animation: splash-moon-dark 1.6s ease-in-out forwards;
       }
 
-      /* Desplaza el degradado hacia abajo hasta que solo se vea la zona oscura */
       @keyframes splash-slide-dark {
         0% { top: -100%; }
         100% { top: 0%; }
       }
 
-      /* Sol se desvanece en tema oscuro */
       @keyframes splash-sun-dark {
         0% { opacity: 1; top: 15%; right: 15%; transform: translate(0, 0) scale(1); }
         50% { opacity: 0.2; }
         100% { opacity: 0; top: 15%; right: 15%; transform: translate(0, 0) scale(0.8); }
       }
 
-      /* Luna se mueve arriba centrado */
       @keyframes splash-moon-dark {
         0% { top: 75%; left: 15%; transform: translate(0, 0) scale(1); }
         100% { top: 10%; left: 50%; transform: translate(-50%, 0) scale(1.4); }
       }
 
       /* Fade out del splash — empieza DESPUÉS de que la animación del gradiente termine */
-      #waddle-splash {
+      #waddle-splash.splash-start {
         animation: splash-fadeout 0.5s ease-out 1.8s forwards;
       }
 
@@ -246,10 +270,12 @@
         inset: 0;
         z-index: 2;
         opacity: 0;
+      }
+
+      #waddle-splash.splash-start .splash-clouds {
         animation: clouds-fadein 1s ease-out 0.6s forwards;
       }
 
-      /* Ocultar nubes en tema oscuro */
       [data-theme="dark"] #waddle-splash .splash-clouds {
         display: none;
       }
@@ -287,6 +313,9 @@
       [data-theme="dark"] #waddle-splash .splash-stars {
         display: block;
         opacity: 0;
+      }
+
+      [data-theme="dark"] #waddle-splash.splash-start .splash-stars {
         animation: stars-fadein 1s ease-out 0.6s forwards;
       }
 

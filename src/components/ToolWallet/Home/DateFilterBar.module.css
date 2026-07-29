@@ -1,9 +1,16 @@
 .container {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 1rem;
   padding-bottom: 0;
+}
+
+.container > * {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .dateInput {

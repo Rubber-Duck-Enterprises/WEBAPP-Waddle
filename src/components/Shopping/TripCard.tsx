@@ -113,8 +113,8 @@ const TripCard: React.FC<TripCardProps> = ({ trip, onAction, onEdit, onViewDetai
       </div>
 
       {/* Pie: estado + acción */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: "0.75rem", color: config.color, fontWeight: "bold" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch" }}>
+        <span style={{ fontSize: "0.75rem", color: config.color, fontWeight: "bold", whiteSpace: "nowrap", flexShrink: 0 }}>
           {config.text}
         </span>
         {trip.status === "completed" && (

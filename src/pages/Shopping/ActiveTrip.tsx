@@ -358,7 +358,7 @@ const ActiveTrip: React.FC = () => {
         </div>
 
         {/* Filtros */}
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", overflowX: "auto" }}>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch" }}>
           {(["todos", "en_carrito", "por_agregar", "buscar"] as FilterTab[]).map((tab) => (
             <button
               key={tab}
@@ -372,6 +372,7 @@ const ActiveTrip: React.FC = () => {
                 fontSize: "0.8rem",
                 cursor: "pointer",
                 whiteSpace: "nowrap",
+                flexShrink: 0,
               }}
             >
               {tab === "todos" && "Todos"}
@@ -722,7 +723,16 @@ const AddMoreModal: React.FC<{
   const [unit, setUnit] = useState<import("@/types/shopping").ShoppingItemUnit>("unidad");
   const [category, setCategory] = useState(categories[0]?.name ?? "Otro");
   const [price, setPrice] = useState("");
+  const [priceMode, setPriceMode] = useState<"unitario" | "total">("unitario");
   const { showPopUp } = usePopUp();
+
+  const newUnitPrice = priceMode === "unitario"
+    ? (Number(price) || 0)
+    : (Number(quantity) || 1) > 0 ? (Number(price) || 0) / (Number(quantity) || 1) : 0;
+
+  const newTotalPrice = priceMode === "unitario"
+    ? (Number(price) || 0) * (Number(quantity) || 1)
+    : (Number(price) || 0);
 
   const handleSubmitNew = () => {
     if (!name.trim()) {
@@ -734,7 +744,7 @@ const AddMoreModal: React.FC<{
       quantity: Number(quantity) || 1,
       unit,
       category,
-      price: Number(price) || 0,
+      price: newUnitPrice,
     });
   };
 
@@ -843,8 +853,52 @@ const AddMoreModal: React.FC<{
           <UITextInput placeholder="Nombre del producto" value={name} onChange={(e) => setName(e.target.value)} />
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
             <UITextInput type="number" placeholder="Cantidad" value={quantity} onChange={(e) => setQuantity(e.target.value)} min={1} />
-            <UITextInput type="number" placeholder="Precio real" value={price} onChange={(e) => setPrice(e.target.value)} min={0} step={0.01} />
+            <div>
+              <div style={{ display: "flex", gap: "0.3rem", marginBottom: "0.3rem" }}>
+                <button
+                  onClick={() => setPriceMode("unitario")}
+                  style={{
+                    flex: 1,
+                    padding: "0.25rem",
+                    borderRadius: "4px",
+                    border: "1px solid var(--border-color)",
+                    background: priceMode === "unitario" ? "var(--btn-primary-bg)" : "transparent",
+                    color: priceMode === "unitario" ? "var(--btn-text-color)" : "var(--text-primary)",
+                    fontSize: "0.65rem",
+                    cursor: "pointer",
+                    fontWeight: priceMode === "unitario" ? "bold" : "normal",
+                  }}
+                >
+                  Unitario
+                </button>
+                <button
+                  onClick={() => setPriceMode("total")}
+                  style={{
+                    flex: 1,
+                    padding: "0.25rem",
+                    borderRadius: "4px",
+                    border: "1px solid var(--border-color)",
+                    background: priceMode === "total" ? "var(--btn-primary-bg)" : "transparent",
+                    color: priceMode === "total" ? "var(--btn-text-color)" : "var(--text-primary)",
+                    fontSize: "0.65rem",
+                    cursor: "pointer",
+                    fontWeight: priceMode === "total" ? "bold" : "normal",
+                  }}
+                >
+                  Total
+                </button>
+              </div>
+              <UITextInput type="number" placeholder={priceMode === "unitario" ? "Precio unit." : "Precio total"} value={price} onChange={(e) => setPrice(e.target.value)} min={0} step={0.01} />
+            </div>
           </div>
+          {price && (
+            <div style={{ textAlign: "right", fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "-0.25rem" }}>
+              {priceMode === "unitario"
+                ? `Total: $${newTotalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : `Unitario: $${newUnitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              }
+            </div>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
             <select
               value={category}
@@ -1022,7 +1076,9 @@ const TripSummary: React.FC<{
   const { showModal, hideModal } = useModal();
   const { showPopUp } = usePopUp();
   const { addExpense } = useWalletStore();
-  const [registeredInWallet, setRegisteredInWallet] = useState(false);
+  const { markRegisteredInWallet } = useShoppingStore();
+
+  const registeredInWallet = trip.registeredInWallet ?? false;
 
   const purchasedItems = trip.items.filter((i) => i.inCart && !i.removed);
   const removedItems = trip.items.filter((i) => i.removed);
@@ -1065,7 +1121,7 @@ const TripSummary: React.FC<{
             notes: `${purchasedItems.length} productos · Lista: ${trip.listName}`,
           });
           hideModal();
-          setRegisteredInWallet(true);
+          markRegisteredInWallet(trip.id);
           showPopUp("SUCCESS", "Gasto registrado en Wallet ✅");
         }}
       />

@@ -296,10 +296,11 @@ const ShoppingReports: React.FC = () => {
             <div
               style={{
                 fontSize: "0.8rem",
-                color: "var(--text-secondary)",
+                color: "var(--text-primary)",
                 padding: "0.5rem 0.75rem",
                 borderRadius: "8px",
-                background: "rgba(0,0,0,0.05)",
+                background: "var(--bullet-bg)",
+                border: "1px solid var(--border-color)",
               }}
             >
               {budgetAnalysis.diagnosis === "ideal" && (

@@ -39,21 +39,36 @@ export const useSettingsStore = create<SettingsStore>()(
       hydrated: false,
       setFavouriteEmojis: (emojis) => set({ favouriteEmojis: emojis }),
       setFavouriteColors: (colors) => set({ favouriteColors: colors }),
-      setSetting: (key, value) => set({ [key]: value }),
+      setSetting: (key, value) => {
+        set({ [key]: value });
+        if (key === "theme") {
+          const themeStr = value as "light" | "dark";
+          const html = document.documentElement;
+          html.setAttribute("data-theme", themeStr);
+          try { localStorage.setItem("waddle-theme", themeStr); } catch {}
+        }
+      },
     }),
     {
       name: "waddle-settings",
       storage: createJSONStorage(() => createScopedStorage(localforage)),
       onRehydrateStorage: () => (state, error) => {
-        if (!error && state?.hydrated !== undefined) {
+        if (!error && state) {
           useSettingsStore.setState({ hydrated: true });
           const theme = state.theme ?? "light";
-          // Deshabilitar transiciones para evitar animación durante rehydratación
           const html = document.documentElement;
           html.classList.add("theme-loading");
           html.setAttribute("data-theme", theme);
           // Espejo síncrono para que index.html pueda leerlo antes de React
           try { localStorage.setItem("waddle-theme", theme); } catch {}
+
+          // Si el splash loader sigue presente y no se ha iniciado, activarlo con el tema rehidratado
+          const splash = document.getElementById("waddle-splash");
+          if (splash && !(window as any).__waddleSplashStarted) {
+            (window as any).__waddleSplashStarted = true;
+            splash.classList.add("splash-start");
+          }
+
           // Re-habilitar transiciones después del repaint
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {

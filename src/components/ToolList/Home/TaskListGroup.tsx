@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import TaskItem from "./TaskListItem";
@@ -45,6 +45,65 @@ const EmptyState: React.FC<{ filter: string }> = ({ filter }) => {
     </div>
   );
 };
+
+/** Obtiene la key de agrupación por fecha */
+function getDateGroupKey(dueDate: string | undefined): string {
+  if (!dueDate) return "sin-fecha";
+  const date = new Date(dueDate);
+  const today = new Date(new Date().toDateString());
+  if (date < today) return "vencidas";
+  if (date.toDateString() === today.toDateString()) return "hoy";
+  // Usar fecha local (no UTC) para la key de agrupación
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/** Obtiene el label de un grupo de fecha */
+function getDateGroupLabel(key: string): string {
+  if (key === "sin-fecha") return "📌 Sin fecha";
+  if (key === "vencidas") return "⚠️ Vencidas";
+  if (key === "hoy") return "📅 Hoy";
+
+  // Parsear como fecha local (no UTC)
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  const tomorrow = new Date(new Date().toDateString());
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  if (date.toDateString() === tomorrow.toDateString()) return "📅 Mañana";
+
+  return `📅 ${date.toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric" })}`;
+}
+
+/** Orden de prioridad para los grupos de fecha */
+function getDateGroupOrder(key: string): number {
+  if (key === "vencidas") return 0;
+  if (key === "hoy") return 1;
+  if (key === "sin-fecha") return 999;
+  // Parsear como fecha local para ordenar
+  const [y, m, d] = key.split("-").map(Number);
+  return 2 + new Date(y, m - 1, d).getTime() / 1e12;
+}
+
+/** Agrupa tareas por fecha de vencimiento */
+function groupTasksByDate(tasks: Task[]): { key: string; label: string; tasks: Task[] }[] {
+  const groups: Record<string, Task[]> = {};
+
+  for (const task of tasks) {
+    const key = getDateGroupKey(task.dueDate);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(task);
+  }
+
+  return Object.entries(groups)
+    .map(([key, tasks]) => ({
+      key,
+      label: getDateGroupLabel(key),
+      tasks,
+    }))
+    .sort((a, b) => getDateGroupOrder(a.key) - getDateGroupOrder(b.key));
+}
 
 /** Lista virtualizada para cuando hay muchas tareas */
 const VirtualizedSection: React.FC<{
@@ -103,6 +162,44 @@ const VirtualizedSection: React.FC<{
   );
 };
 
+/** Renderiza una sección de tareas (con o sin virtualización) */
+const TaskSection: React.FC<{
+  tasks: Task[];
+  taskLists: TaskList[];
+  onToggleDone: (taskId: string) => void;
+  onEdit: (task: Task) => void;
+}> = ({ tasks, taskLists, onToggleDone, onEdit }) => {
+  if (tasks.length > VIRTUALIZE_THRESHOLD) {
+    return (
+      <VirtualizedSection
+        tasks={tasks}
+        taskLists={taskLists}
+        onToggleDone={onToggleDone}
+        onEdit={onEdit}
+      />
+    );
+  }
+
+  return (
+    <div className={styles.sectionList}>
+      <AnimatePresence mode="popLayout">
+        {tasks.map((task) => {
+          const list = taskLists.find((l) => l.id === task.listId);
+          return (
+            <TaskItem
+              key={task.id}
+              task={task}
+              list={list}
+              onToggleDone={() => onToggleDone(task.id)}
+              onEdit={() => onEdit(task)}
+            />
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 const TaskListGroup: React.FC<Props> = ({
   tasks,
   taskLists,
@@ -113,56 +210,74 @@ const TaskListGroup: React.FC<Props> = ({
   const pendingTasks = tasks.filter((t) => !t.isDone);
   const doneTasks = tasks.filter((t) => t.isDone);
 
-  const sections: { key: string; title: string; tasks: Task[] }[] = [];
+  // Agrupar por fecha de vencimiento
+  const pendingGroups = useMemo(() => groupTasksByDate(pendingTasks), [pendingTasks]);
+  const doneGroups = useMemo(() => groupTasksByDate(doneTasks), [doneTasks]);
 
-  if (filter === "all") {
-    sections.push({ key: "pending", title: "🕐 Pendientes", tasks: pendingTasks });
-    sections.push({ key: "done", title: "✅ Completadas", tasks: doneTasks });
-  } else if (filter === "pending") {
-    sections.push({ key: "pending", title: "🕐 Pendientes", tasks: pendingTasks });
-  } else {
-    sections.push({ key: "done", title: "✅ Completadas", tasks: doneTasks });
-  }
+  const totalVisible =
+    (filter !== "done" ? pendingTasks.length : 0) +
+    (filter !== "pending" ? doneTasks.length : 0);
 
-  const totalVisible = sections.reduce((acc, s) => acc + s.tasks.length, 0);
   if (totalVisible === 0) {
     return <EmptyState filter={filter} />;
   }
 
   return (
     <div className={styles.groupContainer}>
-      {sections.map((section) => (
-        <div key={section.key}>
+      {/* Pendientes agrupadas por fecha */}
+      {filter !== "done" && pendingTasks.length > 0 && (
+        <div>
           <h4 className={styles.sectionHeader}>
-            {section.title} ({section.tasks.length})
+            🕐 Pendientes ({pendingTasks.length})
           </h4>
-          {section.tasks.length > VIRTUALIZE_THRESHOLD ? (
-            <VirtualizedSection
-              tasks={section.tasks}
-              taskLists={taskLists}
-              onToggleDone={onToggleDone}
-              onEdit={onEdit}
-            />
-          ) : (
-            <div className={styles.sectionList}>
-              <AnimatePresence mode="popLayout">
-                {section.tasks.map((task) => {
-                  const list = taskLists.find((l) => l.id === task.listId);
-                  return (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      list={list}
-                      onToggleDone={() => onToggleDone(task.id)}
-                      onEdit={() => onEdit(task)}
-                    />
-                  );
-                })}
-              </AnimatePresence>
+
+          {/* Mensaje si no hay tareas para hoy */}
+          {!pendingGroups.some((g) => g.key === "hoy") && (
+            <div className={styles.todayFree}>
+              <span>🎉</span>
+              <span>¡Hoy está todo libre!</span>
             </div>
           )}
+
+          {pendingGroups.map((group) => (
+            <div key={group.key} className={styles.dateGroup}>
+              <div className={styles.dateGroupHeader}>
+                <span className={styles.dateGroupLabel}>{group.label}</span>
+                <span className={styles.dateGroupDivider} />
+              </div>
+              <TaskSection
+                tasks={group.tasks}
+                taskLists={taskLists}
+                onToggleDone={onToggleDone}
+                onEdit={onEdit}
+              />
+            </div>
+          ))}
         </div>
-      ))}
+      )}
+
+      {/* Completadas agrupadas por fecha */}
+      {filter !== "pending" && doneTasks.length > 0 && (
+        <div>
+          <h4 className={styles.sectionHeader}>
+            ✅ Completadas ({doneTasks.length})
+          </h4>
+          {doneGroups.map((group) => (
+            <div key={group.key} className={styles.dateGroup}>
+              <div className={styles.dateGroupHeader}>
+                <span className={styles.dateGroupLabel}>{group.label}</span>
+                <span className={styles.dateGroupDivider} />
+              </div>
+              <TaskSection
+                tasks={group.tasks}
+                taskLists={taskLists}
+                onToggleDone={onToggleDone}
+                onEdit={onEdit}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

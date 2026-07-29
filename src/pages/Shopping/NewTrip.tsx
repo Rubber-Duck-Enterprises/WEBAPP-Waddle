@@ -464,7 +464,7 @@ const NewTrip: React.FC = () => {
         </div>
 
         {/* Filtros */}
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", overflowX: "auto" }}>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.75rem", overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch" }}>
           {(["todos", "en_lista", "por_agregar", "buscar"] as FilterTab[]).map((tab) => (
             <button
               key={tab}
@@ -478,6 +478,7 @@ const NewTrip: React.FC = () => {
                 fontSize: "0.8rem",
                 cursor: "pointer",
                 whiteSpace: "nowrap",
+                flexShrink: 0,
               }}
             >
               {tab === "todos" && "Todos"}

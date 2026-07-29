@@ -33,7 +33,14 @@
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.actions > * {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .actionsRow {

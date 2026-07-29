@@ -42,7 +42,11 @@ function getNextDueDate(current: string, repeat: Task["repeat"]): string {
   if (repeat === "daily") date.setDate(date.getDate() + 1);
   if (repeat === "weekly") date.setDate(date.getDate() + 7);
   if (repeat === "monthly") date.setMonth(date.getMonth() + 1);
-  return date.toISOString();
+  // Guardar como fecha local (sin conversión UTC) para evitar desfase de timezone
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}T12:00:00`;
 }
 
 export const useListStore = create<TaskListStore>()(
@@ -137,6 +141,12 @@ export const useListStore = create<TaskListStore>()(
             dueDate: getNextDueDate(task.dueDate || new Date().toISOString(), task.repeat),
             isDone: false,
             completedAt: undefined,
+            // Resetear subtareas a pendientes para la nueva ocurrencia
+            subtasks: task.subtasks?.map((s) => ({
+              ...s,
+              id: nanoid(),
+              isDone: false,
+            })),
           };
           updatedTasks.push(newTask);
         }

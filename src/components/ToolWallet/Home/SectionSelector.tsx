@@ -8,13 +8,14 @@ interface Props {
 }
 
 const SectionSelector: React.FC<Props> = ({ sections, selectedId, onSelect }) => (
-  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", margin: "1rem 0" }}>
+  <div style={{ display: "flex", flexWrap: "nowrap", gap: "0.5rem", margin: "1rem 0", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
     {sections.map((section) => (
       <UIBulletItem
         key={section.id}
         onClick={() => onSelect(section.id)}
         active={selectedId === section.id}
         color={section.color}
+        style={{ flexShrink: 0, whiteSpace: "nowrap" }}
       >
         <span>{section.icon || "📁"}</span>
         {section.name}

@@ -33,6 +33,8 @@ export interface ShoppingTrip {
   durationMinutes?: number;
   /** Minutos acumulados en pantalla de compra activa */
   activeMinutes?: number;
+  /** true si ya se registró el gasto en Wallet */
+  registeredInWallet?: boolean;
   items: ShoppingItem[];
 }
 

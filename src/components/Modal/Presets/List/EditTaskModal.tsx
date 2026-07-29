@@ -42,7 +42,37 @@ const EditTaskModal: React.FC<Props> = ({
   onDelete,
   onCancel,
 }) => {
-  const { taskLists, getTagsForList, addTagToList, addSubtask, toggleSubtask, deleteSubtask } = useListStore();
+  const taskLists = useListStore((s) => s.taskLists);
+  const addTagToList = useListStore((s) => s.addTagToList);
+  const getTagsForList = useListStore((s) => s.getTagsForList);
+
+  // Subtareas: estado local con actualización optimista
+  const [subtasks, setSubtasks] = useState<Task[]>(task.subtasks || []);
+
+  const handleAddSubtask = (title: string) => {
+    // El store genera el ID, así que actualizamos local después de mutar
+    useListStore.getState().addSubtask(task.id, title);
+    const updated = useListStore.getState().tasks.find((t) => t.id === task.id);
+    if (updated?.subtasks) {
+      setSubtasks([...updated.subtasks]);
+    }
+  };
+
+  const handleToggleSubtask = (subtaskId: string) => {
+    // Actualización optimista local inmediata
+    setSubtasks((prev) =>
+      prev.map((s) => (s.id === subtaskId ? { ...s, isDone: !s.isDone } : s))
+    );
+    // Sincronizar con el store
+    useListStore.getState().toggleSubtask(task.id, subtaskId);
+  };
+
+  const handleDeleteSubtask = (subtaskId: string) => {
+    // Actualización optimista local inmediata
+    setSubtasks((prev) => prev.filter((s) => s.id !== subtaskId));
+    // Sincronizar con el store
+    useListStore.getState().deleteSubtask(task.id, subtaskId);
+  };
 
   const [title, setTitle] = useState(task.title || "");
   const [notes, setNotes] = useState(task.notes || "");
@@ -54,9 +84,15 @@ const EditTaskModal: React.FC<Props> = ({
 
   // Campos avanzados
   const [priority, setPriority] = useState<Task["priority"]>(task.priority);
-  const [dueDate, setDueDate] = useState(
-    task.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
-  );
+  const [dueDate, setDueDate] = useState(() => {
+    if (!task.dueDate) return "";
+    // Extraer la fecha local sin pasar por UTC
+    const d = new Date(task.dueDate);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  });
   const [repeat, setRepeat] = useState<Task["repeat"]>(task.repeat || null);
 
   const isValid =
@@ -277,10 +313,10 @@ const EditTaskModal: React.FC<Props> = ({
 
       {/* Subtareas */}
       <UISubtaskList
-        subtasks={task.subtasks || []}
-        onAdd={(title) => addSubtask(task.id, title)}
-        onToggle={(subtaskId) => toggleSubtask(task.id, subtaskId)}
-        onDelete={(subtaskId) => deleteSubtask(task.id, subtaskId)}
+        subtasks={subtasks}
+        onAdd={handleAddSubtask}
+        onToggle={handleToggleSubtask}
+        onDelete={handleDeleteSubtask}
       />
 
       <div
@@ -308,7 +344,7 @@ const EditTaskModal: React.FC<Props> = ({
                   listId: finalListId,
                   tags,
                   priority: priority || undefined,
-                  dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
+                  dueDate: dueDate ? dueDate + "T12:00:00" : undefined,
                   repeat: repeat || undefined,
                 });
               }

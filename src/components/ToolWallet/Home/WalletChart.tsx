@@ -81,6 +81,13 @@ const WalletChart: React.FC<Props> = ({ expenses }) => {
               borderRadius: "8px",
               color: "var(--text-primary)",
             }}
+            labelStyle={{
+              color: "var(--text-primary)",
+              fontWeight: "bold",
+            }}
+            itemStyle={{
+              color: "var(--text-primary)",
+            }}
             formatter={(value: number, name: string) => [
               `$${value.toLocaleString()}`,
               name === "ingresos" ? "Ingresos" : "Gastos",

@@ -79,11 +79,11 @@ const ShoppingHistory: React.FC = () => {
         </h2>
 
         {/* Filtros */}
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch" }}>
           <UISelect
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value as FilterStatus); setPage(0); }}
-            style={{ flex: 1 }}
+            style={{ flex: 1, minWidth: "140px" }}
           >
             <option value="all">Todos los estados</option>
             <option value="completed">Compradas</option>
@@ -95,7 +95,7 @@ const ShoppingHistory: React.FC = () => {
           <UISelect
             value={storeFilter}
             onChange={(e) => { setStoreFilter(e.target.value); setPage(0); }}
-            style={{ flex: 1 }}
+            style={{ flex: 1, minWidth: "140px" }}
           >
             <option value="">Todas las tiendas</option>
             {uniqueStores.map((store) => (

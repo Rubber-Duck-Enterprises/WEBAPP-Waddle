@@ -68,6 +68,8 @@ interface ShoppingState {
   updateTripItem: (tripId: string, itemId: string, updated: Partial<Omit<ShoppingItem, "id">>) => void;
   /** Acumular minutos activos en pantalla de compra */
   addActiveMinutes: (tripId: string, minutes: number) => void;
+  /** Marcar un trip como registrado en Wallet */
+  markRegisteredInWallet: (tripId: string) => void;
 }
 
 export const useShoppingStore = create<ShoppingState>()(
@@ -334,6 +336,15 @@ export const useShoppingStore = create<ShoppingState>()(
           trips: get().trips.map((t) =>
             t.id === tripId
               ? { ...t, activeMinutes: (t.activeMinutes || 0) + minutes }
+              : t
+          ),
+        });
+      },
+      markRegisteredInWallet: (tripId) => {
+        set({
+          trips: get().trips.map((t) =>
+            t.id === tripId
+              ? { ...t, registeredInWallet: true }
               : t
           ),
         });

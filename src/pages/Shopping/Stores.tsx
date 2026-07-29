@@ -450,7 +450,7 @@ const ShoppingStores: React.FC = () => {
           </div>
 
           {/* Lista de categorías */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+          <div style={{ display: "flex", gap: "0.4rem", overflowX: "auto", flexWrap: "nowrap", WebkitOverflowScrolling: "touch", paddingBottom: "0.25rem" }}>
             {categories.map((cat) => (
               <div
                 key={cat.id}
@@ -463,6 +463,8 @@ const ShoppingStores: React.FC = () => {
                   border: "1px solid var(--border-color)",
                   fontSize: "0.8rem",
                   color: "var(--text-primary)",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}
               >
                 <span>{cat.icon}</span>
