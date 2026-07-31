@@ -22,7 +22,17 @@ const MAX_HISTORY_SLOTS = 3;
  *
  * Requirements: 2.1, 2.2, 2.4, 2.5
  */
+const isOffline = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  if (import.meta.env?.MODE === "test") return false;
+  return navigator.onLine === false;
+};
+
 export async function saveCloudBackup(): Promise<void> {
+  if (isOffline()) {
+    throw new Error("Estás en modo sin conexión. Tus registros están seguros en tu dispositivo y se sincronizarán cuando vuelva el internet.");
+  }
+
   const user = auth.currentUser;
   if (!user) {
     throw new Error("Debes iniciar sesión para guardar un respaldo en la nube.");
@@ -97,6 +107,8 @@ export function shouldTriggerAutoBackup(lastAutoBackupAt: string | null): boolea
  * Requirements: 7.2, 7.3, 7.4
  */
 export async function saveAutoBackup(): Promise<void> {
+  if (isOffline()) return;
+
   const user = auth.currentUser;
   if (!user) return;
 
@@ -237,10 +249,11 @@ export async function restoreFromSnapshot(snapshot: BackupSnapshot): Promise<voi
   }
 
   const migratedSnapshot = migrateSnapshot(snapshot);
-  const { walletKey, walletValue, listKey, listValue } = deserializeBackup(migratedSnapshot, user.uid);
+  const { walletKey, walletValue, listKey, listValue, timeBlocksKey, timeBlocksValue } = deserializeBackup(migratedSnapshot, user.uid);
 
   await localforage.setItem(walletKey, walletValue);
   await localforage.setItem(listKey, listValue);
+  await localforage.setItem(timeBlocksKey, timeBlocksValue);
 
   await rehydrateAllStores();
 }

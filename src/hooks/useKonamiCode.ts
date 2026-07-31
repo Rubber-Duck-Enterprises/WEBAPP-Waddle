@@ -23,7 +23,7 @@ export const useKonamiUniversalCode = (onActivate: () => void) => {
   const lastTap = useRef<number>(0);
   const startX = useRef(0);
   const startY = useRef(0);
-  let singleTapTimeout: ReturnType<typeof setTimeout> | null = null;
+  const singleTapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const DOUBLE_TAP_DELAY = 300;
 
 
@@ -67,15 +67,15 @@ export const useKonamiUniversalCode = (onActivate: () => void) => {
     
       if (!direction) {
         if (deltaTime < DOUBLE_TAP_DELAY) {
-          if (singleTapTimeout) {
-            clearTimeout(singleTapTimeout);
-            singleTapTimeout = null;
+          if (singleTapTimeoutRef.current) {
+            clearTimeout(singleTapTimeoutRef.current);
+            singleTapTimeoutRef.current = null;
           }
           direction = "doubleTap";
           touchSequence.current.push(direction);
           lastTap.current = 0;
         } else {
-          singleTapTimeout = setTimeout(() => {
+          singleTapTimeoutRef.current = setTimeout(() => {
             direction = "tap";
             touchSequence.current.push(direction);
             if (touchSequence.current.length > konamiTouchSequence.length) {
@@ -85,7 +85,6 @@ export const useKonamiUniversalCode = (onActivate: () => void) => {
               onActivate();
               touchSequence.current = [];
             }
-            singleTapTimeout = null;
           }, DOUBLE_TAP_DELAY);
           lastTap.current = now;
         }

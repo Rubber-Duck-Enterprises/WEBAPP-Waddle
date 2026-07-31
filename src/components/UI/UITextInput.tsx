@@ -1,6 +1,6 @@
 import React from "react";
 
-interface Props extends React.InputHTMLAttributes<HTMLInputElement> {}
+type Props = React.InputHTMLAttributes<HTMLInputElement>;
 
 const UITextInput: React.FC<Props> = (props) => {
   return (

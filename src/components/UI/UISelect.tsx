@@ -1,6 +1,6 @@
 import React from "react";
 
-interface Props extends React.SelectHTMLAttributes<HTMLSelectElement> {}
+type Props = React.SelectHTMLAttributes<HTMLSelectElement>;
 
 const UISelect: React.FC<Props> = (props) => {
   return (

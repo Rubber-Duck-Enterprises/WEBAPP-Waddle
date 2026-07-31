@@ -1,0 +1,526 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.viewTabs {
+  display: flex;
+  background-color: var(--surface);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  gap: 4px;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tabButtonActive {
+  background-color: var(--background);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Card 'Ahora' / Active Status */
+.nowCard {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.nowHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.nowChipRow {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.headerActionsRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.actionBtnFull {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.actionBtnFull:hover {
+  background-color: var(--surface);
+  border-color: var(--primary-color);
+}
+
+.nowChip {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.nowChipPulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Timeline Container */
+.timelineWrapper {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--background);
+  padding: 0.5rem 0;
+  max-height: 380px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  /* Ocultar barra de scroll en Firefox, IE y Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Ocultar barra de scroll en Chrome, Safari y Opera */
+.timelineWrapper::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.timelineGrid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.hourRow {
+  display: flex;
+  height: 48px;
+  border-bottom: 1px dashed var(--border-color);
+  position: relative;
+}
+
+.hourLabel {
+  width: 55px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding-left: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+
+.hourLine {
+  flex: 1;
+  height: 100%;
+}
+
+/* Schedule Day Boundaries */
+.dayBoundaryLine {
+  position: absolute;
+  left: 55px;
+  right: 0;
+  height: 1px;
+  border-top: 2px dashed var(--primary-color);
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.dayBoundaryBadge {
+  position: absolute;
+  right: 8px;
+  top: -10px;
+  background-color: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Block Item on Timeline */
+.timelineBlocksOverlay {
+  position: absolute;
+  top: 0;
+  left: 55px;
+  right: 0.5rem;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.blockCard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: auto;
+  border-radius: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, filter 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+}
+
+.freeTimeBlockCard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: auto;
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  border: 1px dashed var(--border-color);
+  background: rgba(148, 163, 184, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.2s ease;
+}
+
+.freeTimeBlockCard:hover {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.blockCard:hover {
+  filter: brightness(1.12);
+}
+
+.blockCardSelected {
+  z-index: 8;
+}
+
+.blockContentStack {
+  position: sticky;
+  top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+}
+
+.blockTitleRow {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.blockSubRow {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blockTaskCountRow {
+  font-size: 0.66rem;
+  font-weight: 700;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Compact layout for short blocks (< 60 mins) */
+.blockCompactStack {
+  position: sticky;
+  top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  width: 100%;
+}
+
+.blockCompactHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.blockCompactTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.blockCompactTime {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.blockCompactTaskCount {
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Red Current Time Line */
+.currentTimeLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--danger-color, #ef4444);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.currentTimeLabel {
+  position: absolute;
+  right: 8px; /* Hasta la derecha para no solapar textos */
+  top: -10px;
+  background-color: var(--danger-color, #ef4444);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 1px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+  z-index: 11;
+}
+
+.currentTimeDot {
+  position: absolute;
+  left: 4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--danger-color, #ef4444);
+  box-shadow: 0 0 6px var(--danger-color, #ef4444);
+}
+
+/* Day Summary Highlights Row */
+.highlightsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 480px) {
+  .highlightsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.highlightCard {
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.highlightLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.highlightValue {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* Bottom Card: Tasks for Block */
+.tasksCard {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  width: 100%;
+}
+
+.tasksHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.tasksTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tasksTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.blockBadge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.addQuickTaskRow {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  align-items: center;
+}
+
+.quickInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.quickAddBtn {
+  flex-shrink: 0;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* Filter Bullets Row matching main task view */
+.filterRow {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-left: 0.15rem;
+  padding-right: 0.15rem;
+  padding-bottom: 0.25rem;
+  width: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filterRow::-webkit-scrollbar {
+  display: none;
+}
+
+.filterBullet {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.taskItemRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background-color: var(--background);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  min-width: 0;
+}
+
+.overdueBadge {
+  background-color: var(--danger-bg);
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}

@@ -45,7 +45,7 @@ export const useSettingsStore = create<SettingsStore>()(
           const themeStr = value as "light" | "dark";
           const html = document.documentElement;
           html.setAttribute("data-theme", themeStr);
-          try { localStorage.setItem("waddle-theme", themeStr); } catch {}
+          try { localStorage.setItem("waddle-theme", themeStr); } catch { /* Ignore storage error */ }
         }
       },
     }),
@@ -60,12 +60,13 @@ export const useSettingsStore = create<SettingsStore>()(
           html.classList.add("theme-loading");
           html.setAttribute("data-theme", theme);
           // Espejo síncrono para que index.html pueda leerlo antes de React
-          try { localStorage.setItem("waddle-theme", theme); } catch {}
+          try { localStorage.setItem("waddle-theme", theme); } catch { /* Ignore storage error */ }
 
           // Si el splash loader sigue presente y no se ha iniciado, activarlo con el tema rehidratado
           const splash = document.getElementById("waddle-splash");
-          if (splash && !(window as any).__waddleSplashStarted) {
-            (window as any).__waddleSplashStarted = true;
+          const win = window as unknown as { __waddleSplashStarted?: boolean };
+          if (splash && !win.__waddleSplashStarted) {
+            win.__waddleSplashStarted = true;
             splash.classList.add("splash-start");
           }
 

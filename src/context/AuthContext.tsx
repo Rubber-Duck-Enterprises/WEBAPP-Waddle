@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                           } catch (err) {
                             console.error("❌ Migration failed:", err);
                             // Aún así intentamos marcar como handled para no repetir
-                            try { await markMigrationHandled(u.uid); } catch {}
+                            try { await markMigrationHandled(u.uid); } catch { /* Ignore secondary fallback error */ }
                           } finally {
                             hideModal();
                             // 2. Rehydratar SIN resetear — los datos merged ya están en localforage.
@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
                             await markMigrationHandled(u.uid);
                           } catch (err) {
                             console.error("❌ Clear anonymous data failed:", err);
-                            try { await markMigrationHandled(u.uid); } catch {}
+                            try { await markMigrationHandled(u.uid); } catch { /* Ignore secondary fallback error */ }
                           } finally {
                             hideModal();
                             // Rehydratar datos del usuario (sin datos anon mezclados)

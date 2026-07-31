@@ -1,4 +1,4 @@
-import type { Section, Expense, TaskList, Task, Tag } from "@/types";
+import type { Section, Expense, TaskList, Task, Tag, TimeBlock } from "@/types";
 
 // ─── Origin & Scope ───────────────────────────────────────────────────────────
 
@@ -27,6 +27,7 @@ export interface BackupSnapshot {
       tasks: Task[];
       tagsByList: Record<string, Tag[]>;
       activeListId: string;
+      timeBlocks?: TimeBlock[];
     };
   };
 }
@@ -60,6 +61,10 @@ export interface DeserializedData {
   listKey: string;
   /** JSON-serialized list state for localforage */
   listValue: string;
+  /** e.g. "waddle-time-blocks-{uid}" */
+  timeBlocksKey: string;
+  /** JSON-serialized time blocks state for localforage */
+  timeBlocksValue: string;
 }
 
 // ─── Validation ───────────────────────────────────────────────────────────────

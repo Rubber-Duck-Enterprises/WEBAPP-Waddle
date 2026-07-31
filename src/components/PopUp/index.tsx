@@ -59,7 +59,8 @@ function Toast({ id, variant, content, onClose, autoCloseMs = 4500, action }: To
       }}
       style={{
         pointerEvents: "auto",
-        height: 44,
+        minHeight: 44,
+        height: "auto",
         borderRadius: 8,
         background: s.bg,
         border: `1px solid ${s.border}`,
@@ -68,6 +69,8 @@ function Toast({ id, variant, content, onClose, autoCloseMs = 4500, action }: To
         alignItems: "center",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
+        paddingTop: 4,
+        paddingBottom: 4,
       }}
     >
       <div
@@ -87,9 +90,10 @@ function Toast({ id, variant, content, onClose, autoCloseMs = 4500, action }: To
       <div
         style={{
           width: 1,
-          height: "60%",
+          height: 24,
           backgroundColor: s.border,
-          marginRight: "1rem",
+          marginRight: "0.75rem",
+          flex: "0 0 1px",
         }}
       />
 
@@ -107,12 +111,12 @@ function Toast({ id, variant, content, onClose, autoCloseMs = 4500, action }: To
           style={{
             minWidth: 0,
             width: "100%",
-            maxWidth: "40vw",
+            maxWidth: "72vw",
             flex: "1 1 auto",
-            fontSize: 14,
+            fontSize: 13,
+            lineHeight: 1.35,
             color: "var(--text-primary)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
+            wordBreak: "break-word",
           }}
           title={content}
         >

@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import NotificationsInitializer from "./components/Modal/NotificationsInitializer";
+import OfflineBanner from "@/components/OfflineBanner";
 
 import StartRedirect from "@/pages/StartRedirect";
 import WalletHome from "@/pages/Wallet/Home";
@@ -175,6 +176,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
+        <OfflineBanner />
         <NotificationsInitializer />
         <AnimatedRoutes />
       </Router>

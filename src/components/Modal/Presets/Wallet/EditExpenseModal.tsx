@@ -69,7 +69,7 @@ const EditExpenseModal: React.FC<Props> = ({ expense, sections, onCancel, onConf
 
       <UISelect
         value={type}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setType(e.target.value as any)}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setType(e.target.value as "income" | "expense")}
       >
         <option value="income">Ingreso</option>
         <option value="expense">Gasto</option>

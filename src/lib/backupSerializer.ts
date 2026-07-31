@@ -1,5 +1,6 @@
 import type { BackupSnapshot, BackupOrigin, BackupScope, DeserializedData } from "@/lib/backupTypes";
 import { CURRENT_BACKUP_VERSION } from "@/lib/backupMigrations";
+import { useTimeBlockStore } from "@/stores/timeBlockStore";
 
 // ─── State shape types ────────────────────────────────────────────────────────
 
@@ -15,6 +16,7 @@ export interface ListStoreState {
   tagsByList: Record<string, import("@/types").Tag[]>;
   activeListId: string;
   activeFilter?: string;
+  timeBlocks?: import("@/types").TimeBlock[];
 }
 
 // ─── serializeBackup ──────────────────────────────────────────────────────────
@@ -49,6 +51,7 @@ export function serializeBackup(
       tasks: listState.tasks,
       tagsByList: listState.tagsByList,
       activeListId: listState.activeListId,
+      timeBlocks: listState.timeBlocks ?? useTimeBlockStore.getState().blocks,
     };
   }
 
@@ -67,16 +70,6 @@ export function serializeBackup(
 /**
  * Type guard that validates whether an unknown value is a structurally valid
  * BackupSnapshot.
- *
- * Checks:
- *  - obj is a non-null object
- *  - version is a number
- *  - createdAt is a string
- *  - data is a non-null object
- *
- * Returns true (and narrows the type) when all checks pass, false otherwise.
- *
- * Validates: Requirements 5.1, 5.4
  */
 export function validateSnapshot(obj: unknown): obj is BackupSnapshot {
   if (obj === null || typeof obj !== "object") return false;
@@ -101,9 +94,7 @@ export function validateSnapshot(obj: unknown): obj is BackupSnapshot {
  * Keys follow the pattern used by scopedStorage: "{store_name}-{uid}"
  *   - wallet: "waddle-wallet-{uid}"
  *   - list:   "waddle-list-{uid}"
- *
- * Zustand's persist middleware wraps the state in { state: ..., version: 0 },
- * so we mirror that structure here so the store rehydrates correctly.
+ *   - time-blocks: "waddle-time-blocks-{uid}"
  */
 export function deserializeBackup(
   snapshot: BackupSnapshot,
@@ -111,6 +102,7 @@ export function deserializeBackup(
 ): DeserializedData {
   const walletKey = `waddle-wallet-${uid}`;
   const listKey = `waddle-list-${uid}`;
+  const timeBlocksKey = `waddle-time-blocks-${uid}`;
 
   // Wallet value — use snapshot data if present, otherwise empty state
   const walletState: WalletStoreState = snapshot.data.wallet ?? {
@@ -127,9 +119,16 @@ export function deserializeBackup(
     activeListId: "all",
   };
 
+  // TimeBlocks value — use snapshot list timeBlocks if present
+  const timeBlocksState = {
+    blocks: snapshot.data.list?.timeBlocks ?? [],
+    selectedBlockId: null,
+  };
+
   // Zustand persist wraps persisted state as { state: <data>, version: 0 }
   const walletValue = JSON.stringify({ state: walletState, version: 0 });
   const listValue = JSON.stringify({ state: listState, version: 0 });
+  const timeBlocksValue = JSON.stringify({ state: timeBlocksState, version: 0 });
 
-  return { walletKey, walletValue, listKey, listValue };
+  return { walletKey, walletValue, listKey, listValue, timeBlocksKey, timeBlocksValue };
 }

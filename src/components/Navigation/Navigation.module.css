@@ -1,5 +1,6 @@
 /* Header */
 .header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -11,8 +12,12 @@
 }
 
 .headerTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-weight: bold;
   font-size: 1.5rem;
+  pointer-events: none;
 }
 
 .headerSpacer {

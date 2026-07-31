@@ -184,13 +184,15 @@ describe("importBackupFromFile", () => {
   });
 
   it("throws when version field is missing", async () => {
-    const { version: _v, ...noVersion } = validSnapshot;
+    const noVersion = { ...validSnapshot };
+    delete (noVersion as { version?: unknown }).version;
     const file = makeFile(JSON.stringify(noVersion));
     await expect(importBackupFromFile(file)).rejects.toThrow(/respaldo válido/);
   });
 
   it("throws when data field is missing", async () => {
-    const { data: _d, ...noData } = validSnapshot;
+    const noData = { ...validSnapshot };
+    delete (noData as { data?: unknown }).data;
     const file = makeFile(JSON.stringify(noData));
     await expect(importBackupFromFile(file)).rejects.toThrow(/respaldo válido/);
   });

@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useListStore } from "@/stores/listStore";
+import { useTimeBlockStore } from "@/stores/timeBlockStore";
+import { TimeBlock } from "@/types";
 
 import ListLayout from "@/layouts/ListLayout";
 import TaskListGroup from "@/components/ToolList/Home/TaskListGroup";
@@ -7,32 +9,91 @@ import FloatingActionButton from "@/components/Navigation/FloatingActionButton";
 import UIButton from "@/components/UI/UIButton";
 import UIBulletItem from "@/components/UI/UIBulletItem";
 import UITextInput from "@/components/UI/UITextInput";
+import DayTimeline from "@/components/ToolList/TimeBlocks/DayTimeline";
+import TimeBlockTaskCard from "@/components/ToolList/TimeBlocks/TimeBlockTaskCard";
+
 import { useModal } from "@/context/ModalContext";
 import { getEditTaskModal } from "@/components/Modal/Presets/List/EditTaskModal";
 import { getCreateTaskListModal } from "@/components/Modal/Presets/List/CreateTaskListModal";
 import { getDeleteTaskListModal } from "@/components/Modal/Presets/List/DeleteTaskListModal";
+import { getCreateEditBlockModal } from "@/components/Modal/Presets/List/CreateEditBlockModal";
 import { triggerCelebration } from "@/components/UI/UIFullScreenEffectLayer";
+
 import styles from "@/components/ToolList/Home/TaskList.module.css";
+import blockStyles from "@/components/ToolList/TimeBlocks/TimeBlocks.module.css";
 
 const ListHome: React.FC = () => {
   const {
     taskLists,
     activeListId,
     activeFilter,
-    tasks, 
+    tasks,
     addTaskList,
     deleteTaskList,
     setActiveListId,
     setActiveFilter,
-    toggleTaskDone, 
-    updateTask, 
+    toggleTaskDone,
+    updateTask,
     deleteTask,
   } = useListStore();
+
+  const {
+    blocks,
+    selectedBlockId,
+    setSelectedBlockId,
+    getActiveBlock,
+    addBlock,
+    updateBlock,
+    deleteBlock,
+  } = useTimeBlockStore();
+
   const { showModal, hideModal } = useModal();
 
+  const [viewMode, setViewMode] = useState<"lists" | "blocks">("blocks");
   const [search, setSearch] = useState("");
 
-  // Filtrar por lista activa y búsqueda
+  const activeBlock = useMemo(() => getActiveBlock(), [blocks, getActiveBlock]);
+
+  // Si no hay un bloque manualmente seleccionado, por defecto enfocamos el bloque activo si existe
+  const currentSelectedBlock = useMemo(() => {
+    if (selectedBlockId) {
+      const found = blocks.find((b) => b.id === selectedBlockId);
+      if (found) return found;
+    }
+    return activeBlock || (blocks.length > 0 ? blocks[0] : null);
+  }, [selectedBlockId, blocks, activeBlock]);
+
+  // Modales de Bloques de Tiempo
+  const handleOpenCreateBlockModal = () => {
+    showModal(
+      getCreateEditBlockModal({
+        onCancel: hideModal,
+        onConfirm: (blockData) => {
+          addBlock(blockData);
+          hideModal();
+        },
+      })
+    );
+  };
+
+  const handleOpenEditBlockModal = (block: TimeBlock) => {
+    showModal(
+      getCreateEditBlockModal({
+        initialBlock: block,
+        onCancel: hideModal,
+        onConfirm: (updatedData) => {
+          updateBlock(block.id, updatedData);
+          hideModal();
+        },
+        onDelete: () => {
+          deleteBlock(block.id);
+          hideModal();
+        },
+      })
+    );
+  };
+
+  // Filtrar por lista activa y búsqueda en modo "lists"
   const filteredTasks = useMemo(() => {
     let result = tasks.filter((t) => activeListId === "all" || t.listId === activeListId);
 
@@ -64,132 +125,176 @@ const ListHome: React.FC = () => {
   }, [tasks, activeListId, search]);
 
   return (
-    <ListLayout floating={<FloatingActionButton activeListId={activeListId} />}>
+    <ListLayout floating={viewMode === "lists" ? <FloatingActionButton activeListId={activeListId} /> : undefined}>
       <div className={styles.homeContainer}>
-        {/* Select de listas */}
-        <div className={styles.listSelector}>
-          <select
-            value={activeListId}
-            onChange={(e) => setActiveListId(e.target.value)}
-            className={styles.listSelect}
+        {/* Selector de Pestañas / Vista */}
+        <div className={blockStyles.viewTabs}>
+          <button
+            className={`${blockStyles.tabButton} ${viewMode === "blocks" ? blockStyles.tabButtonActive : ""
+              }`}
+            onClick={() => setViewMode("blocks")}
           >
-            <option value="all">🗂️ Todas las listas ({tasks.filter(t => !t.isDone).length})</option>
-            {taskLists.map((list) => {
-              const pendingCount = tasks.filter(t => t.listId === list.id && !t.isDone).length;
-              return (
-                <option key={list.id} value={list.id}>
-                  {list.icon} {list.name} {pendingCount > 0 ? `(${pendingCount})` : ""}
+            ⏰ Mis Bloques
+          </button>
+          <button
+            className={`${blockStyles.tabButton} ${viewMode === "lists" ? blockStyles.tabButtonActive : ""
+              }`}
+            onClick={() => setViewMode("lists")}
+          >
+            📋 Mis Listas
+          </button>
+        </div>
+
+        {/* Vista Bloques del Día */}
+        {viewMode === "blocks" ? (
+          <>
+            <DayTimeline
+              blocks={blocks}
+              activeBlock={activeBlock}
+              selectedBlockId={currentSelectedBlock?.id || null}
+              onSelectBlock={(id) => setSelectedBlockId(id)}
+              onAddNewBlock={handleOpenCreateBlockModal}
+            />
+
+            <TimeBlockTaskCard
+              selectedBlock={currentSelectedBlock}
+              onEditBlock={handleOpenEditBlockModal}
+              onAddNewBlock={handleOpenCreateBlockModal}
+            />
+          </>
+        ) : (
+          /* Vista Tradicional por Listas */
+          <>
+            {/* Select de listas */}
+            <div className={styles.listSelector}>
+              <select
+                value={activeListId}
+                onChange={(e) => setActiveListId(e.target.value)}
+                className={styles.listSelect}
+              >
+                <option value="all">
+                  🗂️ Todas las listas ({tasks.filter((t) => !t.isDone).length})
                 </option>
-              );
-            })}
-          </select>
+                {taskLists.map((list) => {
+                  const pendingCount = tasks.filter(
+                    (t) => t.listId === list.id && !t.isDone
+                  ).length;
+                  return (
+                    <option key={list.id} value={list.id}>
+                      {list.icon} {list.name} {pendingCount > 0 ? `(${pendingCount})` : ""}
+                    </option>
+                  );
+                })}
+              </select>
 
-          {activeListId !== "all" && (
-            <UIButton
-              variant="danger"
-              onClick={() => {
-                const list = taskLists.find((l) => l.id === activeListId);
-                if (!list) return;
+              {activeListId !== "all" && (
+                <UIButton
+                  variant="danger"
+                  onClick={() => {
+                    const list = taskLists.find((l) => l.id === activeListId);
+                    if (!list) return;
 
+                    showModal(
+                      getDeleteTaskListModal({
+                        listName: list.name,
+                        onClose: hideModal,
+                        onConfirm: () => {
+                          deleteTaskList(list.id);
+                          setActiveListId("all");
+                          hideModal();
+                        },
+                      })
+                    );
+                  }}
+                >
+                  Eliminar
+                </UIButton>
+              )}
+
+              <UIButton
+                variant="primary"
+                onClick={() => {
+                  showModal(
+                    getCreateTaskListModal({
+                      onCancel: hideModal,
+                      onConfirm: ({ name, color, icon }) => {
+                        addTaskList({ name, color, icon });
+                        hideModal();
+                      },
+                    })
+                  );
+                }}
+              >
+                Nueva
+              </UIButton>
+            </div>
+
+            {/* Búsqueda */}
+            <UITextInput
+              placeholder="🔍 Buscar tareas..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            {/* Filtros */}
+            <div className={styles.filterRow}>
+              <UIBulletItem
+                active={activeFilter === "pending"}
+                onClick={() => setActiveFilter("pending")}
+                color="#f39c12"
+                className={styles.filterBullet}
+              >
+                Pendientes
+              </UIBulletItem>
+              <UIBulletItem
+                active={activeFilter === "done"}
+                onClick={() => setActiveFilter("done")}
+                color="#2ecc71"
+                className={styles.filterBullet}
+              >
+                Completadas
+              </UIBulletItem>
+              <UIBulletItem
+                active={activeFilter === "all"}
+                onClick={() => setActiveFilter("all")}
+                color="#cccccc"
+                className={styles.filterBullet}
+              >
+                Todas
+              </UIBulletItem>
+            </div>
+
+            {/* Lista de tareas */}
+            <TaskListGroup
+              tasks={filteredTasks}
+              taskLists={taskLists}
+              activeListId={activeListId}
+              filter={activeFilter}
+              onToggleDone={(id) => {
+                toggleTaskDone(id);
+                const task = tasks.find((t) => t.id === id);
+                if (task && !task.isDone) triggerCelebration();
+              }}
+              onEdit={(task) => {
                 showModal(
-                  getDeleteTaskListModal({
-                    listName: list.name,
-                    onClose: hideModal,
-                    onConfirm: () => {
-                      deleteTaskList(list.id);
-                      setActiveListId("all");
+                  getEditTaskModal({
+                    task,
+                    activeListId,
+                    onCancel: hideModal,
+                    onConfirm: (updatedTask) => {
+                      updateTask(task.id, updatedTask);
+                      hideModal();
+                    },
+                    onDelete: () => {
+                      deleteTask(task.id);
                       hideModal();
                     },
                   })
                 );
               }}
-            >
-              Eliminar
-            </UIButton>
-          )}
-
-          <UIButton
-            variant="primary"
-            onClick={() => {
-              showModal(
-                getCreateTaskListModal({
-                  onCancel: hideModal,
-                  onConfirm: ({ name, color, icon }) => {
-                    addTaskList({ name, color, icon });
-                    hideModal();
-                  }
-                })
-              );
-            }}
-          >
-            Nueva
-          </UIButton>
-        </div>
-
-        {/* Búsqueda */}
-        <UITextInput
-          placeholder="🔍 Buscar tareas..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        {/* Filtros */}
-        <div className={styles.filterRow}>
-          <UIBulletItem
-            active={activeFilter === "pending"}
-            onClick={() => setActiveFilter("pending")}
-            color="#f39c12"
-            className={styles.filterBullet}
-          >
-            Pendientes
-          </UIBulletItem>
-          <UIBulletItem
-            active={activeFilter === "done"}
-            onClick={() => setActiveFilter("done")}
-            color="#2ecc71"
-            className={styles.filterBullet}
-          >
-            Completadas
-          </UIBulletItem>
-          <UIBulletItem
-            active={activeFilter === "all"}
-            onClick={() => setActiveFilter("all")}
-            color="#cccccc"
-            className={styles.filterBullet}
-          >
-            Todas
-          </UIBulletItem>
-        </div>
-
-        {/* Lista de tareas */}
-        <TaskListGroup
-          tasks={filteredTasks}
-          taskLists={taskLists}
-          activeListId={activeListId}
-          filter={activeFilter}
-          onToggleDone={(id) => {
-            toggleTaskDone(id);
-            const task = tasks.find((t) => t.id === id);
-            if (task && !task.isDone) triggerCelebration();
-          }}
-          onEdit={(task) => {
-            showModal(
-              getEditTaskModal({
-                task,
-                activeListId,
-                onCancel: hideModal,
-                onConfirm: (updatedTask) => {
-                  updateTask(task.id, updatedTask);
-                  hideModal();
-                },
-                onDelete: () => {
-                  deleteTask(task.id);
-                  hideModal();
-                },
-              })
-            );
-          }}
-        />
+            />
+          </>
+        )}
       </div>
     </ListLayout>
   );

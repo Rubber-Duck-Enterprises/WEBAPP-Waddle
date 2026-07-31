@@ -15,6 +15,7 @@ export default defineConfig({
       strategies: 'injectManifest',
       injectManifest: {
         swSrc: 'public/sw.js',
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2}'],
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {

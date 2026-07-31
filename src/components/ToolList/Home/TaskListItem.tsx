@@ -108,7 +108,7 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
             </p>
           )}
 
-          {/* Indicadores — SIEMPRE visibles */}
+          {/* Indicadores — SIEMPRE visibles y consistentes en estilo pill */}
           <div className={styles.taskMeta}>
             {task.priority && (
               <span
@@ -116,6 +116,7 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
                 style={{
                   backgroundColor: `${priorityConfig[task.priority].color}1A`,
                   border: `1px solid ${priorityConfig[task.priority].color}`,
+                  color: priorityConfig[task.priority].color,
                 }}
               >
                 {priorityConfig[task.priority].emoji} {priorityConfig[task.priority].label}
@@ -126,10 +127,10 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
               <span
                 className={styles.badge}
                 style={{
-                  backgroundColor: overdue ? "#f443361A" : "var(--information-bg)",
-                  border: `1px solid ${overdue ? "#f44336" : "var(--information-color)"}`,
-                  fontWeight: overdue ? "700" : "normal",
-                  color: overdue ? "#f44336" : "var(--text-secondary)",
+                  backgroundColor: overdue ? "var(--danger-bg)" : "var(--information-bg)",
+                  border: `1px solid ${overdue ? "var(--danger-color)" : "var(--information-color)"}`,
+                  fontWeight: overdue ? "700" : "600",
+                  color: overdue ? "var(--danger-color)" : "var(--information-color)",
                 }}
               >
                 {overdue ? "⚠️" : "📅"} {formatDueDate(task.dueDate)}
@@ -137,19 +138,42 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
             )}
 
             {task.repeat && (
-              <span style={{ opacity: 0.8 }}>
+              <span
+                className={styles.badge}
+                style={{
+                  backgroundColor: "var(--information-bg)",
+                  border: "1px solid var(--information-color)",
+                  color: "var(--information-color)",
+                }}
+              >
                 {repeatLabels[task.repeat]}
               </span>
             )}
 
             {task.isDone && task.completedAt && (
-              <span style={{ opacity: 0.7 }}>
+              <span
+                className={styles.badge}
+                style={{
+                  backgroundColor: "var(--success-bg)",
+                  border: "1px solid var(--success-color)",
+                  color: "var(--success-color)",
+                }}
+              >
                 ✅ {new Date(task.completedAt).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
               </span>
             )}
 
             {task.tags && task.tags.length > 0 && (
-              <span>🏷️ {task.tags.join(", ")}</span>
+              <span
+                className={styles.badge}
+                style={{
+                  backgroundColor: "var(--surface)",
+                  border: "1px solid var(--border-color)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                🏷️ {task.tags.join(", ")}
+              </span>
             )}
 
             {/* Badge de subtareas (clickeable para expandir) */}
@@ -165,8 +189,10 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
                   border: `1px solid ${completedCount === subtasks.length
                     ? "var(--success-color)"
                     : "var(--border-color)"}`,
+                  color: completedCount === subtasks.length
+                    ? "var(--success-color)"
+                    : "var(--text-primary)",
                   cursor: "pointer",
-                  fontSize: "0.75rem",
                 }}
               >
                 📝 {completedCount}/{subtasks.length}
@@ -174,7 +200,16 @@ const TaskItem: React.FC<Props> = ({ task, list, onToggleDone, onEdit }) => {
             )}
 
             {list && (
-              <span>{list.icon || "📁"} {list.name}</span>
+              <span
+                className={styles.badge}
+                style={{
+                  backgroundColor: "var(--surface)",
+                  border: "1px solid var(--border-color)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                {list.icon || "📁"} {list.name}
+              </span>
             )}
           </div>
         </div>

@@ -56,6 +56,22 @@ export type Task = {
   repeat?: "daily" | "weekly" | "monthly" | null;
   completedAt?: string;
   tags?: string[];
+  blockId?: string;
+  blockCategory?: string;
+  lastCompletedAt?: string;
+  isOverdueFromPreviousPeriod?: boolean;
+};
+
+export type TimeBlock = {
+  id: string;
+  name: string;
+  startTime: string; // HH:mm format, e.g. "09:00"
+  endTime: string;   // HH:mm format, e.g. "14:00"
+  daysOfWeek: number[]; // 0=Sunday, 1=Monday, ..., 6=Saturday
+  color?: string;
+  icon?: string;
+  listId?: string;
+  categoryKey?: string;
 };
 
 export type TaskList = {

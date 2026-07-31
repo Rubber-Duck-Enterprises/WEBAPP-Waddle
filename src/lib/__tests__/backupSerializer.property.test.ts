@@ -92,11 +92,22 @@ const tagsByListArb: fc.Arbitrary<Record<string, import("@/types").Tag[]>> = fc.
   { maxKeys: 5 }
 );
 
+const timeBlockArb = fc.record({
+  id: fc.string({ minLength: 1, maxLength: 20 }),
+  name: fc.string({ minLength: 1, maxLength: 50 }),
+  startTime: fc.string({ minLength: 5, maxLength: 5 }),
+  endTime: fc.string({ minLength: 5, maxLength: 5 }),
+  daysOfWeek: fc.array(fc.integer({ min: 0, max: 6 }), { maxLength: 7 }),
+  color: fc.option(hexColorArb, { nil: undefined }),
+  icon: fc.option(fc.string({ minLength: 1, maxLength: 10 }), { nil: undefined }),
+});
+
 const listStateArb: fc.Arbitrary<ListStoreState> = fc.record({
   taskLists: fc.array(taskListArb, { maxLength: 5 }),
   tasks: fc.array(taskArb, { maxLength: 10 }),
   tagsByList: tagsByListArb,
   activeListId: fc.string({ minLength: 1, maxLength: 20 }),
+  timeBlocks: fc.array(timeBlockArb, { maxLength: 5 }),
 });
 
 // ─── Property 1: Round-trip de serialización ─────────────────────────────────
